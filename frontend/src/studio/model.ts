@@ -2,12 +2,15 @@ import { PROMPTS } from "./prompts";
 
 export type Concept = { id: string; title: string; premise: string; moves: string; experiment: string };
 export const MAX_CONCEPTS = 12;
+export type Precedent = { id: string; title: string; source: string; observation: string; application: string };
+export const MAX_PRECEDENTS = 30;
 export type StudioDraft = {
   title: string; brief: string; interests: string; experience: string;
   site: string; users: string; requirements: string; openQuestions: string;
   promptNotes: Record<string, string>;
   concepts: Concept[];
   comparisonIds: string[]; directionId: string; decisionNotes: string;
+  precedents: Precedent[];
 };
 export const EMPTY_DRAFT: StudioDraft = {
   title: "", brief: "", interests: "", experience: "",
@@ -15,6 +18,7 @@ export const EMPTY_DRAFT: StudioDraft = {
   promptNotes: {},
   concepts: [],
   comparisonIds: [], directionId: "", decisionNotes: "",
+  precedents: [],
 };
 
 export function record(value: unknown): Record<string, unknown> {
@@ -56,6 +60,10 @@ export function normalizeDraft(value: unknown): StudioDraft {
       ? [...new Set(source.comparisonIds.filter((id): id is string => typeof id === "string" && conceptIds.has(id)))].slice(0, 3) : [],
     directionId: typeof source.directionId === "string" && conceptIds.has(source.directionId) ? source.directionId : "",
     decisionNotes: text(source.decisionNotes),
+    precedents: rows(source.precedents, MAX_PRECEDENTS).map(row => ({
+      id: text(row.id, 100), title: text(row.title, 200), source: text(row.source, 1000),
+      observation: text(row.observation), application: text(row.application),
+    })),
   };
 }
 
