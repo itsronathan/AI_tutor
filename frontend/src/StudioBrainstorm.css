@@ -45,5 +45,6 @@
 .studio-source-link { display: block; color: #0f766e; margin-top: 16px; text-decoration: underline; }
 .studio-milestone { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr)); gap: 16px; align-items: center; }
 .studio-milestone label { margin-top: 0; }
+.studio-export-preview { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 480px; overflow-y: auto; padding: 18px; background: #f7f3ea; font-size: 13px; }
 .studio-page summary:focus-visible { outline: 3px solid #0f766e; outline-offset: 3px; }
 @media (max-width: 850px) { .studio-layout { grid-template-columns: 1fr; } .studio-page { padding: 24px 16px 48px; } .studio-card { padding: 20px; } }
