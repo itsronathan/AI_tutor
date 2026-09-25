@@ -2,7 +2,7 @@ import { useState } from "react";
 import type { StudioDraft } from "./model";
 import { buildProjectNotes, exportFilename } from "./exportNotes";
 
-export default function ExportNotes({ draft }: { draft: StudioDraft }) {
+export default function ProjectExport({ draft }: { draft: StudioDraft }) {
   const [message, setMessage] = useState("");
   const notes = buildProjectNotes(draft);
   function download() {

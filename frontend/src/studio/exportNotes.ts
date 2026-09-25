@@ -40,5 +40,8 @@ export function buildProjectNotes(draft: StudioDraft): string {
       field("Feedback received", item.feedback), field("Interpretation / questions", item.response),
       field(`Follow-up (${item.done ? "complete" : "open"})`, item.nextAction),
     ].join("\n")),
+    field("PRESENTATION STORY", draft.presentationStory), field("QUESTIONS FOR REVIEW", draft.reviewQuestions),
+    "PRESENTATION CHECKLIST\n",
+    ...draft.presentationItems.map(item => `[${item.done ? "x" : " "}] ${item.label || "Untitled presentation item"}`),
   ].join("\n");
 }

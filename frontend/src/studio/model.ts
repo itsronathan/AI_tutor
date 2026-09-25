@@ -9,6 +9,8 @@ export type Milestone = { id: string; title: string; due: string; done: boolean 
 export const MAX_MILESTONES = 50;
 export type Critique = { id: string; date: string; reviewer: string; feedback: string; response: string; nextAction: string; done: boolean };
 export const MAX_CRITIQUES = 50;
+export type PresentationItem = { id: string; label: string; done: boolean };
+export const MAX_PRESENTATION_ITEMS = 40;
 export type StudioDraft = {
   title: string; brief: string; interests: string; experience: string;
   site: string; users: string; requirements: string; openQuestions: string;
@@ -18,6 +20,7 @@ export type StudioDraft = {
   precedents: Precedent[];
   milestones: Milestone[];
   critiques: Critique[];
+  presentationItems: PresentationItem[]; presentationStory: string; reviewQuestions: string;
 };
 export const EMPTY_DRAFT: StudioDraft = {
   title: "", brief: "", interests: "", experience: "",
@@ -28,6 +31,7 @@ export const EMPTY_DRAFT: StudioDraft = {
   precedents: [],
   milestones: [],
   critiques: [],
+  presentationItems: [], presentationStory: "", reviewQuestions: "",
 };
 
 export function record(value: unknown): Record<string, unknown> {
@@ -80,6 +84,10 @@ export function normalizeDraft(value: unknown): StudioDraft {
       id: text(row.id, 100), date: dateOnly(row.date), reviewer: text(row.reviewer, 200),
       feedback: text(row.feedback), response: text(row.response), nextAction: text(row.nextAction), done: row.done === true,
     })),
+    presentationItems: rows(source.presentationItems, MAX_PRESENTATION_ITEMS).map(row => ({
+      id: text(row.id, 100), label: text(row.label, 300), done: row.done === true,
+    })),
+    presentationStory: text(source.presentationStory), reviewQuestions: text(source.reviewQuestions),
   };
 }
 

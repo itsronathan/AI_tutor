@@ -7,8 +7,11 @@ import ConceptComparison from "./studio/ConceptComparison";
 import PrecedentJournal from "./studio/PrecedentJournal";
 import MilestonePlanner from "./studio/MilestonePlanner";
 import CritiqueLog from "./studio/CritiqueLog";
-import ExportNotes from "./studio/ExportNotes";
+import ProjectExport from "./studio/ProjectExport";
+import PresentationPrep from "./studio/PresentationPrep";
 import "./StudioBrainstorm.css";
+
+const SECTIONS = ["Brief & exercises", "Concepts", "References", "Plan", "Review & export"] as const;
 
 export default function StudioBrainstorm({ ownerId }: { ownerId: string }) {
   const storageKey = `studio-brainstorm:v1:${ownerId}`;
@@ -16,6 +19,7 @@ export default function StudioBrainstorm({ ownerId }: { ownerId: string }) {
   const [draft, setDraft] = useState(initial.draft);
   const [status, setStatus] = useState(initial.status);
   const [summary, setSummary] = useState<StudioDraft | null>(null);
+  const [section, setSection] = useState<typeof SECTIONS[number]>("Brief & exercises");
 
   function persist(next: StudioDraft, message: string) {
     try {
@@ -50,6 +54,13 @@ export default function StudioBrainstorm({ ownerId }: { ownerId: string }) {
         <h1>Studio Brainstorm</h1>
         <p>Start with the brief. Find a question worth exploring.</p>
       </header>
+      <nav className="studio-nav" aria-label="Studio tools">
+        {SECTIONS.map(label => <button type="button" key={label} aria-pressed={section === label}
+          onClick={() => setSection(label)}>{label}</button>)}
+      </nav>
+      <p className="studio-status" role="status">{status}</p>
+      <p className="studio-small">Edits save automatically in this browser only; not synced to your account. Guest drafts are shared by people using this browser.</p>
+      {section === "Brief & exercises" && <>
       <div className="studio-layout">
         <form className="studio-card" onSubmit={save}>
           <h2>Set up your project</h2>
@@ -73,29 +84,34 @@ export default function StudioBrainstorm({ ownerId }: { ownerId: string }) {
             onChange={event => update("experience", event.target.value)} />
           <ProjectContext draft={draft} onChange={update} />
           <button type="submit">Save project draft</button>
-          <p className="studio-status" role="status">{status}</p>
-          <p className="studio-small">Edits save automatically in this browser only; not synced to your account. Guest drafts are shared by people using this browser.</p>
         </form>
         <aside className="studio-side">
           <PromptExplorer notes={draft.promptNotes} onChange={value => update("promptNotes", value)} />
           <section className="studio-card">
-            <h2>What comes next</h2>
-            <p>This first version captures your starting point. AI follow-up questions and concept directions are planned for the next step.</p>
+            <h2>A workspace for your ideas</h2>
+            <p>Use Concepts to develop and compare directions, References to collect inspiration, and Plan to set your next steps. Prepare for critiques in Review &amp; export.</p>
+            <p className="studio-small">The exercises are written prompts. AI-generated concepts and PDF upload are not connected yet.</p>
           </section>
         </aside>
       </div>
-      <ConceptBoard concepts={draft.concepts} onChange={value => update("concepts", value)} />
-      <ConceptComparison draft={draft} onChange={update} />
-      <PrecedentJournal precedents={draft.precedents} onChange={value => update("precedents", value)} />
-      <MilestonePlanner milestones={draft.milestones} onChange={value => update("milestones", value)} />
-      <CritiqueLog critiques={draft.critiques} onChange={value => update("critiques", value)} />
-      <ExportNotes draft={draft} />
       {summary && <section className="studio-card studio-summary" aria-label="Project starting point">
         <h2>{summary.title.trim() || "Your project starting point"}</h2>
         <h3>Assignment brief</h3><p>{summary.brief}</p>
         <h3>Your interests</h3><p>{summary.interests.trim() || "Still open — explore through sketches."}</p>
         <h3>Intended experience</h3><p>{summary.experience.trim() || "Still open — start with one person’s journey."}</p>
       </section>}
+      </>}
+      {section === "Concepts" && <>
+        <ConceptBoard concepts={draft.concepts} onChange={value => update("concepts", value)} />
+        <ConceptComparison draft={draft} onChange={update} />
+      </>}
+      {section === "References" && <PrecedentJournal precedents={draft.precedents} onChange={value => update("precedents", value)} />}
+      {section === "Plan" && <MilestonePlanner milestones={draft.milestones} onChange={value => update("milestones", value)} />}
+      {section === "Review & export" && <>
+        <PresentationPrep draft={draft} onChange={update} />
+        <CritiqueLog critiques={draft.critiques} onChange={value => update("critiques", value)} />
+        <ProjectExport draft={draft} />
+      </>}
     </main>
   );
 }
