@@ -1,10 +1,14 @@
+import { PROMPTS } from "./prompts";
+
 export type StudioDraft = {
   title: string; brief: string; interests: string; experience: string;
   site: string; users: string; requirements: string; openQuestions: string;
+  promptNotes: Record<string, string>;
 };
 export const EMPTY_DRAFT: StudioDraft = {
   title: "", brief: "", interests: "", experience: "",
   site: "", users: "", requirements: "", openQuestions: "",
+  promptNotes: {},
 };
 
 export function record(value: unknown): Record<string, unknown> {
@@ -24,6 +28,7 @@ export function normalizeDraft(value: unknown): StudioDraft {
     interests: text(source.interests), experience: text(source.experience),
     site: text(source.site), users: text(source.users),
     requirements: text(source.requirements), openQuestions: text(source.openQuestions),
+    promptNotes: Object.fromEntries(PROMPTS.map(prompt => [prompt.id, text(record(source.promptNotes)[prompt.id])])),
   };
 }
 

@@ -24,5 +24,8 @@
 .studio-summary p { white-space: pre-wrap; }
 .studio-context { border-top: 1px solid #dcd8ce; margin-top: 24px; padding-top: 16px; }
 .studio-context summary { cursor: pointer; font-weight: 600; }
+.studio-card select { width: 100%; padding: 10px; border: 1px solid #a9b0b2; border-radius: 8px; color: #1c2530; background: #fff; font: inherit; }
+.studio-card select:focus-visible { outline: 3px solid #0f766e; outline-offset: 3px; }
+.studio-exercise + .studio-exercise { border-top: 1px solid #dcd8ce; margin-top: 24px; padding-top: 8px; }
 .studio-page summary:focus-visible { outline: 3px solid #0f766e; outline-offset: 3px; }
 @media (max-width: 850px) { .studio-layout { grid-template-columns: 1fr; } .studio-page { padding: 24px 16px 48px; } .studio-card { padding: 20px; } }

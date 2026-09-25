@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { loadDraft, type StudioDraft } from "./studio/model";
 import ProjectContext from "./studio/ProjectContext";
+import PromptExplorer from "./studio/PromptExplorer";
 import "./StudioBrainstorm.css";
 
 export default function StudioBrainstorm({ ownerId }: { ownerId: string }) {
@@ -70,17 +71,7 @@ export default function StudioBrainstorm({ ownerId }: { ownerId: string }) {
           <p className="studio-small">Edits save automatically in this browser only; not synced to your account. Guest drafts are shared by people using this browser.</p>
         </form>
         <aside className="studio-side">
-          <section className="studio-card">
-            <p className="studio-eyebrow">A first sketch</p>
-            <h2>Try three ways in</h2>
-            <p>These are general starting exercises, not AI feedback on your brief.</p>
-            <ol>
-              <li><strong>Follow a person.</strong> Sketch one person’s journey through the site. Where might they pause?</li>
-              <li><strong>Explore a contrast.</strong> Draw how an open space could become sheltered, or a busy space become quiet.</li>
-              <li><strong>Change one thing.</strong> Make three tiny sketches with different entrances, gathering spaces, or relationships to the ground.</li>
-            </ol>
-            <p>Choose one sketch and write the question it helps you investigate.</p>
-          </section>
+          <PromptExplorer notes={draft.promptNotes} onChange={value => update("promptNotes", value)} />
           <section className="studio-card">
             <h2>What comes next</h2>
             <p>This first version captures your starting point. AI follow-up questions and concept directions are planned for the next step.</p>
