@@ -33,5 +33,14 @@
 .studio-card .studio-secondary { color: #0f766e; background: transparent; border: 1px solid #0f766e; }
 .studio-card button:disabled { opacity: .55; cursor: not-allowed; }
 .studio-empty { padding: 16px 0; color: #5b6672; }
+.studio-card .studio-check { display: flex; gap: 10px; align-items: center; margin: 12px 0; font-weight: 400; }
+.studio-card .studio-check input { width: 18px; height: 18px; flex: 0 0 18px; accent-color: #0f766e; }
+.studio-table-scroll { overflow-x: auto; margin-top: 18px; }
+.studio-table { width: 100%; border-collapse: collapse; table-layout: fixed; min-width: 560px; }
+.studio-table caption { text-align: left; padding: 8px 0; }
+.studio-table td, .studio-table th { border: 1px solid #dcd8ce; padding: 14px; text-align: left; vertical-align: top; white-space: pre-wrap; overflow-wrap: anywhere; }
+.studio-table th { background: #f0eee6; }
+.studio-table button { margin-top: 0; }
+.studio-selection { margin-top: 18px; }
 .studio-page summary:focus-visible { outline: 3px solid #0f766e; outline-offset: 3px; }
 @media (max-width: 850px) { .studio-layout { grid-template-columns: 1fr; } .studio-page { padding: 24px 16px 48px; } .studio-card { padding: 20px; } }

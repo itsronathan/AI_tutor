@@ -7,12 +7,14 @@ export type StudioDraft = {
   site: string; users: string; requirements: string; openQuestions: string;
   promptNotes: Record<string, string>;
   concepts: Concept[];
+  comparisonIds: string[]; directionId: string; decisionNotes: string;
 };
 export const EMPTY_DRAFT: StudioDraft = {
   title: "", brief: "", interests: "", experience: "",
   site: "", users: "", requirements: "", openQuestions: "",
   promptNotes: {},
   concepts: [],
+  comparisonIds: [], directionId: "", decisionNotes: "",
 };
 
 export function record(value: unknown): Record<string, unknown> {
@@ -38,16 +40,22 @@ export function rows(value: unknown, limit = 50): Record<string, unknown>[] {
 // Keep the original storage key and tolerate fields absent from older drafts.
 export function normalizeDraft(value: unknown): StudioDraft {
   const source = record(value);
+  const concepts = rows(source.concepts, MAX_CONCEPTS).map(row => ({
+    id: text(row.id, 100), title: text(row.title, 200), premise: text(row.premise),
+    moves: text(row.moves), experiment: text(row.experiment),
+  }));
+  const conceptIds = new Set(concepts.map(concept => concept.id));
   return {
     title: text(source.title, 200), brief: text(source.brief, 30000),
     interests: text(source.interests), experience: text(source.experience),
     site: text(source.site), users: text(source.users),
     requirements: text(source.requirements), openQuestions: text(source.openQuestions),
     promptNotes: Object.fromEntries(PROMPTS.map(prompt => [prompt.id, text(record(source.promptNotes)[prompt.id])])),
-    concepts: rows(source.concepts, MAX_CONCEPTS).map(row => ({
-      id: text(row.id, 100), title: text(row.title, 200), premise: text(row.premise),
-      moves: text(row.moves), experiment: text(row.experiment),
-    })),
+    concepts,
+    comparisonIds: Array.isArray(source.comparisonIds)
+      ? [...new Set(source.comparisonIds.filter((id): id is string => typeof id === "string" && conceptIds.has(id)))].slice(0, 3) : [],
+    directionId: typeof source.directionId === "string" && conceptIds.has(source.directionId) ? source.directionId : "",
+    decisionNotes: text(source.decisionNotes),
   };
 }
 
