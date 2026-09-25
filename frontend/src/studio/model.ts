@@ -1,5 +1,11 @@
-export type StudioDraft = { title: string; brief: string; interests: string; experience: string };
-export const EMPTY_DRAFT: StudioDraft = { title: "", brief: "", interests: "", experience: "" };
+export type StudioDraft = {
+  title: string; brief: string; interests: string; experience: string;
+  site: string; users: string; requirements: string; openQuestions: string;
+};
+export const EMPTY_DRAFT: StudioDraft = {
+  title: "", brief: "", interests: "", experience: "",
+  site: "", users: "", requirements: "", openQuestions: "",
+};
 
 export function record(value: unknown): Record<string, unknown> {
   return value !== null && typeof value === "object" && !Array.isArray(value)
@@ -16,6 +22,8 @@ export function normalizeDraft(value: unknown): StudioDraft {
   return {
     title: text(source.title, 200), brief: text(source.brief, 30000),
     interests: text(source.interests), experience: text(source.experience),
+    site: text(source.site), users: text(source.users),
+    requirements: text(source.requirements), openQuestions: text(source.openQuestions),
   };
 }
 

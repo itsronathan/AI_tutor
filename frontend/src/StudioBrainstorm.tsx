@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { loadDraft, type StudioDraft } from "./studio/model";
+import ProjectContext from "./studio/ProjectContext";
 import "./StudioBrainstorm.css";
 
 export default function StudioBrainstorm({ ownerId }: { ownerId: string }) {
@@ -63,6 +64,7 @@ export default function StudioBrainstorm({ ownerId }: { ownerId: string }) {
           <textarea id="studio-experience" rows={3} maxLength={4000} value={draft.experience}
             placeholder="Think about arrival, movement, gathering, or finding a quiet place. It’s okay to leave this open."
             onChange={event => update("experience", event.target.value)} />
+          <ProjectContext draft={draft} onChange={update} />
           <button type="submit">Save project draft</button>
           <p className="studio-status" role="status">{status}</p>
           <p className="studio-small">Edits save automatically in this browser only; not synced to your account. Guest drafts are shared by people using this browser.</p>

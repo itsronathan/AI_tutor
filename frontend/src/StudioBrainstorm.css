@@ -22,4 +22,7 @@
 .studio-side li { margin: 16px 0; }
 .studio-summary { margin-top: 24px; overflow-wrap: anywhere; }
 .studio-summary p { white-space: pre-wrap; }
+.studio-context { border-top: 1px solid #dcd8ce; margin-top: 24px; padding-top: 16px; }
+.studio-context summary { cursor: pointer; font-weight: 600; }
+.studio-page summary:focus-visible { outline: 3px solid #0f766e; outline-offset: 3px; }
 @media (max-width: 850px) { .studio-layout { grid-template-columns: 1fr; } .studio-page { padding: 24px 16px 48px; } .studio-card { padding: 20px; } }
