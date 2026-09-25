@@ -1,9 +1,12 @@
 import { PROMPTS } from "./prompts";
+import { dateOnly } from "./dates";
 
 export type Concept = { id: string; title: string; premise: string; moves: string; experiment: string };
 export const MAX_CONCEPTS = 12;
 export type Precedent = { id: string; title: string; source: string; observation: string; application: string };
 export const MAX_PRECEDENTS = 30;
+export type Milestone = { id: string; title: string; due: string; done: boolean };
+export const MAX_MILESTONES = 50;
 export type StudioDraft = {
   title: string; brief: string; interests: string; experience: string;
   site: string; users: string; requirements: string; openQuestions: string;
@@ -11,6 +14,7 @@ export type StudioDraft = {
   concepts: Concept[];
   comparisonIds: string[]; directionId: string; decisionNotes: string;
   precedents: Precedent[];
+  milestones: Milestone[];
 };
 export const EMPTY_DRAFT: StudioDraft = {
   title: "", brief: "", interests: "", experience: "",
@@ -19,6 +23,7 @@ export const EMPTY_DRAFT: StudioDraft = {
   concepts: [],
   comparisonIds: [], directionId: "", decisionNotes: "",
   precedents: [],
+  milestones: [],
 };
 
 export function record(value: unknown): Record<string, unknown> {
@@ -63,6 +68,9 @@ export function normalizeDraft(value: unknown): StudioDraft {
     precedents: rows(source.precedents, MAX_PRECEDENTS).map(row => ({
       id: text(row.id, 100), title: text(row.title, 200), source: text(row.source, 1000),
       observation: text(row.observation), application: text(row.application),
+    })),
+    milestones: rows(source.milestones, MAX_MILESTONES).map(row => ({
+      id: text(row.id, 100), title: text(row.title, 200), due: dateOnly(row.due), done: row.done === true,
     })),
   };
 }
