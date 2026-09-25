@@ -1,28 +1,27 @@
 import { useState, type FormEvent } from "react";
+import { loadDraft, type StudioDraft } from "./studio/model";
 import "./StudioBrainstorm.css";
-
-type Draft = { title: string; brief: string; interests: string; experience: string };
-const EMPTY: Draft = { title: "", brief: "", interests: "", experience: "" };
-
-function readDraft(key: string): Draft {
-  try {
-    const value: unknown = JSON.parse(localStorage.getItem(key) || "null");
-    if (value && typeof value === "object" && Object.keys(EMPTY).every(
-      field => typeof (value as Record<string, unknown>)[field] === "string",
-    )) return value as Draft;
-  } catch { /* An unavailable or invalid draft starts with an empty form. */ }
-  return { ...EMPTY };
-}
 
 export default function StudioBrainstorm({ ownerId }: { ownerId: string }) {
   const storageKey = `studio-brainstorm:v1:${ownerId}`;
-  const [draft, setDraft] = useState(() => readDraft(storageKey));
-  const [status, setStatus] = useState("");
-  const [summary, setSummary] = useState<Draft | null>(null);
+  const [initial] = useState(() => loadDraft(storageKey));
+  const [draft, setDraft] = useState(initial.draft);
+  const [status, setStatus] = useState(initial.status);
+  const [summary, setSummary] = useState<StudioDraft | null>(null);
 
-  function update(field: keyof Draft, value: string) {
-    setDraft(current => ({ ...current, [field]: value }));
-    setStatus("Unsaved changes");
+  function persist(next: StudioDraft, message: string) {
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(next));
+      setStatus(message);
+    } catch {
+      setStatus("Browser storage is unavailable. Your notes are still here, but will be lost when you leave.");
+    }
+  }
+
+  function update<K extends keyof StudioDraft>(field: K, value: StudioDraft[K]) {
+    const next = { ...draft, [field]: value };
+    setDraft(next);
+    persist(next, "Changes saved in this browser.");
     setSummary(null);
   }
 
@@ -33,12 +32,7 @@ export default function StudioBrainstorm({ ownerId }: { ownerId: string }) {
       return;
     }
     setSummary({ ...draft });
-    try {
-      localStorage.setItem(storageKey, JSON.stringify(draft));
-      setStatus("Draft saved in this browser.");
-    } catch {
-      setStatus("Browser storage is unavailable. Your notes are still here, but will be lost when you leave.");
-    }
+    persist(draft, "Draft saved in this browser.");
   }
 
   return (
@@ -71,7 +65,7 @@ export default function StudioBrainstorm({ ownerId }: { ownerId: string }) {
             onChange={event => update("experience", event.target.value)} />
           <button type="submit">Save project draft</button>
           <p className="studio-status" role="status">{status}</p>
-          <p className="studio-small">Saved on this browser only; not synced to your account. Guest drafts are shared by people using this browser.</p>
+          <p className="studio-small">Edits save automatically in this browser only; not synced to your account. Guest drafts are shared by people using this browser.</p>
         </form>
         <aside className="studio-side">
           <section className="studio-card">

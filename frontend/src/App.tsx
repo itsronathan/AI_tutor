@@ -67,7 +67,7 @@ function AppShell() {
             <Route path="/learning-bar" element={<MyLearningBar />} />
             <Route path="/profile" element={<UserProfile />} />
             <Route path="/grades" element={<Grades />} />
-            <Route path="/studio" element={<StudioBrainstorm key={user?.uid || "guest"} ownerId={user?.uid || "guest"} />} />
+            <Route path="/studio" element={loading ? <p>Loading studio…</p> : <StudioBrainstorm key={user?.uid || "guest"} ownerId={user?.uid || "guest"} />} />
           </Routes>
         </div>
 

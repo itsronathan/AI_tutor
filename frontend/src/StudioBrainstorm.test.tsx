@@ -7,6 +7,13 @@ beforeEach(() => localStorage.clear());
 afterEach(() => { cleanup(); vi.restoreAllMocks(); });
 
 describe("Studio Brainstorm drafts", () => {
+  it("autosaves partial work before the student has an assignment brief", () => {
+    const first = render(<StudioBrainstorm ownerId="guest" />);
+    fireEvent.change(screen.getByLabelText(/What catches your interest/), { target: { value: "Light through a courtyard" } });
+    first.unmount();
+    render(<StudioBrainstorm ownerId="guest" />);
+    expect(screen.getByLabelText(/What catches your interest/)).toHaveValue("Light through a courtyard");
+  });
   it("restores a saved brief for its owner without showing it to another owner", () => {
     const first = render(<StudioBrainstorm ownerId="student-a" />);
     fireEvent.change(screen.getByLabelText(/Assignment brief/), { target: { value: "Design a gathering space." } });
