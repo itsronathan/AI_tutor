@@ -27,5 +27,11 @@
 .studio-card select { width: 100%; padding: 10px; border: 1px solid #a9b0b2; border-radius: 8px; color: #1c2530; background: #fff; font: inherit; }
 .studio-card select:focus-visible { outline: 3px solid #0f766e; outline-offset: 3px; }
 .studio-exercise + .studio-exercise { border-top: 1px solid #dcd8ce; margin-top: 24px; padding-top: 8px; }
+.studio-section { margin-top: 24px; }
+.studio-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 270px), 1fr)); gap: 20px; }
+.studio-item { min-width: 0; padding: 16px; margin-top: 16px; border: 1px solid #dcd8ce; border-radius: 10px; overflow-wrap: anywhere; }
+.studio-card .studio-secondary { color: #0f766e; background: transparent; border: 1px solid #0f766e; }
+.studio-card button:disabled { opacity: .55; cursor: not-allowed; }
+.studio-empty { padding: 16px 0; color: #5b6672; }
 .studio-page summary:focus-visible { outline: 3px solid #0f766e; outline-offset: 3px; }
 @media (max-width: 850px) { .studio-layout { grid-template-columns: 1fr; } .studio-page { padding: 24px 16px 48px; } .studio-card { padding: 20px; } }

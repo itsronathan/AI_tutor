@@ -2,6 +2,7 @@ import { useState, type FormEvent } from "react";
 import { loadDraft, type StudioDraft } from "./studio/model";
 import ProjectContext from "./studio/ProjectContext";
 import PromptExplorer from "./studio/PromptExplorer";
+import ConceptBoard from "./studio/ConceptBoard";
 import "./StudioBrainstorm.css";
 
 export default function StudioBrainstorm({ ownerId }: { ownerId: string }) {
@@ -78,6 +79,7 @@ export default function StudioBrainstorm({ ownerId }: { ownerId: string }) {
           </section>
         </aside>
       </div>
+      <ConceptBoard concepts={draft.concepts} onChange={value => update("concepts", value)} />
       {summary && <section className="studio-card studio-summary" aria-label="Project starting point">
         <h2>{summary.title.trim() || "Your project starting point"}</h2>
         <h3>Assignment brief</h3><p>{summary.brief}</p>

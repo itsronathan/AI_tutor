@@ -1,14 +1,18 @@
 import { PROMPTS } from "./prompts";
 
+export type Concept = { id: string; title: string; premise: string; moves: string; experiment: string };
+export const MAX_CONCEPTS = 12;
 export type StudioDraft = {
   title: string; brief: string; interests: string; experience: string;
   site: string; users: string; requirements: string; openQuestions: string;
   promptNotes: Record<string, string>;
+  concepts: Concept[];
 };
 export const EMPTY_DRAFT: StudioDraft = {
   title: "", brief: "", interests: "", experience: "",
   site: "", users: "", requirements: "", openQuestions: "",
   promptNotes: {},
+  concepts: [],
 };
 
 export function record(value: unknown): Record<string, unknown> {
@@ -20,6 +24,17 @@ export function text(value: unknown, limit = 4000): string {
   return typeof value === "string" ? value.slice(0, limit) : "";
 }
 
+export function rows(value: unknown, limit = 50): Record<string, unknown>[] {
+  if (!Array.isArray(value)) return [];
+  const seen = new Set<string>();
+  return value.map(record).filter(row => {
+    const id = text(row.id, 100);
+    if (!id || seen.has(id)) return false;
+    seen.add(id);
+    return true;
+  }).slice(0, limit);
+}
+
 // Keep the original storage key and tolerate fields absent from older drafts.
 export function normalizeDraft(value: unknown): StudioDraft {
   const source = record(value);
@@ -29,6 +44,10 @@ export function normalizeDraft(value: unknown): StudioDraft {
     site: text(source.site), users: text(source.users),
     requirements: text(source.requirements), openQuestions: text(source.openQuestions),
     promptNotes: Object.fromEntries(PROMPTS.map(prompt => [prompt.id, text(record(source.promptNotes)[prompt.id])])),
+    concepts: rows(source.concepts, MAX_CONCEPTS).map(row => ({
+      id: text(row.id, 100), title: text(row.title, 200), premise: text(row.premise),
+      moves: text(row.moves), experiment: text(row.experiment),
+    })),
   };
 }
 
