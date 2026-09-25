@@ -7,6 +7,7 @@ import LearningModel from "./LearningModel";
 import MyLearningBar from "./MyLearningBar";
 import UserProfile from "./UserProfile";
 import Grades from "./Grades";
+import StudioBrainstorm from "./StudioBrainstorm";
 import SignInModal from "./SignInModal";
 import Sidebar from "./components/Sidebar";
 import OnboardingTour from "./components/OnboardingTour";
@@ -66,6 +67,7 @@ function AppShell() {
             <Route path="/learning-bar" element={<MyLearningBar />} />
             <Route path="/profile" element={<UserProfile />} />
             <Route path="/grades" element={<Grades />} />
+            <Route path="/studio" element={<StudioBrainstorm key={user?.uid || "guest"} ownerId={user?.uid || "guest"} />} />
           </Routes>
         </div>
 

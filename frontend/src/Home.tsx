@@ -53,6 +53,10 @@ export default function Home() {
                 {!loading && !user && <span className="hs-note">↜ free for students!</span>}
               </div>
 
+              <div className="hs-cta-row hs-cta-row--sub">
+                <Link to="/studio" className="hs-btn-ghost">Try Studio Brainstorm →</Link>
+              </div>
+
               {!loading && !user && (
                 <div className="hs-cta-row hs-cta-row--sub">
                   <button type="button" className="hs-btn-ghost" onClick={() => setShowSignIn(true)}>
