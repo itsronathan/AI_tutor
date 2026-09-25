@@ -6,6 +6,7 @@ import ConceptBoard from "./studio/ConceptBoard";
 import ConceptComparison from "./studio/ConceptComparison";
 import PrecedentJournal from "./studio/PrecedentJournal";
 import MilestonePlanner from "./studio/MilestonePlanner";
+import CritiqueLog from "./studio/CritiqueLog";
 import "./StudioBrainstorm.css";
 
 export default function StudioBrainstorm({ ownerId }: { ownerId: string }) {
@@ -86,6 +87,7 @@ export default function StudioBrainstorm({ ownerId }: { ownerId: string }) {
       <ConceptComparison draft={draft} onChange={update} />
       <PrecedentJournal precedents={draft.precedents} onChange={value => update("precedents", value)} />
       <MilestonePlanner milestones={draft.milestones} onChange={value => update("milestones", value)} />
+      <CritiqueLog critiques={draft.critiques} onChange={value => update("critiques", value)} />
       {summary && <section className="studio-card studio-summary" aria-label="Project starting point">
         <h2>{summary.title.trim() || "Your project starting point"}</h2>
         <h3>Assignment brief</h3><p>{summary.brief}</p>

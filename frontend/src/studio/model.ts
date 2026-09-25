@@ -7,6 +7,8 @@ export type Precedent = { id: string; title: string; source: string; observation
 export const MAX_PRECEDENTS = 30;
 export type Milestone = { id: string; title: string; due: string; done: boolean };
 export const MAX_MILESTONES = 50;
+export type Critique = { id: string; date: string; reviewer: string; feedback: string; response: string; nextAction: string; done: boolean };
+export const MAX_CRITIQUES = 50;
 export type StudioDraft = {
   title: string; brief: string; interests: string; experience: string;
   site: string; users: string; requirements: string; openQuestions: string;
@@ -15,6 +17,7 @@ export type StudioDraft = {
   comparisonIds: string[]; directionId: string; decisionNotes: string;
   precedents: Precedent[];
   milestones: Milestone[];
+  critiques: Critique[];
 };
 export const EMPTY_DRAFT: StudioDraft = {
   title: "", brief: "", interests: "", experience: "",
@@ -24,6 +27,7 @@ export const EMPTY_DRAFT: StudioDraft = {
   comparisonIds: [], directionId: "", decisionNotes: "",
   precedents: [],
   milestones: [],
+  critiques: [],
 };
 
 export function record(value: unknown): Record<string, unknown> {
@@ -71,6 +75,10 @@ export function normalizeDraft(value: unknown): StudioDraft {
     })),
     milestones: rows(source.milestones, MAX_MILESTONES).map(row => ({
       id: text(row.id, 100), title: text(row.title, 200), due: dateOnly(row.due), done: row.done === true,
+    })),
+    critiques: rows(source.critiques, MAX_CRITIQUES).map(row => ({
+      id: text(row.id, 100), date: dateOnly(row.date), reviewer: text(row.reviewer, 200),
+      feedback: text(row.feedback), response: text(row.response), nextAction: text(row.nextAction), done: row.done === true,
     })),
   };
 }
