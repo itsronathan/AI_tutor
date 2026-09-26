@@ -8,6 +8,7 @@ from fastapi.staticfiles import StaticFiles
 
 from api_routes import router as api_router
 from eval_routes import router as eval_router
+from studio_routes import router as studio_router
 import database
 
 app = FastAPI()
@@ -36,6 +37,7 @@ def startup():
 
 app.include_router(api_router)
 app.include_router(eval_router)
+app.include_router(studio_router)
 
 _BACKEND_DIR = Path(__file__).resolve().parent
 _default_dist = _BACKEND_DIR.parent / "frontend" / "dist"

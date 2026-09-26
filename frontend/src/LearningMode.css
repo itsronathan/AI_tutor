@@ -1,0 +1,4 @@
+.learning-course-switch { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; flex-shrink: 0; padding: 10px 14px; background: #fffdf8; color: #1c2530; border-bottom: 1px solid #dcd8ce; }
+.learning-course-switch label { font-weight: 600; }
+.learning-course-switch select { max-width: 100%; padding: 8px; border: 1px solid #a9b0b2; border-radius: 6px; background: white; color: #1c2530; font: inherit; }
+.learning-course-switch select:focus-visible { outline: 3px solid #0f766e; outline-offset: 2px; }

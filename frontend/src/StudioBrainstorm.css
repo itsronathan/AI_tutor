@@ -1,0 +1,66 @@
+.app-container .content:has(.studio-page) { display: block; overflow-y: auto; background: #f7f3ea; }
+.studio-page { max-width: 1160px; margin: 0 auto; padding: 40px 32px 72px; color: #1c2530; font-family: 'DM Sans', system-ui, sans-serif; }
+.studio-header { margin-bottom: 28px; }
+.studio-page .studio-eyebrow { color: #0f766e; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; font-weight: 700; }
+.studio-page h1 { font-family: 'DM Serif Display', Georgia, serif; font-size: clamp(32px, 5vw, 46px); color: #1c2530; background: none; -webkit-text-fill-color: currentColor; }
+.studio-page h2 { font-size: 21px; margin-bottom: 10px; }
+.studio-page h3 { font-size: 16px; margin-top: 18px; }
+.studio-page p { line-height: 1.65; }
+.studio-layout { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+.studio-card { background: #fffdf8; border: 1px solid #dcd8ce; border-radius: 16px; padding: 26px; min-width: 0; }
+.studio-card label { display: block; font-weight: 600; margin: 22px 0 7px; }
+.studio-card label span { font-weight: 400; color: #5b6672; }
+.studio-card input, .studio-card textarea { display: block; box-sizing: border-box; width: 100%; background: #fff; color: #1c2530; border: 1px solid #a9b0b2; border-radius: 8px; padding: 11px 12px; font: inherit; }
+.studio-card textarea { resize: vertical; min-height: 90px; }
+.studio-card input:focus-visible, .studio-card textarea:focus-visible, .studio-card button:focus-visible { outline: 3px solid #0f766e; outline-offset: 3px; }
+.studio-card button { margin-top: 22px; border: 0; border-radius: 8px; padding: 12px 20px; background: #0f766e; color: white; font: inherit; font-weight: 600; cursor: pointer; }
+.studio-card button:hover { background: #115e59; }
+.studio-page .studio-small, #studio-brief-help { font-size: 13px; color: #5b6672; margin-bottom: 9px; }
+.studio-status { margin: 10px 0; font-size: 14px; }
+.studio-side { display: grid; gap: 20px; }
+.studio-side ol { padding-left: 22px; margin: 16px 0; }
+.studio-side li { margin: 16px 0; }
+.studio-summary { margin-top: 24px; overflow-wrap: anywhere; }
+.studio-summary p { white-space: pre-wrap; }
+.studio-context { border-top: 1px solid #dcd8ce; margin-top: 24px; padding-top: 16px; }
+.studio-context summary { cursor: pointer; font-weight: 600; }
+.studio-card select { width: 100%; padding: 10px; border: 1px solid #a9b0b2; border-radius: 8px; color: #1c2530; background: #fff; font: inherit; }
+.studio-card select:focus-visible { outline: 3px solid #0f766e; outline-offset: 3px; }
+.studio-exercise + .studio-exercise { border-top: 1px solid #dcd8ce; margin-top: 24px; padding-top: 8px; }
+.studio-section { margin-top: 24px; }
+.studio-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 270px), 1fr)); gap: 20px; }
+.studio-item { min-width: 0; padding: 16px; margin-top: 16px; border: 1px solid #dcd8ce; border-radius: 10px; overflow-wrap: anywhere; }
+.studio-card .studio-secondary { color: #0f766e; background: transparent; border: 1px solid #0f766e; }
+.studio-card button:disabled { opacity: .55; cursor: not-allowed; }
+.studio-empty { padding: 16px 0; color: #5b6672; }
+.studio-card .studio-check { display: flex; gap: 10px; align-items: center; margin: 12px 0; font-weight: 400; }
+.studio-card .studio-check input { width: 18px; height: 18px; flex: 0 0 18px; accent-color: #0f766e; }
+.studio-table-scroll { overflow-x: auto; margin-top: 18px; }
+.studio-table { width: 100%; border-collapse: collapse; table-layout: fixed; min-width: 560px; }
+.studio-table caption { text-align: left; padding: 8px 0; }
+.studio-table td, .studio-table th { border: 1px solid #dcd8ce; padding: 14px; text-align: left; vertical-align: top; white-space: pre-wrap; overflow-wrap: anywhere; }
+.studio-table th { background: #f0eee6; }
+.studio-table button { margin-top: 0; }
+.studio-selection { margin-top: 18px; }
+.studio-source-link { display: block; color: #0f766e; margin-top: 16px; text-decoration: underline; }
+.studio-milestone { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr)); gap: 16px; align-items: center; }
+.studio-milestone label { margin-top: 0; }
+.studio-export-preview { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 480px; overflow-y: auto; padding: 18px; background: #f7f3ea; font-size: 13px; }
+.studio-nav { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.studio-nav button { border: 1px solid #0f766e; border-radius: 24px; background: #fffdf8; color: #0f766e; padding: 10px 18px; font: inherit; cursor: pointer; }
+.studio-nav button[aria-pressed="true"] { background: #0f766e; color: white; }
+.studio-nav button:focus-visible, .studio-table-scroll:focus-visible { outline: 3px solid #0f766e; outline-offset: 3px; }
+.studio-preserve { white-space: pre-wrap; overflow-wrap: anywhere; }
+.studio-analysis { margin: 24px 0; padding: 20px 0; border-top: 1px solid #dcd8ce; border-bottom: 1px solid #dcd8ce; }
+.studio-analysis h3 { margin: 16px 0 8px; }
+.studio-requirements { list-style: none; padding: 0; }
+.studio-requirements li { margin: 14px 0; padding: 14px; background: #f7f3ea; border-radius: 8px; }
+.studio-category { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: #0f766e; font-weight: 700; }
+.studio-analysis blockquote { margin: 10px 0; padding-left: 12px; border-left: 3px solid #0f766e; white-space: pre-wrap; overflow-wrap: anywhere; color: #4b5563; }
+.studio-error { margin-top: 12px; padding: 12px; background: #fff1f0; color: #9a2923; border: 1px solid #edc6c2; border-radius: 8px; }
+.studio-conversation { max-height: 620px; overflow-y: auto; }
+.studio-turn { padding: 18px 0; border-top: 1px solid #dcd8ce; overflow-wrap: anywhere; }
+.studio-turn h4 { margin: 12px 0 5px; }
+.studio-turn ul { padding-left: 20px; }
+.studio-page summary:focus-visible { outline: 3px solid #0f766e; outline-offset: 3px; }
+@media (max-width: 850px) { .studio-layout { grid-template-columns: 1fr; } .studio-page { padding: 24px 16px 48px; } .studio-card { padding: 20px; } }
