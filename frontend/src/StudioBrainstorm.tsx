@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 import { loadDraft, normalizeDraft, type StudioDraft } from "./studio/model";
 import ProjectContext from "./studio/ProjectContext";
 import PromptExplorer from "./studio/PromptExplorer";
@@ -9,6 +9,7 @@ import MilestonePlanner from "./studio/MilestonePlanner";
 import CritiqueLog from "./studio/CritiqueLog";
 import ProjectExport from "./studio/ProjectExport";
 import PresentationPrep from "./studio/PresentationPrep";
+import AssignmentTutorPanel from "./studio/AssignmentTutorPanel";
 import "./StudioBrainstorm.css";
 
 const SECTIONS = ["Brief & exercises", "Concepts", "References", "Plan", "Review & export"] as const;
@@ -17,6 +18,7 @@ export default function StudioBrainstorm({ ownerId }: { ownerId: string }) {
   const storageKey = `studio-brainstorm:v1:${ownerId}`;
   const [initial] = useState(() => loadDraft(storageKey));
   const [draft, setDraft] = useState(initial.draft);
+  const currentDraft = useRef(initial.draft);
   const [status, setStatus] = useState(initial.status);
   const [summary, setSummary] = useState<StudioDraft | null>(null);
   const [section, setSection] = useState<typeof SECTIONS[number]>("Brief & exercises");
@@ -31,7 +33,8 @@ export default function StudioBrainstorm({ ownerId }: { ownerId: string }) {
   }
 
   function update<K extends keyof StudioDraft>(field: K, value: StudioDraft[K]) {
-    const next = normalizeDraft({ ...draft, [field]: value });
+    const next = normalizeDraft({ ...currentDraft.current, [field]: value });
+    currentDraft.current = next;
     setDraft(next);
     persist(next, "Changes saved in this browser.");
     setSummary(null);
@@ -70,10 +73,11 @@ export default function StudioBrainstorm({ ownerId }: { ownerId: string }) {
             placeholder="e.g. Design Studio — Community gathering space"
             onChange={event => update("title", event.target.value)} />
           <label htmlFor="studio-brief">Assignment brief <span>(required)</span></label>
-          <p id="studio-brief-help">Paste the assignment, including any site, users, required spaces, and deliverables. PDF upload will come later.</p>
+          <p id="studio-brief-help">Paste the assignment, including any site, users, required spaces, and deliverables. PDF upload will come later. Changing the brief clears its AI review, clarification answers, and conversation.</p>
           <textarea id="studio-brief" required rows={9} maxLength={30000}
             aria-describedby="studio-brief-help" value={draft.brief}
             onChange={event => update("brief", event.target.value)} />
+          <AssignmentTutorPanel brief={draft.brief.trim()} review={draft.assignmentReview} onChange={value => update("assignmentReview", value)} />
           <label htmlFor="studio-interests">What catches your interest? <span>(optional)</span></label>
           <textarea id="studio-interests" rows={3} maxLength={4000} value={draft.interests}
             placeholder="A site detail, a material, a memory, a question — or simply ‘I’m not sure yet.’"
@@ -90,7 +94,7 @@ export default function StudioBrainstorm({ ownerId }: { ownerId: string }) {
           <section className="studio-card">
             <h2>A workspace for your ideas</h2>
             <p>Use Concepts to develop and compare directions, References to collect inspiration, and Plan to set your next steps. Prepare for critiques in Review &amp; export.</p>
-            <p className="studio-small">The exercises are written prompts. AI-generated concepts and PDF upload are not connected yet.</p>
+            <p className="studio-small">The exercises here are written prompts. Use Analyze assignment to review the brief with AI before asking the assignment tutor for help. PDF upload is not available yet.</p>
           </section>
         </aside>
       </div>

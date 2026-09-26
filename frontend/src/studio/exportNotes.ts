@@ -11,11 +11,26 @@ export function buildProjectNotes(draft: StudioDraft): string {
   const conceptName = (id: string) => draft.concepts.find(item => item.id === id)?.title || "Untitled concept";
   return [
     draft.title.trim() || "Studio project notes",
-    "Student-authored notes and responses to guided exercises. Not an AI design assessment.\n",
+    "Student-authored notes and responses to guided exercises. AI assignment reviews, if present, are labeled separately.\n",
     field("ASSIGNMENT BRIEF", draft.brief), field("INTERESTS", draft.interests),
     field("INTENDED EXPERIENCE", draft.experience), field("SITE OBSERVATIONS", draft.site),
     field("PEOPLE AND ACTIVITIES", draft.users), field("REQUIREMENTS FROM THE BRIEF", draft.requirements),
     field("QUESTIONS FOR THE INSTRUCTOR", draft.openQuestions),
+    ...(draft.assignmentReview ? [
+      "AI ASSIGNMENT REVIEW\n",
+      field("Review status", draft.assignmentReview.reviewed ? "Reviewed by the student" : "Not yet reviewed by the student"),
+      field("AI summary", draft.assignmentReview.analysis.summary),
+      ...draft.assignmentReview.analysis.requirements.map(item => `[${item.category}] ${item.requirement}\nSource quote: ${item.quote}\n`),
+      field("Student corrections / additional context", draft.assignmentReview.reviewNotes),
+      ...draft.assignmentReview.analysis.questions.map((item, index) =>
+        `Clarification (${item.ask}): ${item.question}\nWhy: ${item.reason}\nAnswer: ${draft.assignmentReview!.answers[index]?.trim() || "Still open"}\n`),
+      "ASSIGNMENT TUTOR CONVERSATION\n",
+      ...draft.assignmentReview.turns.map(turn => [
+        field("Student question", turn.question), field("AI response", turn.reply.answer),
+        field("Supporting quotes from the brief", turn.reply.supporting_quotes.join("\n")),
+        field("Still to clarify", turn.reply.remaining_questions.join("\n")),
+      ].join("\n")),
+    ] : []),
     "BRAINSTORMING RESPONSES\n",
     ...PROMPTS.filter(prompt => draft.promptNotes[prompt.id]?.trim()).map(prompt =>
       `${prompt.theme}: ${prompt.title}\nPrompt: ${prompt.question}\nExercise: ${prompt.exercise}\n${field("Response", draft.promptNotes[prompt.id])}`),

@@ -1,5 +1,6 @@
 import { PROMPTS } from "./prompts";
 import { dateOnly } from "./dates";
+import { normalizeReview, type AssignmentReviewState } from "./assignmentReview";
 
 export type Concept = { id: string; title: string; premise: string; moves: string; experiment: string };
 export const MAX_CONCEPTS = 12;
@@ -21,6 +22,7 @@ export type StudioDraft = {
   milestones: Milestone[];
   critiques: Critique[];
   presentationItems: PresentationItem[]; presentationStory: string; reviewQuestions: string;
+  assignmentReview: AssignmentReviewState | null;
 };
 export const EMPTY_DRAFT: StudioDraft = {
   title: "", brief: "", interests: "", experience: "",
@@ -32,6 +34,7 @@ export const EMPTY_DRAFT: StudioDraft = {
   milestones: [],
   critiques: [],
   presentationItems: [], presentationStory: "", reviewQuestions: "",
+  assignmentReview: null,
 };
 
 export function record(value: unknown): Record<string, unknown> {
@@ -88,6 +91,7 @@ export function normalizeDraft(value: unknown): StudioDraft {
       id: text(row.id, 100), label: text(row.label, 300), done: row.done === true,
     })),
     presentationStory: text(source.presentationStory), reviewQuestions: text(source.reviewQuestions),
+    assignmentReview: normalizeReview(source.assignmentReview, text(source.brief, 30000)),
   };
 }
 

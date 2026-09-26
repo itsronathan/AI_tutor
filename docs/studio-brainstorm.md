@@ -2,8 +2,57 @@
 
 Open `/studio` from Home or the sidebar. This architecture prototype helps students
 start a semester assignment, explore several ideas, and prepare for critiques.
-It works without a backend or AI API key. Its exercises are authored prompts, not
-AI-generated concepts, instructor feedback, or a grading rubric.
+The local project tools work without a backend or AI API key. Assignment analysis
+and the assignment tutor use the AI backend. The brainstorming exercises remain
+authored prompts, and starter lists are not an instructor's grading rubric.
+
+## Analyze an assignment before asking questions
+
+1. Paste the complete assignment in **Assignment brief**, then select **Analyze assignment**.
+2. Read the AI summary and extracted requirements. Each requirement includes a
+   supporting quote from the brief. The server verifies that the quote occurs in
+   the source; the student still needs to check whether the interpretation is correct.
+3. Add corrections or additional context and mark the requirements as reviewed.
+4. Answer clarification questions as information becomes available. Questions for
+   the instructor are labeled separately from student design choices. Unanswered
+   questions can remain open.
+5. Ask the **assignment tutor** about deliverables, constraints, or what to explore
+   next. It receives the original brief, reviewed analysis, corrections, answers,
+   and the most recent six conversation turns. The prompt asks it to identify
+   missing information and distinguish design possibilities from actual requirements.
+
+AI analysis, clarification answers, and the last 20 Q&A turns are saved with the
+local draft and included in the text export. Changing the brief clears that AI
+context and requires a fresh review; other project notes remain. Requests can be
+canceled and time out in the browser after two minutes. Switching tools cancels
+an in-progress request. Responses from old briefs are discarded.
+
+Analysis sends the brief to the configured AI service. Follow-up requests also
+send the reviewed analysis, corrections, clarifications, and recent conversation.
+The studio endpoints are stateless and do not require MongoDB. They follow the
+existing app's guest-access model; deployers should use their existing API access
+and usage controls. There is no simulated success fallback when AI is unavailable.
+
+### Local AI setup
+
+Install `backend/requirements.txt` in a Python environment. Configure
+`OPENAI_API_KEY` in `backend/.env` (the existing `API_KEY` alias also works).
+Never add the real key to Git or to frontend environment variables. Optionally
+set `STUDIO_MODEL`; it defaults to `gpt-5.2`, matching the existing tutor. An override
+must support Chat Completions and strict JSON Schema outputs.
+
+Run `uvicorn main:app --host 127.0.0.1 --port 8000` from `backend`.
+For local frontend development, set `DEV_API_PROXY_TARGET=http://127.0.0.1:8000`
+in the frontend shell or its ignored `.env.local`, then restart `npm run dev`.
+Otherwise the existing Vite default points to the hosted API, which needs this
+backend change deployed before the new endpoints are available. For production,
+deploy the backend and frontend together using the existing API origin configuration.
+
+The endpoints are `POST /api/studio/analyze` and `POST /api/studio/follow-up`.
+Provider calls reuse the existing OpenAI helper with
+[Structured Outputs](https://developers.openai.com/api/docs/guides/structured-outputs).
+Missing credentials, provider failures, incomplete responses, invalid output,
+and unsupported source quotes return errors rather than fabricated analysis.
 
 ## Tools
 
@@ -41,24 +90,28 @@ failures appear above every tool; editing and exporting still work in memory.
 Text fields and collection lengths are capped to keep browser drafts manageable.
 
 This prototype supports one project per account/browser, English page content,
-and translated sidebar labels. PDF/image upload, AI suggestions, cloud storage,
+and translated sidebar labels. PDF/image upload, cloud storage,
 multi-project management, and course-specific rubrics remain future work.
 
 ## Validation
 
 From `frontend`, run `npm run test:run -- src/StudioBrainstorm.test.tsx src/studio`
-and `npm run build`. Component tests cover restoration, partial autosaving, storage
+and `npm run build`. From `backend`, run `python -m pytest test_studio_routes.py`.
+The assignment tests stub the AI provider; passing tests do not verify live model
+quality or API access. Component tests cover restoration, partial autosaving, storage
 failures, tool switching, concept removal, and the review/export workflow. Utility
 tests cover migration, date handling, reference URLs, and export content.
 
 For manual review, try the tools in order, refresh after edits, and compare a few
 concepts on a narrow viewport. The table scrolls horizontally; the rest of the
 workspace stacks. Verify that the downloaded notes contain the project's current
-state. No AI service is called.
+state. For a live AI smoke test, configure the backend key, paste a short test
+assignment, review it, answer one clarification, and ask a follow-up. Editing the
+brief should clear the previous analysis and disable follow-up until a new review.
 
 ## Next milestone
 
-Test the workflow with architecture students. Then connect briefs to
-architecture-specific follow-up questions and concept directions, each grounded
-in the assignment and accompanied by assumptions and an experiment. Keep studio
-requests separate from the existing math-specific textbook tutor.
+Test analysis quality and the workflow with architecture students. Future concept
+generation should keep requirements separate from suggestions and include a small
+experiment for each proposed direction. Keep studio requests separate from the
+existing math-specific textbook tutor.

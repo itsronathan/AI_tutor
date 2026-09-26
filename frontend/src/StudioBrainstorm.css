@@ -51,5 +51,16 @@
 .studio-nav button[aria-pressed="true"] { background: #0f766e; color: white; }
 .studio-nav button:focus-visible, .studio-table-scroll:focus-visible { outline: 3px solid #0f766e; outline-offset: 3px; }
 .studio-preserve { white-space: pre-wrap; overflow-wrap: anywhere; }
+.studio-analysis { margin: 24px 0; padding: 20px 0; border-top: 1px solid #dcd8ce; border-bottom: 1px solid #dcd8ce; }
+.studio-analysis h3 { margin: 16px 0 8px; }
+.studio-requirements { list-style: none; padding: 0; }
+.studio-requirements li { margin: 14px 0; padding: 14px; background: #f7f3ea; border-radius: 8px; }
+.studio-category { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: #0f766e; font-weight: 700; }
+.studio-analysis blockquote { margin: 10px 0; padding-left: 12px; border-left: 3px solid #0f766e; white-space: pre-wrap; overflow-wrap: anywhere; color: #4b5563; }
+.studio-error { margin-top: 12px; padding: 12px; background: #fff1f0; color: #9a2923; border: 1px solid #edc6c2; border-radius: 8px; }
+.studio-conversation { max-height: 620px; overflow-y: auto; }
+.studio-turn { padding: 18px 0; border-top: 1px solid #dcd8ce; overflow-wrap: anywhere; }
+.studio-turn h4 { margin: 12px 0 5px; }
+.studio-turn ul { padding-left: 20px; }
 .studio-page summary:focus-visible { outline: 3px solid #0f766e; outline-offset: 3px; }
 @media (max-width: 850px) { .studio-layout { grid-template-columns: 1fr; } .studio-page { padding: 24px 16px 48px; } .studio-card { padding: 20px; } }
