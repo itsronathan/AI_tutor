@@ -2,9 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import { analyzeBrief, askAboutBrief } from "./assignmentApi";
 import type { AssignmentReviewState } from "./assignmentReview";
 
-export default function AssignmentTutorPanel({ brief, review, onChange }: {
+export default function AssignmentTutorPanel({ brief, review, onChange, questionPrefix = "" }: {
   brief: string; review: AssignmentReviewState | null;
   onChange: (value: AssignmentReviewState) => void;
+  questionPrefix?: string;
 }) {
   const [busy, setBusy] = useState<"analysis" | "answer" | null>(null);
   const [error, setError] = useState("");
@@ -38,16 +39,17 @@ export default function AssignmentTutorPanel({ brief, review, onChange }: {
           latest.current.onChange({ analysis, reviewed: false, reviewNotes: "", answers: {}, turns: [] });
         }
       } else if (review) {
-        const reply = await askAboutBrief(source, review, asked, controller.signal);
+        const contextualQuestion = questionPrefix + asked;
+        const reply = await askAboutBrief(source, review, contextualQuestion, controller.signal);
         const current = latest.current.review;
         if (!controller.signal.aborted && active.current === controller && current?.analysis.source_brief === source && latest.current.brief.trim() === source) {
-          latest.current.onChange({ ...current, turns: [...current.turns, { question: asked, reply }].slice(-20) });
+          latest.current.onChange({ ...current, turns: [...current.turns, { question: contextualQuestion, reply }].slice(-20) });
           setQuestion("");
         }
       }
     } catch (failure) {
       if (active.current === controller) {
-        if (timedOut) setError("The tutor took too long to respond. Your work is saved; please try again.");
+        if (timedOut) setError("The tutor took too long to respond. Your notes are still here; please try again.");
         else if (!controller.signal.aborted) setError(failure instanceof Error ? failure.message : "The request failed. Please try again.");
       }
     } finally {
@@ -112,7 +114,7 @@ export default function AssignmentTutorPanel({ brief, review, onChange }: {
           </article>)}
         </div>
         <label htmlFor="assignment-question">Your question for the assignment tutor</label>
-        <textarea id="assignment-question" rows={3} maxLength={2000} value={question} disabled={!!busy}
+        <textarea id="assignment-question" rows={3} maxLength={2000 - questionPrefix.length} value={question} disabled={!!busy}
           placeholder="e.g. What should I explore first while meeting these requirements?"
           onChange={event => setQuestion(event.target.value)} />
         <button type="button" disabled={!!busy || !question.trim()} onClick={() => void run("answer")}>{busy === "answer" ? "Answering…" : "Ask assignment tutor"}</button>

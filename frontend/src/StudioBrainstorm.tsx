@@ -10,18 +10,19 @@ import CritiqueLog from "./studio/CritiqueLog";
 import ProjectExport from "./studio/ProjectExport";
 import PresentationPrep from "./studio/PresentationPrep";
 import AssignmentTutorPanel from "./studio/AssignmentTutorPanel";
+import StudioLessons from "./studio/StudioLessons";
 import "./StudioBrainstorm.css";
 
-const SECTIONS = ["Brief & exercises", "Concepts", "References", "Plan", "Review & export"] as const;
+const SECTIONS = ["Brief & exercises", "Learn", "Concepts", "References", "Plan", "Review & export"] as const;
 
-export default function StudioBrainstorm({ ownerId }: { ownerId: string }) {
+export default function StudioBrainstorm({ ownerId, learningMode = false }: { ownerId: string; learningMode?: boolean }) {
   const storageKey = `studio-brainstorm:v1:${ownerId}`;
   const [initial] = useState(() => loadDraft(storageKey));
   const [draft, setDraft] = useState(initial.draft);
   const currentDraft = useRef(initial.draft);
   const [status, setStatus] = useState(initial.status);
   const [summary, setSummary] = useState<StudioDraft | null>(null);
-  const [section, setSection] = useState<typeof SECTIONS[number]>("Brief & exercises");
+  const [section, setSection] = useState<typeof SECTIONS[number]>(learningMode ? "Learn" : "Brief & exercises");
 
   function persist(next: StudioDraft, message: string) {
     try {
@@ -54,8 +55,8 @@ export default function StudioBrainstorm({ ownerId }: { ownerId: string }) {
     <main className="studio-page">
       <header className="studio-header">
         <p className="studio-eyebrow">Architecture · Early prototype</p>
-        <h1>Studio Brainstorm</h1>
-        <p>Start with the brief. Find a question worth exploring.</p>
+        <h1>{learningMode ? "Architectural Design Studio" : "Studio Brainstorm"}</h1>
+        <p>{learningMode ? "Learn a concept. Test it through a sketch or model. Reflect on your choices." : "Start with the brief. Find a question worth exploring."}</p>
       </header>
       <nav className="studio-nav" aria-label="Studio tools">
         {SECTIONS.map(label => <button type="button" key={label} aria-pressed={section === label}
@@ -63,6 +64,7 @@ export default function StudioBrainstorm({ ownerId }: { ownerId: string }) {
       </nav>
       <p className="studio-status" role="status">{status}</p>
       <p className="studio-small">Edits save automatically in this browser only; not synced to your account. Guest drafts are shared by people using this browser.</p>
+      {section === "Learn" && <StudioLessons draft={draft} onChange={update} onOpenBrief={() => setSection("Brief & exercises")} />}
       {section === "Brief & exercises" && <>
       <div className="studio-layout">
         <form className="studio-card" onSubmit={save}>

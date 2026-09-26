@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from "react-route
 import { API_BASE, apiBlockedByMixedContent } from "./apiBase";
 import Home from "./Home";
 import AutoGrader from "./AutoGrader";
-import LearningModel from "./LearningModel";
+import LearningMode from "./LearningMode";
 import MyLearningBar from "./MyLearningBar";
 import UserProfile from "./UserProfile";
 import Grades from "./Grades";
@@ -63,7 +63,7 @@ function AppShell() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/autograder" element={<AutoGrader />} />
-            <Route path="/learning" element={<LearningModel />} />
+            <Route path="/learning" element={<LearningMode />} />
             <Route path="/learning-bar" element={<MyLearningBar />} />
             <Route path="/profile" element={<UserProfile />} />
             <Route path="/grades" element={<Grades />} />

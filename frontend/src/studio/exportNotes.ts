@@ -1,5 +1,6 @@
 import type { StudioDraft } from "./model";
 import { PROMPTS } from "./prompts";
+import { STUDIO_LESSONS } from "./lessons";
 
 export function exportFilename(title: string): string {
   const slug = title.trim().replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "").slice(0, 70);
@@ -34,6 +35,9 @@ export function buildProjectNotes(draft: StudioDraft): string {
     "BRAINSTORMING RESPONSES\n",
     ...PROMPTS.filter(prompt => draft.promptNotes[prompt.id]?.trim()).map(prompt =>
       `${prompt.theme}: ${prompt.title}\nPrompt: ${prompt.question}\nExercise: ${prompt.exercise}\n${field("Response", draft.promptNotes[prompt.id])}`),
+    "ARCHITECTURE LEARNING REFLECTIONS (student-authored; optional exercises)\n",
+    ...STUDIO_LESSONS.filter(lesson => draft.lessonNotes[lesson.id]?.reflection.trim() || draft.lessonNotes[lesson.id]?.completed).map(lesson =>
+      `${lesson.title}\nExercise: ${lesson.steps.join(" ")}\nSelf-marked complete: ${draft.lessonNotes[lesson.id].completed ? "Yes" : "No"}\n${field("Reflection", draft.lessonNotes[lesson.id].reflection)}`),
     "CONCEPTS\n",
     ...draft.concepts.map((concept, index) => [
       `${index + 1}. ${concept.title || "Untitled concept"}`,

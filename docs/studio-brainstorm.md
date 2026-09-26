@@ -77,6 +77,31 @@ and unsupported source quotes return errors rather than fabricated analysis.
 
 ## Saving and limits
 
+### Architecture Learning Mode
+
+Choose **Architectural Design Studio** in the Learning Mode selector, open
+`/learning?course=architecture`, or select **Learn** in Studio Brainstorm.
+Textbook learning remains the default at `/learning`.
+
+Four introductory lessons cover site analysis, circulation and arrival, scale and
+human experience, and spatial organization. Each contains an explanation, a possible
+example, a short sketch/model exercise, and a reflection prompt. These are authored
+general learning materials, not an RPI syllabus or official project requirements.
+Lessons work without a backend or AI key. Completion is self-reported, not graded.
+
+Learning and Studio use the same owner-scoped local project. Reflections and
+completion checkboxes autosave and appear in the notebook export. They remain when
+the brief changes so students can revisit earlier work against new requirements.
+
+After assignment review, the lesson tutor reuses `/api/studio/follow-up`, sending
+the selected concept and exercise with the question, original brief, corrections,
+clarification answers, and recent conversation. It asks for an explanation, an
+experiment, and a reflection question. Saved reflections are not sent automatically;
+students can include observations in their question. Replies join the existing
+Studio conversation. Switching lessons cancels pending requests. Without a reviewed
+brief, a button directs students to assignment setup instead of guessing context.
+The existing textbook progress sidebar is separate from the lesson checklist.
+
 Edits save immediately to one local draft per user ID, or to a shared guest draft.
 Blank briefs and incomplete ideas can be saved automatically. The explicit save
 button requires a nonblank brief and displays its summary. Signing in switches to
@@ -95,7 +120,7 @@ multi-project management, and course-specific rubrics remain future work.
 
 ## Validation
 
-From `frontend`, run `npm run test:run -- src/StudioBrainstorm.test.tsx src/studio`
+From `frontend`, run `npm run test:run -- src/LearningMode.test.tsx src/StudioBrainstorm.test.tsx src/studio`
 and `npm run build`. From `backend`, run `python -m pytest test_studio_routes.py`.
 The assignment tests stub the AI provider; passing tests do not verify live model
 quality or API access. Component tests cover restoration, partial autosaving, storage

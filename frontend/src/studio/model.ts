@@ -1,6 +1,7 @@
 import { PROMPTS } from "./prompts";
 import { dateOnly } from "./dates";
 import { normalizeReview, type AssignmentReviewState } from "./assignmentReview";
+import { STUDIO_LESSONS, type LessonNotes } from "./lessons";
 
 export type Concept = { id: string; title: string; premise: string; moves: string; experiment: string };
 export const MAX_CONCEPTS = 12;
@@ -23,6 +24,7 @@ export type StudioDraft = {
   critiques: Critique[];
   presentationItems: PresentationItem[]; presentationStory: string; reviewQuestions: string;
   assignmentReview: AssignmentReviewState | null;
+  lessonNotes: LessonNotes;
 };
 export const EMPTY_DRAFT: StudioDraft = {
   title: "", brief: "", interests: "", experience: "",
@@ -35,6 +37,7 @@ export const EMPTY_DRAFT: StudioDraft = {
   critiques: [],
   presentationItems: [], presentationStory: "", reviewQuestions: "",
   assignmentReview: null,
+  lessonNotes: Object.fromEntries(STUDIO_LESSONS.map(lesson => [lesson.id, { reflection: "", completed: false }])),
 };
 
 export function record(value: unknown): Record<string, unknown> {
@@ -92,6 +95,10 @@ export function normalizeDraft(value: unknown): StudioDraft {
     })),
     presentationStory: text(source.presentationStory), reviewQuestions: text(source.reviewQuestions),
     assignmentReview: normalizeReview(source.assignmentReview, text(source.brief, 30000)),
+    lessonNotes: Object.fromEntries(STUDIO_LESSONS.map(lesson => {
+      const note = record(record(source.lessonNotes)[lesson.id]);
+      return [lesson.id, { reflection: text(note.reflection), completed: note.completed === true }];
+    })),
   };
 }
 
