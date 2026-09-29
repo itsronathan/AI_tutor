@@ -77,6 +77,55 @@ and unsupported source quotes return errors rather than fabricated analysis.
 
 ## Saving and limits
 
+### Course preset, inspiration and concept drawings
+
+In **Brief & exercises**, open the optional ARCH 4820 Fall 2026 preset and preview
+the summary before adding it. It is curated from the supplied `CD1 Syllabus_Fall
+2026.pdf` and includes page references; it is not a complete PDF import or a claim
+that instructor updates are reflected. The PDF itself is not published with the app.
+The preset appends to existing brief text and clears its prior review/conversation.
+Duplicate application is disabled, and the 30,000-character brief limit is checked.
+Model scales, grading weights, land-use extent, circulation percentages, and phase
+numbering differences remain explicitly unresolved.
+
+In **Concepts**, review the current assignment before generating three directions.
+Each AI suggestion includes its connection to requirements, source quotes checked
+against the brief, a trade-off, an experiment and an unresolved question. Suggestions
+are not researched precedents. Add a direction to the editable concept board to
+develop it or compare it with other concepts. AI starting points retain a label.
+Changes to the brief, review status, corrections or clarification answers make
+previous directions historical; regenerate against the updated context.
+
+Choose a direction and request one optional parti, program bubble diagram or rough
+massing illustration. A refinement requests a new interpretation, not pixel edits
+to an earlier image. Images are exploratory and not verified scaled drawings,
+regulatory checks, engineering proposals or substitutes for physical models.
+PNG images remain only in memory while the panel is open: download them before
+navigating away. JSON/text process exports do not embed images.
+
+The latest 12 successful inspiration/drawing records autosave locally, retaining
+input snapshots, instructions, provider/model, timestamps, text outputs and image
+settings. Download JSON in Concepts or include records in the project notebook
+export. Image filenames carry their record ID. Export regularly before older records
+roll off. Failed/canceled calls and activity in other AI tools are not recorded.
+Canceled browser requests may still complete and incur costs at the provider.
+
+Backend routes: `/api/studio/inspiration` and `/api/studio/concept-drawing`.
+Text uses the existing `STUDIO_MODEL`; images use `STUDIO_IMAGE_MODEL` (default
+`gpt-image-1`) with one 1024x1024, low-quality PNG per explicit request. A compatible
+image model and API access are required. Configure `OPENAI_API_KEY` on the backend;
+never place it in a frontend environment variable. Both app and backend must be
+deployed. Requests send the reviewed assignment, notes, clarification answers and
+student focus; drawing requests additionally send the chosen direction/refinement.
+There are no automatic image retries. Backend image timeout is 180 seconds; client
+timeout is 200 seconds. Oversized drawing prompts return a clear error.
+See the [official image API guide](https://developers.openai.com/api/docs/guides/image-generation).
+
+Run backend coverage with `python -m pytest test_studio_routes.py test_studio_inspiration.py`.
+Provider responses are mocked in tests; live generation needs a configured account
+and separate quality review. These prototype endpoints use the app's existing guest
+access model; deployment operators should apply their normal usage/access controls.
+
 ### Architecture Learning Mode
 
 Choose **Architectural Design Studio** in the Learning Mode selector, open

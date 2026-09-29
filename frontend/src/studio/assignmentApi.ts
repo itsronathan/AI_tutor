@@ -1,7 +1,7 @@
 import { apiUrl } from "../apiBase";
 import { parseAnalysis, parseReply, type AssignmentReviewState } from "./assignmentReview";
 
-async function request(path: string, body: unknown, signal: AbortSignal): Promise<unknown> {
+export async function request(path: string, body: unknown, signal: AbortSignal): Promise<unknown> {
   let response: Response;
   try {
     response = await fetch(apiUrl(`/api/studio/${path}`), {

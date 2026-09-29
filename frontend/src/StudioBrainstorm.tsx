@@ -11,6 +11,8 @@ import ProjectExport from "./studio/ProjectExport";
 import PresentationPrep from "./studio/PresentationPrep";
 import AssignmentTutorPanel from "./studio/AssignmentTutorPanel";
 import StudioLessons from "./studio/StudioLessons";
+import CoursePreset from "./studio/CoursePresetPanel";
+import InspirationPanel from "./studio/InspirationPanel";
 import "./StudioBrainstorm.css";
 
 const SECTIONS = ["Brief & exercises", "Learn", "Concepts", "References", "Plan", "Review & export"] as const;
@@ -66,6 +68,7 @@ export default function StudioBrainstorm({ ownerId, learningMode = false }: { ow
       <p className="studio-small">Edits save automatically in this browser only; not synced to your account. Guest drafts are shared by people using this browser.</p>
       {section === "Learn" && <StudioLessons draft={draft} onChange={update} onOpenBrief={() => setSection("Brief & exercises")} />}
       {section === "Brief & exercises" && <>
+      <CoursePreset brief={draft.brief} onApply={value => update("brief", value)} />
       <div className="studio-layout">
         <form className="studio-card" onSubmit={save}>
           <h2>Set up your project</h2>
@@ -108,6 +111,7 @@ export default function StudioBrainstorm({ ownerId, learningMode = false }: { ow
       </section>}
       </>}
       {section === "Concepts" && <>
+        <InspirationPanel draft={draft} onChange={update} onOpenBrief={() => setSection("Brief & exercises")} />
         <ConceptBoard concepts={draft.concepts} onChange={value => update("concepts", value)} />
         <ConceptComparison draft={draft} onChange={update} />
       </>}

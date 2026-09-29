@@ -12,7 +12,7 @@ export function buildProjectNotes(draft: StudioDraft): string {
   const conceptName = (id: string) => draft.concepts.find(item => item.id === id)?.title || "Untitled concept";
   return [
     draft.title.trim() || "Studio project notes",
-    "Student-authored notes and responses to guided exercises. AI assignment reviews, if present, are labeled separately.\n",
+    "Student-authored notes and responses to guided exercises. AI starting points and assignment reviews, if present, are labeled separately.\n",
     field("ASSIGNMENT BRIEF", draft.brief), field("INTERESTS", draft.interests),
     field("INTENDED EXPERIENCE", draft.experience), field("SITE OBSERVATIONS", draft.site),
     field("PEOPLE AND ACTIVITIES", draft.users), field("REQUIREMENTS FROM THE BRIEF", draft.requirements),
@@ -33,6 +33,8 @@ export function buildProjectNotes(draft: StudioDraft): string {
       ].join("\n")),
     ] : []),
     "BRAINSTORMING RESPONSES\n",
+    "AI INSPIRATION AND DRAWING PROCESS RECORD (successful generations; images downloaded separately)\n",
+    ...draft.explorations.map(run => JSON.stringify(run, null, 2)),
     ...PROMPTS.filter(prompt => draft.promptNotes[prompt.id]?.trim()).map(prompt =>
       `${prompt.theme}: ${prompt.title}\nPrompt: ${prompt.question}\nExercise: ${prompt.exercise}\n${field("Response", draft.promptNotes[prompt.id])}`),
     "ARCHITECTURE LEARNING REFLECTIONS (student-authored; optional exercises)\n",

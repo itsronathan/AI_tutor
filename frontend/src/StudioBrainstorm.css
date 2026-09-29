@@ -63,4 +63,8 @@
 .studio-turn h4 { margin: 12px 0 5px; }
 .studio-turn ul { padding-left: 20px; }
 .studio-page summary:focus-visible { outline: 3px solid #0f766e; outline-offset: 3px; }
+.studio-concept-image { width: 100%; max-width: 720px; height: auto; border: 1px solid #dcd8ce; border-radius: 8px; }
+.studio-card button[aria-pressed="true"] { outline: 3px solid #153f3c; outline-offset: 3px; }
+.studio-card blockquote { margin: 12px 0; padding-left: 12px; border-left: 3px solid #0f766e; white-space: pre-wrap; overflow-wrap: anywhere; }
+details.studio-card { margin-bottom: 24px; }
 @media (max-width: 850px) { .studio-layout { grid-template-columns: 1fr; } .studio-page { padding: 24px 16px 48px; } .studio-card { padding: 20px; } }
