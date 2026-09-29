@@ -37,7 +37,7 @@ it("adds the preset without overwriting text, clears review and prevents duplica
 it("requires review before inspiration and drawing requests", () => {
   render(<StudioBrainstorm ownerId="guest" />); openConcepts();
   expect(screen.getByRole("button", { name: "Generate three directions" })).toBeDisabled();
-  expect(screen.queryByRole("button", { name: "Generate concept drawing" })).not.toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "Generate concept drawing" })).toBeDisabled();
 });
 
 it("generates alternatives, adopts a concept, requests a selected drawing, and exports provenance", async () => {
@@ -55,12 +55,12 @@ it("generates alternatives, adopts a concept, requests a selected drawing, and e
   fireEvent.click(screen.getAllByRole("button", { name: "Add to concept board" })[0]);
   expect(screen.getByLabelText("Concept name")).toHaveValue("Courtyard");
   fireEvent.click(screen.getAllByRole("button", { name: "Select for drawing" })[0]);
-  fireEvent.change(screen.getByLabelText("Drawing type"), { target: { value: "bubble" } });
+  fireEvent.change(screen.getByLabelText("Drawing type"), { target: { value: "perspective" } });
   fireEvent.change(screen.getByLabelText(/Refinement for this drawing/), { target: { value: "More open" } });
   fireEvent.click(screen.getByRole("button", { name: "Generate concept drawing" }));
   expect(await screen.findByAltText(/AI concept study for Spine/)).toBeInTheDocument();
   const drawing = JSON.parse(fetchMock.mock.calls[1][1].body);
-  expect(drawing.direction.title).toBe("Spine"); expect(drawing.drawing_type).toBe("bubble"); expect(drawing.refinement).toBe("More open");
+  expect(drawing.direction.title).toBe("Spine"); expect(drawing.drawing_type).toBe("perspective"); expect(drawing.refinement).toBe("More open");
   const saved = normalizeDraft(JSON.parse(localStorage.getItem(key)!));
   expect(saved.explorations).toHaveLength(2);
   expect(buildProjectNotes(saved)).toContain("image-test");
@@ -68,7 +68,7 @@ it("generates alternatives, adopts a concept, requests a selected drawing, and e
   fireEvent.click(screen.getByRole("button", { name: "Brief & exercises" }));
   fireEvent.change(screen.getByLabelText(/Assignment brief/), { target: { value: "New assignment" } });
   openConcepts();
-  expect(screen.queryByRole("button", { name: "Generate concept drawing" })).not.toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "Generate concept drawing" })).toBeDisabled();
   expect(JSON.parse(localStorage.getItem(key)!).explorations).toHaveLength(2);
 });
 
@@ -91,4 +91,14 @@ it("shows backend errors without inventing directions", async () => {
   fireEvent.click(screen.getByRole("button", { name: "Generate three directions" }));
   expect(await screen.findByRole("alert")).toHaveTextContent("Configure backend API key");
   expect(JSON.parse(localStorage.getItem(key)!).explorations).toHaveLength(0);
+});
+
+it("opens visible image tools from architecture lessons without making an AI request", () => {
+  const fetchMock = vi.fn(); vi.stubGlobal("fetch", fetchMock);
+  render(<StudioBrainstorm ownerId="guest" learningMode />);
+  fireEvent.click(screen.getByRole("button", { name: "Create concept images" }));
+  expect(screen.getByRole("region", { name: "Generate images" })).toBeInTheDocument();
+  expect(screen.getByRole("option", { name: "Exterior concept sketch" })).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "Generate concept drawing" })).toBeDisabled();
+  expect(fetchMock).not.toHaveBeenCalled();
 });

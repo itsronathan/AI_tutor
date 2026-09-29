@@ -66,7 +66,7 @@ export default function StudioBrainstorm({ ownerId, learningMode = false }: { ow
       </nav>
       <p className="studio-status" role="status">{status}</p>
       <p className="studio-small">Edits save automatically in this browser only; not synced to your account. Guest drafts are shared by people using this browser.</p>
-      {section === "Learn" && <StudioLessons draft={draft} onChange={update} onOpenBrief={() => setSection("Brief & exercises")} />}
+      {section === "Learn" && <StudioLessons draft={draft} onChange={update} onOpenBrief={() => setSection("Brief & exercises")} onOpenConcepts={() => setSection("Concepts")} />}
       {section === "Brief & exercises" && <>
       <CoursePreset brief={draft.brief} onApply={value => update("brief", value)} />
       <div className="studio-layout">

@@ -96,8 +96,11 @@ develop it or compare it with other concepts. AI starting points retain a label.
 Changes to the brief, review status, corrections or clarification answers make
 previous directions historical; regenerate against the updated context.
 
-Choose a direction and request one optional parti, program bubble diagram or rough
-massing illustration. A refinement requests a new interpretation, not pixel edits
+Open **Create concept images** from Learn, or find **Generate images** in Concepts.
+The controls are visible before generation and explain the required assignment review
+and direction selection. Choose a direction and request one optional parti, program
+bubble diagram, rough massing illustration, or exterior perspective concept sketch.
+A refinement requests a new interpretation, not pixel edits
 to an earlier image. Images are exploratory and not verified scaled drawings,
 regulatory checks, engineering proposals or substitutes for physical models.
 PNG images remain only in memory while the panel is open: download them before

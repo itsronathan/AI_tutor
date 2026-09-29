@@ -53,7 +53,8 @@ def test_invented_inspiration_quote_rejected(client, monkeypatch):
     assert client.post("/api/studio/inspiration", json=followup()).status_code == 502
 
 
-def test_drawing_prompt_settings_and_png(client, monkeypatch):
+@pytest.mark.parametrize("kind", ["parti", "bubble", "massing", "perspective"])
+def test_drawing_prompt_settings_and_png(client, monkeypatch, kind):
     calls = []
     png = base64.b64encode(b"\x89PNG\r\n\x1a\nmock-image").decode()
     class Fake:
@@ -66,11 +67,12 @@ def test_drawing_prompt_settings_and_png(client, monkeypatch):
             calls.append(args)
             return SimpleNamespace(data=[SimpleNamespace(b64_json=png)])
     monkeypatch.setattr(feature, "require_openai_client", lambda: Fake())
-    response = client.post("/api/studio/concept-drawing", json=followup(direction=DIRECTION, drawing_type="massing", refinement="More open", review_notes="Keep the tree."))
+    response = client.post("/api/studio/concept-drawing", json=followup(direction=DIRECTION, drawing_type=kind, refinement="More open", review_notes="Keep the tree."))
     assert response.status_code == 200
     assert response.json()["image"].endswith(png)
     assert calls[0]["n"] == 1 and calls[0]["output_format"] == "png"
     assert "NOT TO SCALE" in calls[0]["prompt"]
+    if kind == "perspective": assert "exterior perspective concept sketch" in calls[0]["prompt"]
     assert "More open" in calls[0]["prompt"] and "Keep the tree." in calls[0]["prompt"]
     assert response.json()["record"]["prompt"] == calls[0]["prompt"]
 

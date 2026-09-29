@@ -83,16 +83,21 @@ export default function InspirationPanel({ draft, onChange, onOpenBrief }: {
         <button type="button" disabled={busy} aria-pressed={selected === i} onClick={() => setSelected(i)}>{selected === i ? "Selected for drawing" : "Select for drawing"}</button>
         <button type="button" className="studio-secondary" disabled={draft.concepts.length >= MAX_CONCEPTS || busy} onClick={() => adopt(d)}>Add to concept board</button>
       </article>)}</div>
-      <h3>Visualize: {chosen?.title}</h3>
+    </>}
+    <section aria-label="Generate images" className="studio-analysis">
+      <h3>Generate images</h3>
+      <p>Turn a design direction into an AI-generated diagram or exterior concept sketch. Choose an image type, describe what to emphasize, and download the result as a PNG.</p>
+      {!valid ? <p>Start by analyzing and reviewing your assignment in Brief &amp; exercises.</p> : !chosen ? <p>Generate three directions above, then select one to use as the basis for your image.</p> : <p><strong>Selected direction:</strong> {chosen.title}</p>}
       <p>Exploratory illustrations only: not to scale, not verified plans, and not substitutes for required physical models. Compare every image with your brief.</p>
       <label htmlFor="drawing-type">Drawing type</label><select id="drawing-type" disabled={busy} value={kind} onChange={e => setKind(e.target.value)}>
         <option value="parti">Parti / organizing idea</option><option value="bubble">Program bubble diagram</option><option value="massing">Rough massing illustration</option>
+        <option value="perspective">Exterior concept sketch</option>
       </select>
       <label htmlFor="drawing-refinement">Refinement for this drawing (optional)</label>
       <textarea id="drawing-refinement" rows={2} maxLength={1000} disabled={busy} value={refinement} onChange={e => setRefinement(e.target.value)} placeholder="Try a more open courtyard connection." />
       <p className="studio-small">Each click generates one new interpretation; it does not edit the previous image. Generation can take several minutes.</p>
-      <button type="button" disabled={busy || !valid} onClick={() => void generate(true)}>Generate concept drawing</button>
-    </>}
+      <button type="button" disabled={busy || !valid || !chosen} onClick={() => void generate(true)}>Generate concept drawing</button>
+    </section>
     {image && <figure>
       <img className="studio-concept-image" src={image.src} alt={`AI concept study for ${image.title}; not to scale`} />
       <figcaption>AI concept study: {image.title}. Not to scale or verified for compliance.{image.context !== context && " This image uses an earlier assignment context."}</figcaption>

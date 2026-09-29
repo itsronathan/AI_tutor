@@ -63,7 +63,7 @@ def inspire(request: FollowUpRequest):
 
 class DrawingRequest(FollowUpRequest):
     direction: Direction
-    drawing_type: Literal["parti", "bubble", "massing"]
+    drawing_type: Literal["parti", "bubble", "massing", "perspective"]
     refinement: str = Field(default="", max_length=1000)
 
 
@@ -71,7 +71,9 @@ class DrawingRequest(FollowUpRequest):
 def concept_drawing(request: DrawingRequest):
     require_review(request)
     verify_quotes(request.brief, request.direction.supporting_quotes)
-    prompt = ("Create one exploratory architectural " + request.drawing_type + " diagram. "
+    image_description = ("exterior perspective concept sketch with loose architectural linework, showing spatial character and human scale without measured dimensions"
+                         if request.drawing_type == "perspective" else request.drawing_type + " diagram")
+    prompt = ("Create one exploratory architectural " + image_description + ". "
               "White background, legible minimal labels, simple forms. Include the label "
               "'AI CONCEPT STUDY - NOT TO SCALE'. This is inspiration, not a verified plan. "
               "Do not add numeric dimensions, code compliance claims, invented site boundaries, "

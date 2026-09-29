@@ -3,10 +3,11 @@ import { STUDIO_LESSONS, type LessonNotes } from "./lessons";
 import type { StudioDraft } from "./model";
 import AssignmentTutorPanel from "./AssignmentTutorPanel";
 
-export default function StudioLessons({ draft, onChange, onOpenBrief }: {
+export default function StudioLessons({ draft, onChange, onOpenBrief, onOpenConcepts }: {
   draft: StudioDraft;
   onChange: <K extends keyof StudioDraft>(field: K, value: StudioDraft[K]) => void;
   onOpenBrief: () => void;
+  onOpenConcepts: () => void;
 }) {
   const [selected, setSelected] = useState<string>(STUDIO_LESSONS[0].id);
   const lesson = STUDIO_LESSONS.find(item => item.id === selected)!;
@@ -43,6 +44,9 @@ export default function StudioLessons({ draft, onChange, onOpenBrief }: {
         <h2>Apply this lesson to your project</h2>
         <p>{reviewed ? `Using the reviewed assignment for ${draft.title.trim() || "your Studio project"}.` : "You can use every lesson without AI. To get assignment-specific help, paste and review your brief in Studio first."}</p>
         <button type="button" className="studio-secondary" onClick={onOpenBrief}>Open assignment brief</button>
+        <h3>Explore your idea visually</h3>
+        <p>Use your reviewed assignment to generate design directions, then create a parti, bubble diagram, massing image, or exterior concept sketch in Concepts.</p>
+        <button type="button" className="studio-secondary" onClick={onOpenConcepts}>Create concept images</button>
         {reviewed && <>
           <p className="studio-small">Your question will include the selected lesson and exercise. Your saved brief, corrections, and clarification answers provide the assignment context. Reflections are not sent automatically; include any observations you want to discuss in your question.</p>
           <AssignmentTutorPanel key={lesson.id} brief={draft.brief.trim()} review={draft.assignmentReview}
