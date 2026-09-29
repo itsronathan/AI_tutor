@@ -31,7 +31,31 @@ export const STUDIO_LESSONS = [
     reflection: "Which relationship is strongest in each option? What trade-off would you discuss at a critique?",
     connection: "Check the required program, adjacencies, public/private relationships, and deliverables before adding spaces.",
   },
+  {
+    id: "codes", title: "Zoning and safety codes", duration: "25 minutes",
+    concept: "Zoning shapes land use and development; building codes address matters such as occupancy, fire protection, and means of egress. Research them separately, then connect findings to a design decision. The applicable rules depend on the jurisdiction, edition, and project conditions.",
+    example: "A massing study can respond to a researched zoning envelope while a separate circulation study asks how occupants reach exits. A plausible drawing alone does not demonstrate either requirement is met.",
+    steps: ["Identify the site, jurisdiction, proposed use, and project scope. List missing information.", "Find an official zoning source and the applicable building-code source. Record a relevant section and its applicability as a research question.", "Annotate a massing or circulation sketch with the design consequence and what still needs confirmation."],
+    reflection: "Which finding is supported by a source, and which interpretation needs review?",
+    connection: "Use assigned zoning and life-safety deliverables as a research brief. Confirm the governing edition and project assumptions with your instructor.",
+  },
+  {
+    id: "accessibility", title: "ADA and accessible design", duration: "25 minutes",
+    concept: "Accessible design considers how people arrive, move, use facilities, and participate in activities. Study a complete journey rather than treating a ramp as the whole solution. ADA standards include both scoping requirements and technical criteria; local requirements may also apply.",
+    example: "Trace a visitor's journey from arrival to reception, changing, pool use, and a toilet. An accessible entrance alone does not resolve the rest of that journey.",
+    steps: ["Draw one route through the project's key activities, marking level changes and doors.", "Identify elements to research in the applicable accessibility standards. Separate measured information from assumptions.", "Revise one difficult transition and identify the dimensions or source sections needed to evaluate it."],
+    reflection: "Where does the journey still depend on unverified information or exclude participation?",
+    connection: "Check the brief's user groups and required activities, then investigate accessible routes and the facilities serving those activities.",
+  },
+  {
+    id: "lighting", title: "Lighting strategies", duration: "20 minutes",
+    concept: "Lighting design combines daylight, electric light, and controls to support activities. More sunlight is not always better: compare light distribution, glare, views, and heat gain. Orientation, shading, and room geometry affect the result.",
+    example: "Compare an unshaded opening with a shaded opening in the same room section. Ask where a reader sees glare and how task lighting supports use after dark.",
+    steps: ["Choose one activity and record the room orientation and occupied hours, labeling unknowns.", "Sketch two lighting strategies under the same assumed conditions. Change one feature and annotate expected trade-offs.", "Plan a physical model, simulation, or observation to test your idea. Treat predicted effects as hypotheses until checked."],
+    reflection: "How does your strategy support the activity during the day and after dark?",
+    connection: "Check daylight, envelope, and presentation requirements in the assignment before choosing openings or lighting systems.",
+  },
 ] as const;
 
-export type LessonNote = { reflection: string; completed: boolean };
+export type LessonNote = { reflection: string; completed: boolean; research?: string };
 export type LessonNotes = Record<string, LessonNote>;

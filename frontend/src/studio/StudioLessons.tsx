@@ -2,6 +2,7 @@ import { useState } from "react";
 import { STUDIO_LESSONS, type LessonNotes } from "./lessons";
 import type { StudioDraft } from "./model";
 import AssignmentTutorPanel from "./AssignmentTutorPanel";
+import { STUDY_GUIDES } from "./studyGuides";
 
 export default function StudioLessons({ draft, onChange, onOpenBrief, onOpenConcepts }: {
   draft: StudioDraft;
@@ -11,7 +12,8 @@ export default function StudioLessons({ draft, onChange, onOpenBrief, onOpenConc
 }) {
   const [selected, setSelected] = useState<string>(STUDIO_LESSONS[0].id);
   const lesson = STUDIO_LESSONS.find(item => item.id === selected)!;
-  const note = draft.lessonNotes[lesson.id];
+  const note = draft.lessonNotes[lesson.id] || { reflection: "", completed: false };
+  const guide = STUDY_GUIDES[lesson.id];
   const completed = STUDIO_LESSONS.filter(item => draft.lessonNotes[item.id]?.completed).length;
   const reviewed = draft.assignmentReview?.reviewed;
   function updateNote(patch: Partial<LessonNotes[string]>) {
@@ -32,6 +34,16 @@ export default function StudioLessons({ draft, onChange, onOpenBrief, onOpenConc
         <h3>Try it · About {lesson.duration}</h3>
         <ol>{lesson.steps.map(step => <li key={step}>{step}</li>)}</ol>
         <h3>Connect it to your assignment</h3><p>{lesson.connection}</p>
+        {guide && <section aria-label="Project study worksheet">
+          <h3>Apply it: project study worksheet</h3><p>{guide.scope}</p>
+          <ol>{guide.prompts.map(prompt => <li key={prompt}>{prompt}</li>)}</ol>
+          <h4>Official starting sources</h4>
+          <ul>{guide.sources.map(source => <li key={source.url}><a href={source.url} target="_blank" rel="noopener noreferrer">{source.title}</a></li>)}</ul>
+          <p className="studio-small">Source links checked September 29, 2026. Verify current editions and applicability for your project.</p>
+          <label htmlFor="lesson-research">Working notes and source evidence</label>
+          <textarea id="lesson-research" rows={7} maxLength={8000} value={note.research || ""} onChange={event => updateNote({ research: event.target.value })} placeholder="Record findings, source sections, assumptions, design changes, and questions to verify." />
+          <p className="studio-small">Saved in your notebook and included in export. These notes are not automatically sent to the tutor; include the relevant excerpt in your question.</p>
+        </section>}
         <label htmlFor="lesson-reflection">Your reflection: {lesson.reflection}</label>
         <textarea id="lesson-reflection" rows={5} maxLength={4000} value={note.reflection}
           placeholder="Describe your sketch or model, what you noticed, and what to try next."
@@ -50,7 +62,7 @@ export default function StudioLessons({ draft, onChange, onOpenBrief, onOpenConc
         {reviewed && <>
           <p className="studio-small">Your question will include the selected lesson and exercise. Your saved brief, corrections, and clarification answers provide the assignment context. Reflections are not sent automatically; include any observations you want to discuss in your question.</p>
           <AssignmentTutorPanel key={lesson.id} brief={draft.brief.trim()} review={draft.assignmentReview}
-            questionPrefix={`Learning topic: ${lesson.title}. Concept: ${lesson.concept}\nExercise: ${lesson.steps.join(" ")}\nHelp me learn through an explanation, a small sketch/model experiment, and a reflection question. Distinguish suggestions from requirements.\nMy question: `}
+            questionPrefix={`Learning topic: ${lesson.title}. Concept: ${lesson.concept}\nExercise: ${lesson.steps.join(" ")}\nHelp me learn through an explanation, a small sketch/model experiment, and a reflection question. Distinguish suggestions from requirements. ${guide ? "Do not certify compliance or invent code limits, citations, measurements, or simulation results. Identify missing jurisdiction, edition, and project conditions when relevant; request the applicable source excerpt before interpreting a specific rule." : ""}\nMy question: `}
             onChange={value => onChange("assignmentReview", value)} />
         </>}
       </aside>

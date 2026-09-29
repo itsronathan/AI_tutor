@@ -34,7 +34,7 @@ it("supports lessons without AI, persists separate reflections, exports them, an
   view.unmount();
   const restored = render(<StudioBrainstorm ownerId="guest" learningMode />);
   expect(screen.getByLabelText(/^Your reflection:/)).toHaveValue("Verify the noisy edge on site.");
-  expect(screen.getByText(/1 of 4 exercises/)).toBeInTheDocument();
+  expect(screen.getByText(/1 of 7 exercises/)).toBeInTheDocument();
   restored.unmount();
   render(<StudioBrainstorm ownerId="another-student" learningMode />);
   expect(screen.getByLabelText(/^Your reflection:/)).toHaveValue("");
@@ -98,6 +98,29 @@ it("cancels pending lesson requests when changing topics and fits every topic in
 
 it("normalizes old and malformed lesson notes without importing unknown topics", () => {
   const notes = normalizeDraft({ lessonNotes: { site: { reflection: 42, completed: "true" }, unknown: { reflection: "ignore" } } }).lessonNotes;
-  expect(notes.site).toEqual({ reflection: "", completed: false });
-  expect(Object.keys(notes)).toHaveLength(4);
+  expect(notes.site).toEqual({ reflection: "", completed: false, research: "" });
+  expect(Object.keys(notes)).toHaveLength(7);
+});
+
+
+it("saves each new topic worksheet, exports research-only notes, and restores old drafts", () => {
+  seed(false);
+  const view = render(<StudioBrainstorm ownerId="guest" learningMode />);
+  for (const title of ["Zoning and safety codes", "ADA and accessible design", "Lighting strategies"]) {
+    fireEvent.click(screen.getByRole("button", { name: title }));
+    expect(screen.getByRole("region", { name: "Project study worksheet" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Working notes and source evidence")).toHaveValue("");
+    fireEvent.change(screen.getByLabelText("Working notes and source evidence"), { target: { value: `Research for ${title}` } });
+  }
+  const saved = normalizeDraft(JSON.parse(localStorage.getItem(key)!));
+  const exported = buildProjectNotes(saved);
+  expect(exported).toContain("Research for Zoning and safety codes");
+  expect(exported).toContain("Research for ADA and accessible design");
+  expect(exported).toContain("Research for Lighting strategies");
+  view.unmount();
+  render(<StudioBrainstorm ownerId="guest" learningMode />);
+  fireEvent.click(screen.getByRole("button", { name: "ADA and accessible design" }));
+  expect(screen.getByLabelText("Working notes and source evidence")).toHaveValue("Research for ADA and accessible design");
+  expect(screen.getByRole("link", { name: /DOJ 2010 ADA Standards/ })).toHaveAttribute("href", "https://www.ada.gov/law-and-regs/design-standards/2010-stds/");
+  expect(normalizeDraft({ lessonNotes: { codes: { research: 42 } } }).lessonNotes.codes.research).toBe("");
 });

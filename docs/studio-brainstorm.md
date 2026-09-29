@@ -1,5 +1,29 @@
 # Studio Brainstorm
 
+## Zoning, accessibility and lighting studies
+
+The existing Learn tab now includes **Zoning and safety codes**, **ADA and accessible
+design**, and **Lighting strategies** alongside the four introductory lessons.
+Each new topic includes a design exercise, a project study worksheet, official
+source links checked September 29, 2026, and up to 8,000 characters of working notes.
+Notes autosave per topic and owner, survive assignment changes, and appear in the
+notebook export even without a reflection or completion check. Revisit them when
+the project changes. Older drafts receive empty notes for the new topics.
+
+Zoning and safety research separates land-use rules from building-code questions.
+NYC source links relate to the Greenpoint syllabus example; students must establish
+their project's jurisdiction, applicable edition, and scope. The accessibility
+worksheet traces arrival and participation, including pool facilities when relevant,
+and links to DOJ's 2010 ADA Standards. Lighting compares daylight, glare, shading,
+electric light and controls through two alternatives, with a DOE source.
+
+These are educational research tools, not automated compliance checks, dimensional
+validators, or lighting simulations. The tutor includes the chosen lesson in its
+question context after assignment review, but has no live code lookup and does not
+automatically receive worksheet notes. Students can paste relevant excerpts into a
+question. Backend instructions require missing project conditions and source excerpts
+to be identified rather than inventing code limits or measured performance.
+
 Open `/studio` from Home or the sidebar. This architecture prototype helps students
 start a semester assignment, explore several ideas, and prepare for critiques.
 The local project tools work without a backend or AI API key. Assignment analysis

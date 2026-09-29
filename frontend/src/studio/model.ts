@@ -101,7 +101,7 @@ export function normalizeDraft(value: unknown): StudioDraft {
     explorations: normalizeExplorations(source.explorations),
     lessonNotes: Object.fromEntries(STUDIO_LESSONS.map(lesson => {
       const note = record(record(source.lessonNotes)[lesson.id]);
-      return [lesson.id, { reflection: text(note.reflection), completed: note.completed === true }];
+      return [lesson.id, { reflection: text(note.reflection), completed: note.completed === true, research: text(note.research, 8000) }];
     })),
   };
 }
