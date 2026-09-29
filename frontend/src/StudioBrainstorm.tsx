@@ -13,9 +13,10 @@ import AssignmentTutorPanel from "./studio/AssignmentTutorPanel";
 import StudioLessons from "./studio/StudioLessons";
 import CoursePreset from "./studio/CoursePresetPanel";
 import InspirationPanel from "./studio/InspirationPanel";
+import StudioDemo from "./studio/StudioDemo";
 import "./StudioBrainstorm.css";
 
-const SECTIONS = ["Brief & exercises", "Learn", "Concepts", "References", "Plan", "Review & export"] as const;
+const SECTIONS = ["Professor demo", "Brief & exercises", "Learn", "Concepts", "References", "Plan", "Review & export"] as const;
 
 export default function StudioBrainstorm({ ownerId, learningMode = false }: { ownerId: string; learningMode?: boolean }) {
   const storageKey = `studio-brainstorm:v1:${ownerId}`;
@@ -60,12 +61,14 @@ export default function StudioBrainstorm({ ownerId, learningMode = false }: { ow
         <h1>{learningMode ? "Architectural Design Studio" : "Studio Brainstorm"}</h1>
         <p>{learningMode ? "Learn a concept. Test it through a sketch or model. Reflect on your choices." : "Start with the brief. Find a question worth exploring."}</p>
       </header>
+      {section !== "Professor demo" && <div className="studio-demo-banner"><p><strong>Presenting this to a professor?</strong> Try an 8–10 minute guided walkthrough with a sample assignment, key concepts, diagrams, and feedback notes. No API key needed.</p><button type="button" onClick={() => setSection("Professor demo")}>Start professor demo</button></div>}
       <nav className="studio-nav" aria-label="Studio tools">
         {SECTIONS.map(label => <button type="button" key={label} aria-pressed={section === label}
           onClick={() => setSection(label)}>{label}</button>)}
       </nav>
       <p className="studio-status" role="status">{status}</p>
       <p className="studio-small">Edits save automatically in this browser only; not synced to your account. Guest drafts are shared by people using this browser.</p>
+      {section === "Professor demo" && <StudioDemo key={ownerId} ownerId={ownerId} onFinish={() => setSection("Brief & exercises")} />}
       {section === "Learn" && <StudioLessons draft={draft} onChange={update} onOpenBrief={() => setSection("Brief & exercises")} />}
       {section === "Brief & exercises" && <>
       <CoursePreset brief={draft.brief} onApply={value => update("brief", value)} />
