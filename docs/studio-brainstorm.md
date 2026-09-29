@@ -1,19 +1,5 @@
 # Studio Brainstorm
 
-## Professor walkthrough
-
-In Studio or Architectural Design Studio Learning Mode, select **Start professor demo** or the **Professor demo** tab. Allow about 8–10 minutes:
-
-1. Read the small waterfront pavilion brief, compare its quoted requirements, and check the review box. Point out the difference between requirements and design suggestions.
-2. Explore site analysis, circulation, scale, and spatial organization. The vocabulary disclosure explains program, parti, and massing. Try a short reflection together.
-3. Compare three authored ideas, their connections to the brief, trade-offs, and next experiments. Select one.
-4. Explore its relationship diagram and toggle the arrival connections. Discuss what the diagram leaves unresolved and record a next experiment.
-5. Ask what was useful, unclear, or too directive, then capture the professor's priority change. Download the feedback notes before leaving the meeting.
-
-The entire walkthrough uses labeled authored examples and makes no AI requests. It requires the frontend to be running but no backend API key. Diagrams are responsive SVG relationship studies, not generated architectural plans. This is a demonstration of the intended learning workflow, not evidence of live model quality.
-
-Demo reflections, choices, and feedback autosave under `studio-professor-demo:v1:<ownerId>`, separately from real project drafts. Guest notes are shared within the browser. Reopening starts at the first step while retaining notes; stored review confirmation keeps later steps available. Exiting opens the real assignment workspace without copying sample data. Storage failures leave notes in memory with an export reminder. The feedback export is local and does not send comments to anyone.
-
 Open `/studio` from Home or the sidebar. This architecture prototype helps students
 start a semester assignment, explore several ideas, and prepare for critiques.
 The local project tools work without a backend or AI API key. Assignment analysis

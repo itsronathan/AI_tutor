@@ -67,14 +67,4 @@
 .studio-card button[aria-pressed="true"] { outline: 3px solid #153f3c; outline-offset: 3px; }
 .studio-card blockquote { margin: 12px 0; padding-left: 12px; border-left: 3px solid #0f766e; white-space: pre-wrap; overflow-wrap: anywhere; }
 details.studio-card { margin-bottom: 24px; }
-.studio-demo-banner { padding: 18px; margin: 16px 0 24px; background: #e1ecea; border-radius: 12px; color: #173c35; }
-.studio-demo-banner button { background: #0f766e; color: white; border: 0; border-radius: 8px; padding: 12px 18px; font: inherit; cursor: pointer; }
-.studio-demo-notice { padding: 16px; border-left: 4px solid #0f766e; background: #f7f3ea; }
-.studio-demo-options { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); gap: 18px; }
-.studio-demo-option { border: 1px solid #dcd8ce; border-radius: 10px; padding: 18px; }
-.studio-demo-diagram { width: 100%; max-width: 660px; height: auto; border: 1px solid #dcd8ce; border-radius: 12px; }
-.studio-demo-controls { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
-.studio-demo-stage { scroll-margin-top: 24px; }
-.studio-demo-stage:focus-visible { outline: 2px solid #0f766e; outline-offset: 6px; }
-.studio-nav button:disabled { opacity: .5; cursor: not-allowed; }
 @media (max-width: 850px) { .studio-layout { grid-template-columns: 1fr; } .studio-page { padding: 24px 16px 48px; } .studio-card { padding: 20px; } }
