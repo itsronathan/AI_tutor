@@ -26,7 +26,7 @@ export default function PrecedentJournal({ precedents, onChange }: {
       </div>)}
       {referenceUrl(item.source) && <a className="studio-source-link" href={referenceUrl(item.source)!} target="_blank" rel="noopener noreferrer">Open reference {index + 1} ↗</a>}
       <button type="button" className="studio-secondary" onClick={() => {
-        if (window.confirm(`Remove reference “${item.title || index + 1}”?`)) onChange(precedents.filter(row => row.id !== item.id));
+        onChange(precedents.filter(row => row.id !== item.id));
       }}>Remove reference {index + 1}</button>
     </article>)}</div>
     <button type="button" disabled={precedents.length >= MAX_PRECEDENTS} onClick={() => onChange([

@@ -53,6 +53,8 @@ export function buildProjectNotes(draft: StudioDraft): string {
       `${index + 1}. ${item.title || "Untitled reference"}`, field("Source / citation", item.source),
       field("Observation", item.observation), field("Possible application", item.application),
     ].join("\n")),
+    "ASSIGNMENT REQUIREMENTS CHECKLIST\n",
+    ...draft.requirementItems.map(item => `[${item.done ? "x" : " "}] ${item.label || "Untitled requirement"}\n${item.sourceBrief !== draft.brief ? "Brief changed: recheck this item.\n" : ""}Source quote: ${item.quote || "Student-entered"}\nConcept: ${item.conceptId ? conceptName(item.conceptId) : "Not linked"}\nEvidence / deliverable: ${item.evidence || "Not recorded"}\n`),
     "MILESTONES\n",
     ...draft.milestones.map(item => `[${item.done ? "x" : " "}] ${item.title || "Untitled milestone"} — ${item.due || "No date set"}`),
     "\nCRITIQUE LOG\n",

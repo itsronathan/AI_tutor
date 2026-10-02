@@ -190,9 +190,21 @@ safely when older drafts are loaded; malformed entries are normalized. Storage
 failures appear above every tool; editing and exporting still work in memory.
 Text fields and collection lengths are capped to keep browser drafts manageable.
 
-This prototype supports one project per account/browser, English page content,
+This prototype supports up to 20 projects per account/browser, English page content,
 and translated sidebar labels. PDF/image upload, cloud storage,
-multi-project management, and course-specific rubrics remain future work.
+and course-specific rubrics remain future work.
+
+## Studio usability
+
+The project picker supports up to 20 projects per owner, with New project and Duplicate project actions. Existing single drafts become the first project. The library uses `studio-brainstorm:v1:<owner>:projects`; the original key remains a last-active-draft recovery copy. Projects remain browser-local with shared guest storage. Failed saves retain work in memory and display a warning; export before leaving. Avoid editing the same owner's library in multiple tabs simultaneously.
+
+Continue your project suggests a section from the brief, concepts, and milestones. Sticky navigation and collapsible panels reduce scrolling. Students can always choose any section.
+
+Deletion offers undo for the latest removed concept, reference, milestone, critique, presentation item, or requirement. Undo preserves subsequent edits. Switching projects or reloading clears undo; list limits still apply.
+
+Plan includes up to 80 editable requirements: enter manually or import reviewed AI requirements, link a concept, record deliverable evidence, and self-mark completion. Imports keep source quotes. Changed briefs flag items for rechecking; confirming a recheck resets completion. Exports include the checklist and stale-brief notices.
+
+Check AI connection calls `GET /api/studio/availability`. It reports only client configuration, never credentials, and makes no paid request. Configuration does not guarantee credit, key validity, or model access. Network failure and missing configuration have distinct messages; manual tools remain usable.
 
 ## Validation
 

@@ -92,3 +92,20 @@
 .studio-card blockquote { margin: 12px 0; padding-left: 12px; border-left: 3px solid #98412a; white-space: pre-wrap; overflow-wrap: anywhere; }
 details.studio-card { margin-bottom: 24px; }
 @media (max-width: 850px) { .studio-layout { grid-template-columns: 1fr; } .studio-page { padding: 24px 16px 48px; } .studio-card { padding: 20px; } }
+
+.studio-page .studio-workflow { position: sticky; top: 0; z-index: 5; background: #fcfaf5; box-shadow: 0 4px 10px #292c2914; }
+.studio-section-start { scroll-margin-top: 145px; outline: none; }
+.studio-project-controls, .studio-next-step, .studio-undo { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin: 16px 0; }
+.studio-project-controls select { flex: 1; min-width: 180px; max-width: 100%; padding: 10px; font: inherit; background: #fcfaf5; color: #292c29; border: 1px solid #a7a99e; }
+.studio-page .studio-project-controls button, .studio-page .studio-next-step button, .studio-page .studio-undo button, .studio-page .studio-ai-availability button { cursor: pointer; padding: 10px 14px; font: inherit; border: 1px solid #98412a; background: #fcfaf5; color: #77311e; border-radius: 2px; }
+.studio-page button:disabled { cursor: not-allowed; opacity: .55; }
+.studio-next-step { padding: 16px; border-left: 3px solid #98412a; background: #fcfaf5; }
+.studio-next-step > div { flex: 1; min-width: 200px; }
+.studio-next-step p { margin: 6px 0; }
+.studio-ai-availability { background: #eeeae1; border: 1px solid #cecabe; padding: 14px; margin: 16px 0; }
+.studio-ai-availability p { margin: 0 0 8px; }
+.studio-card button + button { margin-left: 10px; }
+.studio-undo { position: sticky; bottom: 12px; z-index: 6; background: #fcfaf5; border: 1px solid #98412a; padding: 12px; }
+.studio-section-start > details > summary, .studio-side > details > summary, .studio-card > details > summary { padding: 14px 0; font-weight: 600; border-bottom: 1px solid #cecabe; }
+.studio-project-controls button:focus-visible, .studio-project-controls select:focus-visible, .studio-next-step button:focus-visible, .studio-undo button:focus-visible { outline: 3px solid #98412a; outline-offset: 3px; }
+@media (max-width: 620px) { .studio-page .studio-workflow button { padding: 10px 8px; font-size: 13px; gap: 6px; } .studio-section-start { scroll-margin-top: 175px; } }

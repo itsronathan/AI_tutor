@@ -1,5 +1,7 @@
 import { useRef, useState, type FormEvent } from "react";
-import { loadDraft, normalizeDraft, type StudioDraft } from "./studio/model";
+import { normalizeDraft, type StudioDraft } from "./studio/model";
+import { loadProjects, MAX_PROJECTS, type ProjectLibrary } from "./studio/projects";
+import RequirementsChecklist from "./studio/RequirementsChecklist";
 import ProjectContext from "./studio/ProjectContext";
 import PromptExplorer from "./studio/PromptExplorer";
 import ConceptBoard from "./studio/ConceptBoard";
@@ -18,30 +20,95 @@ import "./StudioBrainstorm.css";
 const SECTIONS = ["Brief & exercises", "Learn", "Concepts", "References", "Plan", "Review & export"] as const;
 
 export default function StudioBrainstorm({ ownerId, learningMode = false }: { ownerId: string; learningMode?: boolean }) {
+  return <StudioWorkspace key={ownerId} ownerId={ownerId} learningMode={learningMode} />;
+}
+
+function StudioWorkspace({ ownerId, learningMode }: { ownerId: string; learningMode: boolean }) {
   const storageKey = `studio-brainstorm:v1:${ownerId}`;
-  const [initial] = useState(() => loadDraft(storageKey));
-  const [draft, setDraft] = useState(initial.draft);
-  const currentDraft = useRef(initial.draft);
+  const [initial] = useState(() => loadProjects(storageKey));
+  const [library, setLibrary] = useState(initial.library);
+  const libraryRef = useRef(initial.library);
+  const initialDraft = initial.library.projects.find(p => p.id === initial.library.activeId)!.draft;
+  const [draft, setDraft] = useState(initialDraft);
+  const currentDraft = useRef(initialDraft);
+  const [undo, setUndo] = useState<{ message: string; restore: () => void } | null>(null);
+  const sectionStart = useRef<HTMLDivElement>(null);
   const [status, setStatus] = useState(initial.status);
   const [summary, setSummary] = useState<StudioDraft | null>(null);
   const [section, setSection] = useState<typeof SECTIONS[number]>(learningMode ? "Learn" : "Brief & exercises");
 
-  function persist(next: StudioDraft, message: string) {
+  function persistLibrary(next: ProjectLibrary, message: string) {
+    libraryRef.current = next;
+    setLibrary(next);
     try {
-      localStorage.setItem(storageKey, JSON.stringify(next));
+      localStorage.setItem(`${storageKey}:projects`, JSON.stringify(next));
+      // Keep the previous single-draft format as a recovery copy.
+      localStorage.setItem(storageKey, JSON.stringify(next.projects.find(p => p.id === next.activeId)!.draft));
       setStatus(message);
     } catch {
       setStatus("Browser storage is unavailable. Your notes are still here, but will be lost when you leave.");
     }
   }
 
+  function persist(next: StudioDraft, message: string) {
+    const current = libraryRef.current;
+    persistLibrary({ ...current, projects: current.projects.map(p => p.id === current.activeId ? { ...p, draft: next } : p) }, message);
+  }
+
+  function openProject(id: string) {
+    const next = libraryRef.current.projects.find(p => p.id === id);
+    if (!next) return;
+    currentDraft.current = next.draft; setDraft(next.draft); setSummary(null); setUndo(null);
+    setSection(learningMode ? "Learn" : "Brief & exercises");
+    persistLibrary({ ...libraryRef.current, activeId: id }, "Project opened. Saved in this browser.");
+  }
+
+  function createProject(duplicate: boolean) {
+    if (libraryRef.current.projects.length >= MAX_PROJECTS) return;
+    const next = normalizeDraft(duplicate ? { ...currentDraft.current, title: `${currentDraft.current.title || "Untitled project"} (copy)` } : null);
+    const id = crypto.randomUUID();
+    persistLibrary({ activeId: id, projects: [...libraryRef.current.projects, { id, draft: next }] }, duplicate ? "Project duplicated." : "New project created.");
+    currentDraft.current = next; setDraft(next); setSummary(null); setUndo(null); setSection("Brief & exercises");
+  }
+
+  function navigate(target: typeof SECTIONS[number]) {
+    setSection(target);
+    requestAnimationFrame(() => { sectionStart.current?.scrollIntoView?.({ block: "start" }); sectionStart.current?.focus(); });
+  }
+
   function update<K extends keyof StudioDraft>(field: K, value: StudioDraft[K]) {
+    const limits = { concepts: 12, precedents: 30, milestones: 50, critiques: 50, presentationItems: 40, requirementItems: 80 };
+    if (field in limits && Array.isArray(value)) {
+      type ListKey = keyof typeof limits;
+      const key = field as ListKey;
+      const previous = currentDraft.current;
+      const remaining = new Set((value as { id: string }[]).map(row => row.id));
+      const removed = previous[key].filter(row => !remaining.has(row.id));
+      if (removed.length) setUndo({ message: "Item removed. You can undo the latest deletion in this project.", restore: () => {
+        const now = currentDraft.current;
+        const existing = new Set(now[key].map(row => row.id));
+        const restored = [...now[key], ...removed.filter(row => !existing.has(row.id))];
+        if (restored.length > limits[key]) { setStatus("Make room in this list before restoring the deleted item."); return; }
+        const result = normalizeDraft({ ...now, [key]: restored,
+          ...(key === "concepts" ? { comparisonIds: [...new Set([...now.comparisonIds, ...previous.comparisonIds])], directionId: now.directionId || previous.directionId } : {}),
+        });
+        currentDraft.current = result; setDraft(result); persist(result, "Deleted item restored."); setUndo(null);
+      } });
+    }
     const next = normalizeDraft({ ...currentDraft.current, [field]: value });
     currentDraft.current = next;
     setDraft(next);
     persist(next, "Changes saved in this browser.");
     setSummary(null);
   }
+
+  const nextStep: { section: typeof SECTIONS[number]; reason: string } = !draft.brief.trim()
+    ? { section: "Brief & exercises", reason: "Start by adding your assignment brief." }
+    : !draft.concepts.some(c => c.premise.trim())
+      ? { section: "Concepts", reason: "Capture a first design possibility. You can write your own concept without AI." }
+      : !draft.milestones.some(m => !m.done)
+        ? { section: "Plan", reason: "Choose a concrete sketch, model, or research task to work on next." }
+        : { section: "Review & export", reason: "Prepare your project story and the questions you want feedback on." };
 
   function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -80,17 +147,33 @@ export default function StudioBrainstorm({ ownerId, learningMode = false }: { ow
         <div><span>Brief</span><strong>{draft.assignmentReview?.reviewed ? "Reviewed" : draft.brief.trim() ? "In progress" : "Ready to begin"}</strong></div>
         <div><span>Studies</span><strong>{draft.concepts.length} concept{draft.concepts.length === 1 ? "" : "s"}</strong></div>
       </div>
+      <section className="studio-project-controls" aria-label="Project library">
+        <label htmlFor="studio-project-picker">Open project</label>
+        <select id="studio-project-picker" value={library.activeId} onChange={e => openProject(e.target.value)}>
+          {library.projects.map((p, index) => <option key={p.id} value={p.id}>{p.draft.title || `Untitled project ${index + 1}`}</option>)}
+        </select>
+        <button type="button" disabled={library.projects.length >= MAX_PROJECTS} onClick={() => createProject(false)}>New project</button>
+        <button type="button" disabled={library.projects.length >= MAX_PROJECTS} onClick={() => createProject(true)}>Duplicate project</button>
+        <p className="studio-small">{library.projects.length} / {MAX_PROJECTS} projects in this browser.</p>
+      </section>
+      <aside className="studio-next-step">
+        <div><strong>Suggested next step</strong><p>{nextStep.reason} You can visit any section at any time.</p></div>
+        <button type="button" onClick={() => navigate(nextStep.section)}>Continue your project</button>
+      </aside>
       <nav className="studio-nav studio-workflow" aria-label="Studio tools">
         {SECTIONS.map((label, index) => <button type="button" key={label} aria-pressed={section === label}
-          onClick={() => setSection(label)}><span aria-hidden="true" className="studio-step-number">0{index + 1}</span>{label}</button>)}
+          onClick={() => navigate(label)}><span aria-hidden="true" className="studio-step-number">0{index + 1}</span>{label}</button>)}
       </nav>
       <p className="studio-status" role="status">{status}</p>
+      {undo && <aside className="studio-undo"><span>{undo.message}</span><button type="button" onClick={undo.restore}>Undo deletion</button></aside>}
       <p className="studio-small">Edits save automatically in this browser only; not synced to your account. Guest drafts are shared by people using this browser.</p>
-      {section === "Learn" && <StudioLessons draft={draft} onChange={update} onOpenBrief={() => setSection("Brief & exercises")} onOpenConcepts={() => setSection("Concepts")} />}
+      <div key={library.activeId} ref={sectionStart} tabIndex={-1} className="studio-section-start">
+      {section === "Learn" && <StudioLessons draft={draft} onChange={update} onOpenBrief={() => navigate("Brief & exercises")} onOpenConcepts={() => navigate("Concepts")} />}
       {section === "Brief & exercises" && <>
       <CoursePreset brief={draft.brief} onApply={value => update("brief", value)} />
       <div className="studio-layout">
         <form className="studio-card" onSubmit={save}>
+          <details open><summary>Project brief and context</summary>
           <h2>Set up your project</h2>
           <p>You don’t need a concept yet. Capture what you know and leave the rest open.</p>
           <label htmlFor="studio-title">Project or course name <span>(optional)</span></label>
@@ -113,9 +196,10 @@ export default function StudioBrainstorm({ ownerId, learningMode = false }: { ow
             onChange={event => update("experience", event.target.value)} />
           <ProjectContext draft={draft} onChange={update} />
           <button type="submit">Save project draft</button>
+          </details>
         </form>
         <aside className="studio-side">
-          <PromptExplorer notes={draft.promptNotes} onChange={value => update("promptNotes", value)} />
+          <details open><summary>Brainstorming exercises</summary><PromptExplorer notes={draft.promptNotes} onChange={value => update("promptNotes", value)} /></details>
           <section className="studio-card">
             <h2>A workspace for your ideas</h2>
             <p>Use Concepts to develop and compare directions, References to collect inspiration, and Plan to set your next steps. Prepare for critiques in Review &amp; export.</p>
@@ -131,17 +215,21 @@ export default function StudioBrainstorm({ ownerId, learningMode = false }: { ow
       </section>}
       </>}
       {section === "Concepts" && <>
-        <InspirationPanel draft={draft} onChange={update} onOpenBrief={() => setSection("Brief & exercises")} />
+        <details open><summary>AI inspiration and images</summary><InspirationPanel draft={draft} onChange={update} onOpenBrief={() => navigate("Brief & exercises")} /></details>
         <ConceptBoard concepts={draft.concepts} onChange={value => update("concepts", value)} />
         <ConceptComparison draft={draft} onChange={update} />
       </>}
       {section === "References" && <PrecedentJournal precedents={draft.precedents} onChange={value => update("precedents", value)} />}
-      {section === "Plan" && <MilestonePlanner milestones={draft.milestones} onChange={value => update("milestones", value)} />}
+      {section === "Plan" && <>
+        <details open><summary>Requirements</summary><RequirementsChecklist draft={draft} onChange={value => update("requirementItems", value)} /></details>
+        <details open><summary>Milestones</summary><MilestonePlanner milestones={draft.milestones} onChange={value => update("milestones", value)} /></details>
+      </>}
       {section === "Review & export" && <>
-        <PresentationPrep draft={draft} onChange={update} />
-        <CritiqueLog critiques={draft.critiques} onChange={value => update("critiques", value)} />
+        <details open><summary>Pin-up preparation</summary><PresentationPrep draft={draft} onChange={update} /></details>
+        <details open><summary>Critique notes</summary><CritiqueLog critiques={draft.critiques} onChange={value => update("critiques", value)} /></details>
         <ProjectExport draft={draft} />
       </>}
+      </div>
     </main>
   );
 }

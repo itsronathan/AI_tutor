@@ -24,9 +24,7 @@ export default function ConceptBoard({ concepts, onChange }: {
             onChange={event => onChange(concepts.map(item => item.id === concept.id ? { ...item, [field]: event.target.value } : item))} />
         </div>)}
         <button type="button" className="studio-secondary" onClick={() => {
-          if (window.confirm(`Remove concept “${concept.title || index + 1}” and its notes?`)) {
-            onChange(concepts.filter(item => item.id !== concept.id));
-          }
+          onChange(concepts.filter(item => item.id !== concept.id));
         }}>Remove concept {index + 1}</button>
       </article>)}
     </div>

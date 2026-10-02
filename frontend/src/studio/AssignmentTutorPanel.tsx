@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import AiAvailability from "./AiAvailability";
 import { analyzeBrief, askAboutBrief } from "./assignmentApi";
 import type { AssignmentReviewState } from "./assignmentReview";
 
@@ -60,6 +61,7 @@ export default function AssignmentTutorPanel({ brief, review, onChange, question
 
   return <section className="studio-analysis" aria-label="Assignment analysis and tutor">
     <h3>Understand the assignment first</h3>
+    <AiAvailability />
     <p>Review the requirements before asking the tutor about your project. Analysis sends your brief to the AI service; follow-up sends the brief, review notes, clarification answers, and recent conversation.</p>
     {!review && <>
       <button type="button" disabled={!brief.trim() || !!busy} onClick={() => void run("analysis")}>

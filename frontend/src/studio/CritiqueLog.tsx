@@ -28,7 +28,7 @@ export default function CritiqueLog({ critiques, onChange }: {
       <label className="studio-check"><input type="checkbox" checked={item.done}
         onChange={event => edit(item.id, { done: event.target.checked })} />Follow-up completed for critique {index + 1}</label>
       <button type="button" className="studio-secondary" onClick={() => {
-        if (window.confirm(`Remove critique ${index + 1} and its notes?`)) onChange(critiques.filter(row => row.id !== item.id));
+        onChange(critiques.filter(row => row.id !== item.id));
       }}>Remove critique {index + 1}</button>
     </article>)}
     <button type="button" disabled={critiques.length >= MAX_CRITIQUES} onClick={() => onChange([

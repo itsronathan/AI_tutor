@@ -14,7 +14,9 @@ export type Critique = { id: string; date: string; reviewer: string; feedback: s
 export const MAX_CRITIQUES = 50;
 export type PresentationItem = { id: string; label: string; done: boolean };
 export const MAX_PRESENTATION_ITEMS = 40;
+export type RequirementItem = { id: string; label: string; done: boolean; conceptId: string; evidence: string; quote: string; sourceBrief: string };
 export type StudioDraft = {
+  requirementItems: RequirementItem[];
   title: string; brief: string; interests: string; experience: string;
   site: string; users: string; requirements: string; openQuestions: string;
   promptNotes: Record<string, string>;
@@ -29,6 +31,7 @@ export type StudioDraft = {
   explorations: Exploration[];
 };
 export const EMPTY_DRAFT: StudioDraft = {
+  requirementItems: [],
   title: "", brief: "", interests: "", experience: "",
   site: "", users: "", requirements: "", openQuestions: "",
   promptNotes: {},
@@ -72,6 +75,11 @@ export function normalizeDraft(value: unknown): StudioDraft {
   }));
   const conceptIds = new Set(concepts.map(concept => concept.id));
   return {
+    requirementItems: rows(source.requirementItems, 80).map(row => ({
+      id: text(row.id, 100), label: text(row.label, 1000), done: row.done === true,
+      conceptId: typeof row.conceptId === "string" && conceptIds.has(row.conceptId) ? row.conceptId : "",
+      evidence: text(row.evidence, 1000), quote: text(row.quote, 1500), sourceBrief: text(row.sourceBrief, 30000),
+    })),
     title: text(source.title, 200), brief: text(source.brief, 30000),
     interests: text(source.interests), experience: text(source.experience),
     site: text(source.site), users: text(source.users),

@@ -28,7 +28,7 @@ export default function MilestonePlanner({ milestones, onChange }: {
       </div>
       <label className="studio-check"><input type="checkbox" checked={item.done} onChange={event => edit(item.id, { done: event.target.checked })} />Complete milestone {index + 1}</label>
       <button type="button" className="studio-secondary" onClick={() => {
-        if (window.confirm(`Remove milestone “${item.title || index + 1}”?`)) onChange(milestones.filter(row => row.id !== item.id));
+        onChange(milestones.filter(row => row.id !== item.id));
       }}>Remove milestone {index + 1}</button>
     </div>)}
     <button type="button" disabled={milestones.length >= MAX_MILESTONES} onClick={() => onChange([

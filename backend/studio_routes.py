@@ -7,9 +7,19 @@ from typing import Annotated, Literal, TypeVar
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
-from deps import create_chat_completion
+from deps import create_chat_completion, require_openai_client
 
 router = APIRouter(prefix="/api/studio", tags=["studio"])
+
+
+@router.get("/availability")
+def studio_availability():
+    """Check configuration only; never expose a key or call a paid provider."""
+    try:
+        require_openai_client()
+        return {"configured": True}
+    except HTTPException:
+        return {"configured": False}
 
 
 class StrictModel(BaseModel):

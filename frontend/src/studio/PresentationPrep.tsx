@@ -38,7 +38,7 @@ export default function PresentationPrep({ draft, onChange }: {
       <label className="studio-check"><input type="checkbox" checked={item.done}
         onChange={event => onChange("presentationItems", items.map(row => row.id === item.id ? { ...row, done: event.target.checked } : row))} />Ready: presentation item {index + 1}</label>
       <button type="button" className="studio-secondary" onClick={() => {
-        if (window.confirm(`Remove presentation item ${index + 1}?`)) onChange("presentationItems", items.filter(row => row.id !== item.id));
+        onChange("presentationItems", items.filter(row => row.id !== item.id));
       }}>Remove presentation item {index + 1}</button>
     </div>)}
     <button type="button" disabled={items.length >= MAX_PRESENTATION_ITEMS} onClick={() => onChange("presentationItems", [

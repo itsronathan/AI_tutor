@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import AiAvailability from "./AiAvailability";
 import { MAX_CONCEPTS, type StudioDraft } from "./model";
 import { request } from "./assignmentApi";
 import { downloadText, MAX_RECORDS, parseDirections, parseRecord, reviewContext, type Direction, type Exploration } from "./inspiration";
@@ -64,6 +65,7 @@ export default function InspirationPanel({ draft, onChange, onOpenBrief }: {
   }
   return <section className="studio-card studio-section" aria-label="Design inspiration">
     <h2>Explore design directions</h2>
+    <AiAvailability />
     <p>Generate three possibilities from your reviewed assignment, compare their trade-offs, and choose a starting point. These are AI-generated ideas, not researched architectural precedents.</p>
     {!valid && <><p>Analyze and review your assignment before generating ideas or drawings.</p><button type="button" onClick={onOpenBrief}>Review assignment first</button></>}
     <label htmlFor="inspiration-focus">What would you like to explore?</label>
