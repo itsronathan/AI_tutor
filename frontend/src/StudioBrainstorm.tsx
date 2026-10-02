@@ -56,13 +56,33 @@ export default function StudioBrainstorm({ ownerId, learningMode = false }: { ow
   return (
     <main className="studio-page">
       <header className="studio-header">
-        <p className="studio-eyebrow">Architecture · Early prototype</p>
+        <div className="studio-header-copy">
+        <p className="studio-eyebrow">AI Tutor / Architecture workspace</p>
         <h1>{learningMode ? "Architectural Design Studio" : "Studio Brainstorm"}</h1>
         <p>{learningMode ? "Learn a concept. Test it through a sketch or model. Reflect on your choices." : "Start with the brief. Find a question worth exploring."}</p>
+        <p className="studio-header-caption">Observe. Make. Question. Refine.</p>
+        </div>
+        <div className="studio-drawing" aria-hidden="true">
+          <svg viewBox="0 0 320 200" fill="none">
+            <path d="M20 148 150 73 297 158 168 232" stroke="currentColor" strokeDasharray="3 5" opacity=".25" />
+            <path d="M61 107 149 56 257 118 169 169Z" fill="#deded3" stroke="currentColor" />
+            <path d="M61 107V64L149 13V56M61 64 169 126 257 75V118M169 126V169M149 13 257 75" stroke="currentColor" />
+            <path d="M89 91V70L150 35 228 80V101L167 137Z" fill="#eeeae1" stroke="currentColor" />
+            <path d="m89 70 78 45 61-35M167 115v22M150 35v21l78 45M150 56 89 91" stroke="currentColor" />
+            <path d="m117 107 32-19 50 29-32 19Z" fill="#b35232" fillOpacity=".2" stroke="#a34428" />
+            <path d="m35 67-13 8m13 26-13 8m6-37v34m238 30 9 5m-99 52 9 5m-5-2 90-52" stroke="currentColor" opacity=".5" />
+          </svg>
+          <span>FIG. 01 / SPATIAL STUDY · NTS</span>
+        </div>
       </header>
-      <nav className="studio-nav" aria-label="Studio tools">
-        {SECTIONS.map(label => <button type="button" key={label} aria-pressed={section === label}
-          onClick={() => setSection(label)}>{label}</button>)}
+      <div className="studio-title-block" aria-label="Project overview">
+        <div><span>Project</span><strong>{draft.title.trim() || "Untitled studio project"}</strong></div>
+        <div><span>Brief</span><strong>{draft.assignmentReview?.reviewed ? "Reviewed" : draft.brief.trim() ? "In progress" : "Ready to begin"}</strong></div>
+        <div><span>Studies</span><strong>{draft.concepts.length} concept{draft.concepts.length === 1 ? "" : "s"}</strong></div>
+      </div>
+      <nav className="studio-nav studio-workflow" aria-label="Studio tools">
+        {SECTIONS.map((label, index) => <button type="button" key={label} aria-pressed={section === label}
+          onClick={() => setSection(label)}><span aria-hidden="true" className="studio-step-number">0{index + 1}</span>{label}</button>)}
       </nav>
       <p className="studio-status" role="status">{status}</p>
       <p className="studio-small">Edits save automatically in this browser only; not synced to your account. Guest drafts are shared by people using this browser.</p>
