@@ -168,7 +168,7 @@ export default function Home() {
                 <div className="hs-ace-meta">© 2026 AI Tutor · equal education for everyone</div>
               </div>
               <aside className="hs-ace-checklist" aria-label="Learning process">
-                
+
                 <h3>A process to return to</h3>
                 <ul>
                   <li>Understand the question</li>
