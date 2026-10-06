@@ -1,4 +1,4 @@
-# Math AI Tutor
+# AI Tutor
 
 ### Instruction placeholder....
 
