@@ -65,9 +65,10 @@ const I = {
   ),
 };
 
-type Tab = { key: string; labelKey: "sidebar.learningMode" | "sidebar.grades" | "sidebar.autoGrader"; icon: ReactNode; path: string };
+type Tab = { key: string; labelKey: "sidebar.learningMode" | "sidebar.grades" | "sidebar.autoGrader" | "sidebar.studio"; icon: ReactNode; path: string };
 
 const TABS: Tab[] = [
+  { key: "/studio", labelKey: "sidebar.studio", icon: I.home, path: "/studio" },
   { key: "/learning", labelKey: "sidebar.learningMode", icon: I.learning, path: "/learning" },
   { key: "/grades", labelKey: "sidebar.grades", icon: I.course, path: "/grades" },
   { key: "/autograder", labelKey: "sidebar.autoGrader", icon: I.grader, path: "/autograder" },

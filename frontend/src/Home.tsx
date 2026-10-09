@@ -53,6 +53,10 @@ export default function Home() {
                 {!loading && !user && <span className="hs-note">↜ free for students!</span>}
               </div>
 
+              <div className="hs-cta-row hs-cta-row--sub">
+                <Link to="/studio" className="hs-btn-ghost">Try Studio Brainstorm →</Link>
+              </div>
+
               {!loading && !user && (
                 <div className="hs-cta-row hs-cta-row--sub">
                   <button type="button" className="hs-btn-ghost" onClick={() => setShowSignIn(true)}>
@@ -72,55 +76,49 @@ export default function Home() {
                 <span className="hs-tape hs-tape--top" />
                 <div className="hs-photo">
                   <svg viewBox="0 0 220 200" aria-hidden>
-                    <g stroke="#0c1222" strokeWidth="2.4" fill="none">
-                      <line x1="55" y1="55" x2="160" y2="48" />
-                      <line x1="55" y1="55" x2="70" y2="150" />
-                      <line x1="160" y1="48" x2="70" y2="150" />
-                      <line x1="160" y1="48" x2="172" y2="148" />
-                      <line x1="70" y1="150" x2="172" y2="148" />
-                    </g>
-                    <g fill="#0c1222">
-                      <circle cx="55" cy="55" r="11" />
-                      <circle cx="160" cy="48" r="11" fill="#14b8a6" />
-                      <circle cx="70" cy="150" r="11" />
-                      <circle cx="172" cy="148" r="11" />
+                    <g stroke="#292c29" strokeWidth="1.5" fill="none">
+                      <path d="M30 110 105 67 190 116 115 159Z" fill="#deded3" />
+                      <path d="M30 110V64L105 21V67M30 64 115 113 190 70V116M115 113V159M105 21 190 70" />
+                      <path d="M53 96V67L105 37 167 73V102L115 132Z" fill="#eeeae1" />
+                      <path d="m53 67 62 36 52-30M115 103v29M105 37v30l62 35M105 67 53 96" />
+                      <path d="m77 110 28-16 39 22-28 16Z" fill="#e4c6b7" stroke="#98412a" />
+                      <path d="m20 121 95 55 86-50" strokeDasharray="3 4" opacity=".5" />
                     </g>
                   </svg>
-                  <span className="hs-glabel">∑ deg(v) = 2|E|</span>
+                  <span className="hs-glabel">COURTYARD STUDY · NTS</span>
                 </div>
                 <figcaption className="hs-cap">
-                  matched to your book <span className="hs-chk">✓</span>
+                  explore space &amp; light <span className="hs-chk">↗</span>
                 </figcaption>
               </figure>
 
               <div className="hs-card hs-sticky">
                 <span className="hs-pin" />
-                <div className="hs-kicker">Topic checklist</div>
+                <div className="hs-kicker">Studio checklist</div>
                 <ul>
-                  <li className="done"><span className="hs-box">✓</span><span>Logic &amp; Proofs</span></li>
-                  <li className="done"><span className="hs-box">✓</span><span>Sets &amp; Relations</span></li>
-                  <li><span className="hs-box" /><span>Combinatorics</span></li>
-                  <li><span className="hs-box" /><span>Graph Theory</span></li>
+                  <li className="done"><span className="hs-box">✓</span><span>Read the brief</span></li>
+                  <li className="done"><span className="hs-box">✓</span><span>Explore the site</span></li>
+                  <li><span className="hs-box" /><span>Sketch concepts</span></li>
+                  <li><span className="hs-box" /><span>Test a model</span></li>
                 </ul>
               </div>
 
               <div className="hs-card hs-chat">
                 <div className="hs-dots"><i /><i /><i /></div>
                 <div className="hs-bubble q">
-                  <code>¬(p→q) ≡ p ∧ ¬q</code>? 🤔
+                  How could light shape this space?
                 </div>
                 <div className="hs-bubble a">
-                  <code>p→q</code> is false only when p is true, q false. So its negation is exactly{" "}
-                  <code>p ∧ ¬q</code> — truth table →
+                  Sketch a side window and a roof opening in section. Compare where light falls and what to test next.
                 </div>
-                <span className="hs-srctag">▦ your textbook · Ch.1 Logic</span>
+                <span className="hs-srctag">▦ example studio conversation</span>
               </div>
 
               <div className="hs-card hs-formula">
                 <span className="hs-pin hs-pin--pen" />
-                <div className="hs-formula-lbl">counting</div>
-                <div className="hs-formula-eq">C(8,3)=56</div>
-                <div className="hs-formula-sub">ways to choose 3</div>
+                <div className="hs-formula-lbl">design prompt</div>
+                <div className="hs-formula-eq">3 ideas</div>
+                <div className="hs-formula-sub">one brief, new paths</div>
               </div>
             </div>
           </section>
