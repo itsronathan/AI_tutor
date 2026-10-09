@@ -5,7 +5,7 @@ export default function PromptExplorer({ notes, onChange }: {
   notes: Record<string, string>; onChange: (notes: Record<string, string>) => void;
 }) {
   const [theme, setTheme] = useState<string>("People");
-  return <section className="studio-card" aria-label="Brainstorming exercises">
+  return <section className="studio-card studio-prompts" aria-label="Brainstorming exercises">
     <p className="studio-eyebrow">When you feel stuck</p>
     <h2>Explore a starting point</h2>
     <p>Pick a lens. Sketch or write a response. These prompts work without AI.</p>
@@ -15,7 +15,7 @@ export default function PromptExplorer({ notes, onChange }: {
     </select>
     {PROMPTS.filter(prompt => prompt.theme === theme).map(prompt => <div className="studio-exercise" key={prompt.id}>
       <h3>{prompt.title}</h3><p>{prompt.question}</p>
-      <p><strong>Try this:</strong> {prompt.exercise}</p>
+      <p className="studio-try-this"><span>Try this:</span> {prompt.exercise}</p>
       <label htmlFor={`response-${prompt.id}`}>Your response to “{prompt.title}”</label>
       <textarea id={`response-${prompt.id}`} rows={3} maxLength={4000} value={notes[prompt.id] || ""}
         onChange={event => onChange({ ...notes, [prompt.id]: event.target.value })} />

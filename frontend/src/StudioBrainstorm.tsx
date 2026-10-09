@@ -35,6 +35,7 @@ function StudioWorkspace({ ownerId, learningMode }: { ownerId: string; learningM
   const currentDraft = useRef(initialDraft);
   const [undo, setUndo] = useState<{ message: string; restore: () => void } | null>(null);
   const sectionStart = useRef<HTMLDivElement>(null);
+  const toolsStart = useRef<HTMLElement>(null);
   const [status, setStatus] = useState(initial.status);
   const [summary, setSummary] = useState<StudioDraft | null>(null);
   const [section, setSection] = useState<typeof SECTIONS[number]>(learningMode ? "Learn" : "Brief & exercises");
@@ -162,14 +163,25 @@ function StudioWorkspace({ ownerId, learningMode }: { ownerId: string; learningM
         <div><strong>Suggested next step</strong><p>{nextStep.reason}</p></div>
         <button type="button" onClick={() => navigate(nextStep.section)}>Continue your project</button>
       </aside>
-      <nav className="studio-nav studio-workflow" aria-label="Studio tools">
-        {SECTIONS.map((label, index) => <button type="button" key={label} className={label === "Project tutor" ? "studio-project-tutor-tab" : undefined} aria-pressed={section === label}
-          onClick={() => navigate(label)}><span aria-hidden="true" className="studio-step-number">0{index + 1}</span>{label}</button>)}
+      <nav ref={toolsStart} tabIndex={-1} className="studio-nav studio-workflow" aria-label="Studio tools">
+        <div className="studio-nav-group">
+          <p className="studio-nav-label">Your workspace</p>
+          <div className="studio-nav-options">{SECTIONS.slice(0, 6).map(label => <button type="button" key={label} aria-pressed={section === label}
+            onClick={() => navigate(label)}>{label}</button>)}</div>
+        </div>
+        <div className="studio-nav-group studio-nav-ai">
+          <p className="studio-nav-label">AI support</p>
+          <div className="studio-nav-options">{SECTIONS.slice(6).map(label => <button type="button" key={label} aria-pressed={section === label}
+            onClick={() => navigate(label)}>{label}</button>)}</div>
+        </div>
       </nav>
       <p className="studio-status" role="status">{status}</p>
       {undo && <aside className="studio-undo"><span>{undo.message}</span><button type="button" onClick={undo.restore}>Undo deletion</button></aside>}
       <p className="studio-small">Autosaved in this browser. No account sync; guest drafts are shared here.</p>
       <div key={library.activeId} ref={sectionStart} tabIndex={-1} className="studio-section-start">
+      <div className="studio-current-section"><strong>{section}</strong><button type="button" onClick={() => {
+        toolsStart.current?.scrollIntoView?.({ block: "start" }); toolsStart.current?.focus();
+      }}>Back to sections ↑</button></div>
       {section === "Project tutor" && <ProjectTutor draft={draft} onChange={update} onNavigate={navigate} />}
       {section === "Focused help" && <FocusedHelp draft={draft} onChange={update} onOpenBrief={() => navigate("Brief & exercises")} />}
       {section === "Learn" && <StudioLessons draft={draft} onChange={update} onOpenBrief={() => navigate("Brief & exercises")} onOpenConcepts={() => navigate("Concepts")} />}
