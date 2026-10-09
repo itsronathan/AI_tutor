@@ -46,11 +46,11 @@ describe("Studio Brainstorm drafts", () => {
   });
   it("keeps brainstorming responses when switching lenses and tools", () => {
     render(<StudioBrainstorm ownerId="guest" />);
-    fireEvent.change(screen.getByLabelText("Brainstorming lens"), { target: { value: "Light" } });
+    fireEvent.click(screen.getByRole("checkbox", { name: "Light" }));
     fireEvent.change(screen.getByLabelText("Your response to “Move through light”"), { target: { value: "A dark entry opening to a bright court" } });
     fireEvent.click(screen.getByRole("button", { name: "Concepts" }));
     fireEvent.click(screen.getByRole("button", { name: "Brief & exercises" }));
-    fireEvent.change(screen.getByLabelText("Brainstorming lens"), { target: { value: "Light" } });
+    fireEvent.click(screen.getByRole("checkbox", { name: "Light" }));
     expect(screen.getByLabelText("Your response to “Move through light”")).toHaveValue("A dark entry opening to a bright court");
   });
 

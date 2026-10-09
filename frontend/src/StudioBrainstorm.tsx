@@ -17,6 +17,7 @@ import CoursePreset from "./studio/CoursePresetPanel";
 import InspirationPanel from "./studio/InspirationPanel";
 import ProjectTutor from "./studio/ProjectTutor";
 import FocusedHelp from "./studio/FocusedHelpPanel";
+import BriefPdfUpload from "./studio/BriefPdfUpload";
 import "./StudioBrainstorm.css";
 
 const SECTIONS = ["Brief & exercises", "Learn", "Concepts", "References", "Plan", "Review & export", "Project tutor", "Focused help"] as const;
@@ -196,9 +197,10 @@ function StudioWorkspace({ ownerId, learningMode }: { ownerId: string; learningM
           <input id="studio-title" value={draft.title} maxLength={200}
             placeholder="e.g. Design Studio — Community gathering space"
             onChange={event => update("title", event.target.value)} />
+          <BriefPdfUpload hasBrief={!!draft.brief.trim()} onImport={value => update("brief", value)} />
           <label htmlFor="studio-brief">Assignment brief <span>(required)</span></label>
-          <p id="studio-brief-help">Paste your assignment text (no PDF upload). Editing it resets AI analysis, answers, and chat.</p>
-          <textarea id="studio-brief" required rows={9} maxLength={30000}
+          <p id="studio-brief-help">Import a PDF above or paste text. Editing resets AI review and chat.</p>
+          <textarea id="studio-brief" required rows={5} maxLength={30000}
             aria-describedby="studio-brief-help" value={draft.brief}
             onChange={event => update("brief", event.target.value)} />
           <AssignmentTutorPanel brief={draft.brief.trim()} review={draft.assignmentReview} onChange={value => update("assignmentReview", value)} />

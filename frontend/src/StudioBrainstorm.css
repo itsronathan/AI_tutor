@@ -39,6 +39,12 @@
 .studio-prompts { background: #f1f3ee; }
 .studio-page .studio-try-this { font-size: 13px; line-height: 1.55; color: #5c645d; padding-left: 12px; border-left: 2px solid #cbd3c8; margin: 14px 0 22px; }
 .studio-try-this span { font-weight: 500; }
+.studio-lenses { display: flex; flex-wrap: wrap; gap: 8px 20px; border: 0; padding: 0; margin: 24px 0; }
+.studio-lenses legend { font-weight: 600; margin-bottom: 10px; }
+.studio-card .studio-lenses label { margin: 0; }
+.studio-pdf-upload { margin: 28px 0; padding: 20px; border: 1px dashed #789285; border-radius: 8px; background: #edf3ee; }
+.studio-pdf-upload > label:first-child { margin-top: 0; }
+.studio-card .studio-pdf-upload input { background: transparent; border: 0; padding: 8px 0; font-size: 14px; }
 .studio-card label { display: block; font-weight: 600; margin: 22px 0 7px; }
 .studio-card label span { font-weight: 400; color: #60635c; }
 .studio-card input, .studio-card textarea { display: block; box-sizing: border-box; width: 100%; background: #fff; color: #292c29; border: 1px solid #a7a99e; border-radius: 2px; padding: 11px 12px; font: inherit; }

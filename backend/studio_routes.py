@@ -4,12 +4,54 @@ import json
 import os
 from typing import Annotated, Literal, TypeVar
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
+from starlette.concurrency import run_in_threadpool
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from deps import create_chat_completion, require_openai_client
 
 router = APIRouter(prefix="/api/studio", tags=["studio"])
+
+
+def extract_assignment_pdf(data: bytes) -> dict:
+    import fitz
+    if not data.startswith(b"%PDF-"):
+        raise HTTPException(422, "Choose a valid PDF file.")
+    try:
+        with fitz.open(stream=data, filetype="pdf") as document:
+            if document.needs_pass:
+                raise HTTPException(422, "This PDF is password-protected. Upload an unlocked copy.")
+            if len(document) > 40:
+                raise HTTPException(422, "Use a PDF with at most 40 pages, or paste the relevant assignment text.")
+            parts = []
+            empty = []
+            length = 0
+            for index, page in enumerate(document):
+                text = page.get_text(sort=True).strip()
+                if not text:
+                    empty.append(str(index + 1))
+                length += len(text) + 2
+                if length > 30000:
+                    raise HTTPException(422, "This PDF exceeds the 30,000-character brief limit. Upload an excerpt or paste the relevant text.")
+                parts.append(text)
+            text = "\n\n".join(parts).strip()
+            if not text:
+                raise HTTPException(422, "No readable text found. Scanned PDFs need OCR; paste the text or upload a text-based PDF.")
+            return {"text": text, "warning": f"No text on pages {', '.join(empty)}. Check for scanned content before using this brief." if empty else "Check diagrams, tables, and reading order against the PDF."}
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(422, "Could not read this PDF. Try another copy or paste the text.") from exc
+
+
+@router.post("/import-pdf")
+async def import_assignment_pdf(request: Request):
+    data = bytearray()
+    async for chunk in request.stream():
+        data.extend(chunk)
+        if len(data) > 10 * 1024 * 1024:
+            raise HTTPException(413, "Choose a PDF under 10 MB.")
+    return await run_in_threadpool(extract_assignment_pdf, bytes(data))
 
 
 @router.get("/availability")

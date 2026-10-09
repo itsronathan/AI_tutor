@@ -4,16 +4,18 @@ import { PROMPTS, THEMES } from "./prompts";
 export default function PromptExplorer({ notes, onChange }: {
   notes: Record<string, string>; onChange: (notes: Record<string, string>) => void;
 }) {
-  const [theme, setTheme] = useState<string>("People");
+  const [themes, setThemes] = useState<string[]>(["People"]);
   return <section className="studio-card studio-prompts" aria-label="Brainstorming exercises">
     <p className="studio-eyebrow">When you feel stuck</p>
     <h2>Explore a starting point</h2>
-    <p>Pick a lens. Sketch or write a response. These prompts work without AI.</p>
-    <label htmlFor="studio-theme">Brainstorming lens</label>
-    <select id="studio-theme" value={theme} onChange={event => setTheme(event.target.value)}>
-      {THEMES.map(item => <option key={item}>{item}</option>)}
-    </select>
-    {PROMPTS.filter(prompt => prompt.theme === theme).map(prompt => <div className="studio-exercise" key={prompt.id}>
+    <p>Pick one or more lenses. Sketch or write a response.</p>
+    <fieldset className="studio-lenses"><legend>Brainstorming lenses</legend>
+      {THEMES.map(item => <label className="studio-check" key={item}><input type="checkbox" checked={themes.includes(item)}
+        onChange={event => setThemes(current => event.target.checked ? [...current, item] : current.filter(value => value !== item))} />{item}</label>)}
+    </fieldset>
+    {!themes.length && <p className="studio-small">Choose a lens to see prompts. Your responses stay saved.</p>}
+    {PROMPTS.filter(prompt => themes.includes(prompt.theme)).map(prompt => <div className="studio-exercise" key={prompt.id}>
+      <p className="studio-small">{prompt.theme}</p>
       <h3>{prompt.title}</h3><p>{prompt.question}</p>
       <p className="studio-try-this"><span>Try this:</span> {prompt.exercise}</p>
       <label htmlFor={`response-${prompt.id}`}>Your response to “{prompt.title}”</label>
