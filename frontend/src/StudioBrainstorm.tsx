@@ -18,6 +18,7 @@ import InspirationPanel from "./studio/InspirationPanel";
 import ProjectTutor from "./studio/ProjectTutor";
 import FocusedHelp from "./studio/FocusedHelpPanel";
 import BriefPdfUpload from "./studio/BriefPdfUpload";
+import { MAX_PROMPT_IMAGES } from "./studio/promptImages";
 import "./StudioBrainstorm.css";
 
 const SECTIONS = ["Brief & exercises", "Learn", "Concepts", "References", "Plan", "Review & export", "Project tutor", "Focused help"] as const;
@@ -217,7 +218,15 @@ function StudioWorkspace({ ownerId, learningMode }: { ownerId: string; learningM
           </details>
         </form>
         <aside className="studio-side">
-          <details open><summary>Brainstorming exercises</summary><PromptExplorer notes={draft.promptNotes} onChange={value => update("promptNotes", value)} /></details>
+          <details open><summary>Brainstorming exercises</summary><PromptExplorer notes={draft.promptNotes} onChange={value => update("promptNotes", value)} images={draft.promptImages}
+            onAddImage={(promptId, image) => {
+              const images = currentDraft.current.promptImages || {};
+              if (Object.values(images).flat().length >= MAX_PROMPT_IMAGES) return false;
+              update("promptImages", { ...images, [promptId]: [...(images[promptId] || []), image] }); return true;
+            }} onRemoveImage={(promptId, id) => {
+              const images = currentDraft.current.promptImages;
+              update("promptImages", { ...images, [promptId]: images[promptId].filter(image => image.id !== id) });
+            }} /></details>
         </aside>
       </div>
       {summary && <section className="studio-card studio-summary" aria-label="Project starting point">

@@ -1,8 +1,13 @@
 import { useState } from "react";
 import { PROMPTS, THEMES } from "./prompts";
+import SketchAttachments from "./SketchAttachments";
+import type { PromptImage } from "./promptImages";
 
-export default function PromptExplorer({ notes, onChange }: {
+export default function PromptExplorer({ notes, onChange, images = {}, onAddImage, onRemoveImage }: {
   notes: Record<string, string>; onChange: (notes: Record<string, string>) => void;
+  images?: Record<string, PromptImage[]>;
+  onAddImage?: (promptId: string, image: PromptImage) => boolean;
+  onRemoveImage?: (promptId: string, id: string) => void;
 }) {
   const [themes, setThemes] = useState<string[]>(["People"]);
   return <section className="studio-card studio-prompts" aria-label="Brainstorming exercises">
@@ -21,6 +26,8 @@ export default function PromptExplorer({ notes, onChange }: {
       <label htmlFor={`response-${prompt.id}`}>Your response to “{prompt.title}”</label>
       <textarea id={`response-${prompt.id}`} rows={3} maxLength={4000} value={notes[prompt.id] || ""}
         onChange={event => onChange({ ...notes, [prompt.id]: event.target.value })} />
+      {onAddImage && onRemoveImage && <SketchAttachments promptId={prompt.id} title={prompt.title} images={images[prompt.id] || []}
+        onAdd={image => onAddImage(prompt.id, image)} onRemove={id => onRemoveImage(prompt.id, id)} />}
     </div>)}
   </section>;
 }

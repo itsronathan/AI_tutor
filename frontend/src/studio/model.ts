@@ -5,6 +5,7 @@ import { STUDIO_LESSONS, type LessonNotes } from "./lessons";
 import { normalizeExplorations, type Exploration } from "./inspiration";
 import { PROJECT_STAGES, type Journey } from "./journey";
 import { HELP_TOPICS, type FocusedHelpState } from "./focusedHelp";
+import { MAX_IMAGE_DATA, MAX_PROMPT_IMAGES, type PromptImage } from "./promptImages";
 
 export type Concept = { id: string; title: string; premise: string; moves: string; experiment: string };
 export const MAX_CONCEPTS = 12;
@@ -24,6 +25,7 @@ export type StudioDraft = {
   title: string; brief: string; interests: string; experience: string;
   site: string; users: string; requirements: string; openQuestions: string;
   promptNotes: Record<string, string>;
+  promptImages: Record<string, PromptImage[]>;
   concepts: Concept[];
   comparisonIds: string[]; directionId: string; decisionNotes: string;
   precedents: Precedent[];
@@ -41,6 +43,7 @@ export const EMPTY_DRAFT: StudioDraft = {
   title: "", brief: "", interests: "", experience: "",
   site: "", users: "", requirements: "", openQuestions: "",
   promptNotes: {},
+  promptImages: {},
   concepts: [],
   comparisonIds: [], directionId: "", decisionNotes: "",
   precedents: [],
@@ -80,6 +83,7 @@ export function normalizeDraft(value: unknown): StudioDraft {
     moves: text(row.moves), experiment: text(row.experiment),
   }));
   const conceptIds = new Set(concepts.map(concept => concept.id));
+  let imageCount = 0;
   return {
     focusedHelp: {
       topic: HELP_TOPICS.find(topic => topic.id === record(source.focusedHelp).topic)?.id || "zoning",
@@ -105,6 +109,9 @@ export function normalizeDraft(value: unknown): StudioDraft {
     site: text(source.site), users: text(source.users),
     requirements: text(source.requirements), openQuestions: text(source.openQuestions),
     promptNotes: Object.fromEntries(PROMPTS.map(prompt => [prompt.id, text(record(source.promptNotes)[prompt.id])])),
+    promptImages: Object.fromEntries(PROMPTS.map(prompt => [prompt.id, rows(record(source.promptImages)[prompt.id], MAX_PROMPT_IMAGES)
+      .filter(row => typeof row.data === "string" && row.data.length <= MAX_IMAGE_DATA && /^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(row.data) && imageCount++ < MAX_PROMPT_IMAGES)
+      .map(row => ({ id: text(row.id, 100), name: text(row.name, 200), data: row.data as string }))])),
     concepts,
     comparisonIds: Array.isArray(source.comparisonIds)
       ? [...new Set(source.comparisonIds.filter((id): id is string => typeof id === "string" && conceptIds.has(id)))].slice(0, 3) : [],

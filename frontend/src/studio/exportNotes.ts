@@ -47,6 +47,8 @@ export function buildProjectNotes(draft: StudioDraft): string {
     ...PROMPTS.filter(prompt => draft.promptNotes[prompt.id]?.trim()).map(prompt =>
       `${prompt.theme}: ${prompt.title}\nPrompt: ${prompt.question}\nExercise: ${prompt.exercise}\n${field("Response", draft.promptNotes[prompt.id])}`),
     "ARCHITECTURE LEARNING REFLECTIONS (student-authored; optional exercises)\n",
+    "SKETCH ATTACHMENTS (download images separately from their exercises)\n",
+    ...PROMPTS.flatMap(prompt => (draft.promptImages[prompt.id] || []).map(image => `${prompt.title}: ${image.name}`)),
     ...STUDIO_LESSONS.filter(lesson => draft.lessonNotes[lesson.id]?.reflection.trim() || draft.lessonNotes[lesson.id]?.completed || draft.lessonNotes[lesson.id]?.research?.trim()).map(lesson =>
       `${lesson.title}\nExercise: ${lesson.steps.join(" ")}\nSelf-marked complete: ${draft.lessonNotes[lesson.id].completed ? "Yes" : "No"}\n${field("Reflection", draft.lessonNotes[lesson.id].reflection)}\n${field("Working notes and source evidence (student notes, not verified)", draft.lessonNotes[lesson.id].research || "")}`),
     "CONCEPTS\n",
