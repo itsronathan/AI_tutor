@@ -120,3 +120,20 @@ def test_project_notebook_size_is_bounded(client, monkeypatch):
     calls = mock_completion(monkeypatch, REPLY)
     assert client.post("/api/studio/follow-up", json=followup(project_context="x" * 24001)).status_code == 422
     assert not calls
+
+
+@pytest.mark.parametrize("topic", ["zoning", "programming", "accessibility", "lighting", "circulation"])
+def test_focused_help_uses_specialist_instructions_and_current_context(client, monkeypatch, topic):
+    calls = mock_completion(monkeypatch, REPLY)
+    payload = followup(help_topic=topic, project_context="Keep the courtyard. Investigate room areas.")
+    assert client.post("/api/studio/follow-up", json=payload).status_code == 200
+    assert studio.FOCUSED_INSTRUCTIONS in calls[0]["messages"][0]["content"]
+    assert json.loads(calls[0]["messages"][1]["content"])["help_topic"] == topic
+    assert client.post("/api/studio/follow-up", json={**payload, "reviewed": False}).status_code == 409
+    assert len(calls) == 1
+
+
+def test_unknown_help_topic_is_rejected(client, monkeypatch):
+    calls = mock_completion(monkeypatch, REPLY)
+    assert client.post("/api/studio/follow-up", json=followup(help_topic="unknown")).status_code == 422
+    assert not calls

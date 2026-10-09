@@ -4,6 +4,7 @@ import { normalizeReview, type AssignmentReviewState } from "./assignmentReview"
 import { STUDIO_LESSONS, type LessonNotes } from "./lessons";
 import { normalizeExplorations, type Exploration } from "./inspiration";
 import { PROJECT_STAGES, type Journey } from "./journey";
+import { HELP_TOPICS, type FocusedHelpState } from "./focusedHelp";
 
 export type Concept = { id: string; title: string; premise: string; moves: string; experiment: string };
 export const MAX_CONCEPTS = 12;
@@ -17,6 +18,7 @@ export type PresentationItem = { id: string; label: string; done: boolean };
 export const MAX_PRESENTATION_ITEMS = 40;
 export type RequirementItem = { id: string; label: string; done: boolean; conceptId: string; evidence: string; quote: string; sourceBrief: string };
 export type StudioDraft = {
+  focusedHelp: FocusedHelpState;
   journey: Journey;
   requirementItems: RequirementItem[];
   title: string; brief: string; interests: string; experience: string;
@@ -33,6 +35,7 @@ export type StudioDraft = {
   explorations: Exploration[];
 };
 export const EMPTY_DRAFT: StudioDraft = {
+  focusedHelp: { topic: "zoning", conceptId: "", concept: "", notes: {} },
   journey: { stage: "brief", completed: [], notes: {} },
   requirementItems: [],
   title: "", brief: "", interests: "", experience: "",
@@ -78,6 +81,15 @@ export function normalizeDraft(value: unknown): StudioDraft {
   }));
   const conceptIds = new Set(concepts.map(concept => concept.id));
   return {
+    focusedHelp: {
+      topic: HELP_TOPICS.find(topic => topic.id === record(source.focusedHelp).topic)?.id || "zoning",
+      conceptId: conceptIds.has(text(record(source.focusedHelp).conceptId, 100)) ? text(record(source.focusedHelp).conceptId, 100) : "",
+      concept: text(record(source.focusedHelp).concept),
+      notes: Object.fromEntries(HELP_TOPICS.map(topic => {
+        const note = record(record(record(source.focusedHelp).notes)[topic.id]);
+        return [topic.id, { issue: text(note.issue, 2000), details: text(note.details, 6000) }];
+      })),
+    },
     journey: {
       stage: PROJECT_STAGES.find(stage => stage.id === record(source.journey).stage)?.id || "brief",
       completed: PROJECT_STAGES.filter(stage => Array.isArray(record(source.journey).completed) && (record(source.journey).completed as unknown[]).includes(stage.id)).map(stage => stage.id),

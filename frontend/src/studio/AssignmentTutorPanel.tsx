@@ -2,13 +2,15 @@ import { useEffect, useRef, useState } from "react";
 import AiAvailability from "./AiAvailability";
 import { analyzeBrief, askAboutBrief } from "./assignmentApi";
 import type { AssignmentReviewState } from "./assignmentReview";
+import type { HelpTopic } from "./focusedHelp";
 
-export default function AssignmentTutorPanel({ brief, review, onChange, questionPrefix = "", projectContext, suggestedQuestion }: {
+export default function AssignmentTutorPanel({ brief, review, onChange, questionPrefix = "", projectContext, suggestedQuestion, helpTopic }: {
   brief: string; review: AssignmentReviewState | null;
   onChange: (value: AssignmentReviewState) => void;
   questionPrefix?: string;
   projectContext?: string;
   suggestedQuestion?: string;
+  helpTopic?: HelpTopic;
 }) {
   const [busy, setBusy] = useState<"analysis" | "answer" | null>(null);
   const [error, setError] = useState("");
@@ -43,7 +45,7 @@ export default function AssignmentTutorPanel({ brief, review, onChange, question
         }
       } else if (review) {
         const contextualQuestion = questionPrefix + asked;
-        const reply = await askAboutBrief(source, review, contextualQuestion, controller.signal, projectContext);
+        const reply = await askAboutBrief(source, review, contextualQuestion, controller.signal, projectContext, helpTopic);
         const current = latest.current.review;
         if (!controller.signal.aborted && active.current === controller && current?.analysis.source_brief === source && latest.current.brief.trim() === source) {
           latest.current.onChange({ ...current, turns: [...current.turns, { question: contextualQuestion, reply }].slice(-20) });
@@ -62,7 +64,7 @@ export default function AssignmentTutorPanel({ brief, review, onChange, question
   }
 
   return <section className="studio-analysis" aria-label="Assignment analysis and tutor">
-    <h3>{projectContext ? "Your project tutor" : "Understand your brief"}</h3>
+    <h3>{helpTopic ? "Ask about this issue" : projectContext ? "Your project tutor" : "Understand your brief"}</h3>
     <AiAvailability />
     <p>Review AI findings before asking questions. AI receives your brief; follow-ups include review notes, answers, and recent chat.</p>
     {!review && <>

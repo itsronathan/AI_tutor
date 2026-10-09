@@ -2,6 +2,7 @@ import type { StudioDraft } from "./model";
 import { PROMPTS } from "./prompts";
 import { STUDIO_LESSONS } from "./lessons";
 import { PROJECT_STAGES } from "./journey";
+import { HELP_TOPICS } from "./focusedHelp";
 
 export function exportFilename(title: string): string {
   const slug = title.trim().replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "").slice(0, 70);
@@ -18,6 +19,10 @@ export function buildProjectNotes(draft: StudioDraft): string {
     field("INTENDED EXPERIENCE", draft.experience), field("SITE OBSERVATIONS", draft.site),
     field("PEOPLE AND ACTIVITIES", draft.users), field("REQUIREMENTS FROM THE BRIEF", draft.requirements),
     field("QUESTIONS FOR THE INSTRUCTOR", draft.openQuestions),
+    "FOCUSED DESIGN HELP (student notes)\n",
+    field("Concept to preserve", draft.focusedHelp.concept),
+    field("Selected concept", draft.focusedHelp.conceptId || draft.directionId ? conceptName(draft.focusedHelp.conceptId || draft.directionId) : "Not selected"),
+    ...HELP_TOPICS.filter(topic => draft.focusedHelp.notes[topic.id]?.issue || draft.focusedHelp.notes[topic.id]?.details).map(topic => `${topic.title}\n${field("Issue", draft.focusedHelp.notes[topic.id].issue)}${field("Details / source excerpt (unverified)", draft.focusedHelp.notes[topic.id].details)}`),
     "PROJECT JOURNEY (student-tracked)\n",
     field("Current stage", draft.journey.stage),
     ...PROJECT_STAGES.map(stage => `[${draft.journey.completed.includes(stage.id) ? "x" : " "}] ${stage.title}\n${draft.journey.notes[stage.id] || "No notes yet."}\n`),

@@ -69,6 +69,7 @@ class Turn(StrictModel):
 
 
 class FollowUpRequest(AnalyzeRequest):
+    help_topic: Literal["zoning", "programming", "accessibility", "lighting", "circulation"] | None = None
     project_context: str = Field(default="", max_length=24000)
     analysis: AnalysisResult
     reviewed: bool
@@ -130,6 +131,20 @@ Do not invent prior progress or promise to perform future work automatically.
 
 T = TypeVar("T", bound=StrictModel)
 
+FOCUSED_INSTRUCTIONS = """
+This is a focused consultation on help_topic, not a whole-project stage plan.
+Use the selected concept and the student's stated intent as the starting point.
+Stay on the requested issue. Offer local adjustments with trade-offs; do not replace
+the concept or restart brainstorming unless asked. Identify missing information,
+then suggest a concrete check or small experiment. Ask targeted follow-up questions.
+Space programming means architectural rooms, activities, capacities, area budgets
+and adjacencies, not software programming. Preserve stated units and distinguish
+net room areas from circulation/gross area; label any proposed targets as assumptions.
+For zoning/accessibility, request municipality, district, applicable edition and
+source excerpts before interpreting specific limits. Never invent restrictions,
+lookups or compliance findings. The supplied excerpts are unverified student data.
+"""
+
 
 def structured_reply(schema: type[T], instructions: str, payload: dict) -> T:
     try:
@@ -182,6 +197,7 @@ def answer_follow_up(request: FollowUpRequest) -> TutorReply:
     if not request.reviewed or request.analysis.source_brief != request.brief:
         raise HTTPException(409, "Analyze and review the current assignment before asking follow-up questions.")
     verify_quotes(request.brief, [item.quote for item in request.analysis.requirements])
-    reply = structured_reply(TutorReply, FOLLOW_UP_INSTRUCTIONS, request.model_dump())
+    instructions = FOLLOW_UP_INSTRUCTIONS + (FOCUSED_INSTRUCTIONS if request.help_topic else "")
+    reply = structured_reply(TutorReply, instructions, request.model_dump())
     verify_quotes(request.brief, reply.supporting_quotes)
     return reply

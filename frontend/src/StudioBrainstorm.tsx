@@ -16,9 +16,10 @@ import StudioLessons from "./studio/StudioLessons";
 import CoursePreset from "./studio/CoursePresetPanel";
 import InspirationPanel from "./studio/InspirationPanel";
 import ProjectTutor from "./studio/ProjectTutor";
+import FocusedHelp from "./studio/FocusedHelpPanel";
 import "./StudioBrainstorm.css";
 
-const SECTIONS = ["Brief & exercises", "Learn", "Concepts", "References", "Plan", "Review & export", "Project tutor"] as const;
+const SECTIONS = ["Brief & exercises", "Learn", "Concepts", "References", "Plan", "Review & export", "Project tutor", "Focused help"] as const;
 
 export default function StudioBrainstorm({ ownerId, learningMode = false }: { ownerId: string; learningMode?: boolean }) {
   return <StudioWorkspace key={ownerId} ownerId={ownerId} learningMode={learningMode} />;
@@ -170,6 +171,7 @@ function StudioWorkspace({ ownerId, learningMode }: { ownerId: string; learningM
       <p className="studio-small">Autosaved in this browser. No account sync; guest drafts are shared here.</p>
       <div key={library.activeId} ref={sectionStart} tabIndex={-1} className="studio-section-start">
       {section === "Project tutor" && <ProjectTutor draft={draft} onChange={update} onNavigate={navigate} />}
+      {section === "Focused help" && <FocusedHelp draft={draft} onChange={update} onOpenBrief={() => navigate("Brief & exercises")} />}
       {section === "Learn" && <StudioLessons draft={draft} onChange={update} onOpenBrief={() => navigate("Brief & exercises")} onOpenConcepts={() => navigate("Concepts")} />}
       {section === "Brief & exercises" && <>
       <CoursePreset brief={draft.brief} onApply={value => update("brief", value)} />
