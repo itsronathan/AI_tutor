@@ -5,8 +5,8 @@ export default function RequirementsChecklist({ draft, onChange }: { draft: Stud
   function edit(id: string, change: Partial<RequirementItem>) { onChange(items.map(item => item.id === id ? { ...item, ...change } : item)); }
   const imported = draft.assignmentReview?.reviewed ? draft.assignmentReview.analysis.requirements.filter(r => !items.some(i => i.sourceBrief === draft.brief && i.quote === r.quote && i.label === r.requirement)) : [];
   return <section className="studio-card studio-section" aria-label="Requirements checklist">
-    <h2>Assignment requirements checklist</h2>
-    <p>Record requirements from your brief, link them to a concept or deliverable, and check your progress. Completion is your own assessment.</p>
+    <h2>Requirements checklist</h2>
+    <p>Track requirements and link your evidence. Mark completion yourself.</p>
     <p>{items.filter(i => i.done).length} of {items.length} marked complete</p>
     {items.map((item, index) => <article className="studio-item" key={item.id}>
       <label htmlFor={`requirement-${item.id}`}>Requirement {index + 1}</label>
@@ -27,6 +27,6 @@ export default function RequirementsChecklist({ draft, onChange }: { draft: Stud
     </article>)}
     <button type="button" disabled={items.length >= 80} onClick={() => onChange([...items, { id: crypto.randomUUID(), label: "", done: false, conceptId: "", evidence: "", quote: "", sourceBrief: draft.brief }])}>Add requirement</button>
     <button type="button" disabled={!imported?.length || items.length >= 80} onClick={() => onChange([...items, ...imported!.map(r => ({ id: crypto.randomUUID(), label: r.requirement, quote: r.quote, sourceBrief: draft.brief, done: false, conceptId: "", evidence: "" }))].slice(0, 80))}>Import reviewed requirements</button>
-    <p className="studio-small">Up to 80 items. Import becomes available after you review an AI assignment analysis. Existing items are kept.</p>
+    <p className="studio-small">80 items max. Review AI analysis to import; existing items stay.</p>
   </section>;
 }

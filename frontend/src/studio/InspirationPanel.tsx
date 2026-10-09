@@ -66,7 +66,7 @@ export default function InspirationPanel({ draft, onChange, onOpenBrief }: {
   return <section className="studio-card studio-section" aria-label="Design inspiration">
     <h2>Explore design directions</h2>
     <AiAvailability />
-    <p>Generate three possibilities from your reviewed assignment, compare their trade-offs, and choose a starting point. These are AI-generated ideas, not researched architectural precedents.</p>
+    <p>Explore three AI ideas from your brief. These aren’t researched precedents.</p>
     {!valid && <><p>Analyze and review your assignment before generating ideas or drawings.</p><button type="button" onClick={onOpenBrief}>Review assignment first</button></>}
     <label htmlFor="inspiration-focus">What would you like to explore?</label>
     <textarea id="inspiration-focus" maxLength={2000} rows={3} value={focus} disabled={busy}
@@ -88,16 +88,16 @@ export default function InspirationPanel({ draft, onChange, onOpenBrief }: {
     </>}
     <section aria-label="Generate images" className="studio-analysis">
       <h3>Generate images</h3>
-      <p>Turn a design direction into an AI-generated diagram or exterior concept sketch. Choose an image type, describe what to emphasize, and download the result as a PNG.</p>
-      {!valid ? <p>Start by analyzing and reviewing your assignment in Brief &amp; exercises.</p> : !chosen ? <p>Generate three directions above, then select one to use as the basis for your image.</p> : <p><strong>Selected direction:</strong> {chosen.title}</p>}
-      <p>Exploratory illustrations only: not to scale, not verified plans, and not substitutes for required physical models. Compare every image with your brief.</p>
+      <p>Choose a drawing type, add details, and generate a PNG.</p>
+      {!valid ? <p>Review your assignment in Brief &amp; exercises first.</p> : !chosen ? <p>Generate ideas above, then select one to draw.</p> : <p><strong>Selected direction:</strong> {chosen.title}</p>}
+      <p>Concept studies: not to scale, verified plans, or replacements for required models. Check against your brief.</p>
       <label htmlFor="drawing-type">Drawing type</label><select id="drawing-type" disabled={busy} value={kind} onChange={e => setKind(e.target.value)}>
         <option value="parti">Parti / organizing idea</option><option value="bubble">Program bubble diagram</option><option value="massing">Rough massing illustration</option>
         <option value="perspective">Exterior concept sketch</option>
       </select>
       <label htmlFor="drawing-refinement">Refinement for this drawing (optional)</label>
       <textarea id="drawing-refinement" rows={2} maxLength={1000} disabled={busy} value={refinement} onChange={e => setRefinement(e.target.value)} placeholder="Try a more open courtyard connection." />
-      <p className="studio-small">Each click generates one new interpretation; it does not edit the previous image. Generation can take several minutes.</p>
+      <p className="studio-small">Creates a new image each time. May take several minutes.</p>
       <button type="button" disabled={busy || !valid || !chosen} onClick={() => void generate(true)}>Generate concept drawing</button>
     </section>
     {image && <figure>
@@ -105,7 +105,7 @@ export default function InspirationPanel({ draft, onChange, onOpenBrief }: {
       <figcaption>AI concept study: {image.title}. Not to scale or verified for compliance.{image.context !== context && " This image uses an earlier assignment context."}</figcaption>
       <a className="studio-source-link" href={image.src} download={`studio-concept-${image.id}.png`}>Download concept drawing (PNG)</a>
     </figure>}
-    <p className="studio-small">Images stay in memory while this panel is open; download them before navigating away. The latest {MAX_RECORDS} successful generation records are saved with your project. Export regularly to keep older records.</p>
+    <p className="studio-small">Download images before leaving this panel. Your project keeps {MAX_RECORDS} generation records; export to keep older ones.</p>
     <details className="studio-context"><summary>AI process record ({draft.explorations.length})</summary>
       <p>Includes prompts, input snapshots, text outputs, provider/model, timestamps, and image settings. PNGs are downloaded separately. Failed or canceled calls and other AI applications are not included.</p>
       <button type="button" disabled={!draft.explorations.length} onClick={() => {

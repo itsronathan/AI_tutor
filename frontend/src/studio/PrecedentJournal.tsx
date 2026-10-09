@@ -12,9 +12,9 @@ export default function PrecedentJournal({ precedents, onChange }: {
   precedents: Precedent[]; onChange: (value: Precedent[]) => void;
 }) {
   return <section className="studio-card studio-section" aria-label="Reference journal">
-    <h2>Precedent and inspiration journal</h2>
-    <p>Keep a source and a specific observation alongside each reference. Links are provided by you and are not automatically verified.</p>
-    {!precedents.length && <p className="studio-empty">Add a reference that helps you ask a better design question.</p>}
+    <h2>Reference journal</h2>
+    <p>Save a source, an observation, and an idea to test. Links aren’t verified.</p>
+    {!precedents.length && <p className="studio-empty">Add your first reference.</p>}
     <div className="studio-grid">{precedents.map((item, index) => <article key={item.id} className="studio-item">
       <h3>Reference {index + 1}</h3>
       {FIELDS.map(([field, label, placeholder]) => <div key={field}>

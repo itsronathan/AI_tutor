@@ -8,8 +8,8 @@ export default function CritiqueLog({ critiques, onChange }: {
     onChange(critiques.map(item => item.id === id ? { ...item, ...patch } : item));
   }
   return <section className="studio-card studio-section" aria-label="Critique log">
-    <h2>Turn critique into a next step</h2>
-    <p>Record feedback in your own words. Keep what was said separate from your interpretation and the experiment you choose to try.</p>
+    <h2>Critique notes</h2>
+    <p>Record feedback, your interpretation, and your next test.</p>
     <p>{critiques.filter(item => item.nextAction.trim() && !item.done).length} follow-up actions open</p>
     {!critiques.length && <p className="studio-empty">Use this after a desk critique, peer conversation, or review.</p>}
     {critiques.map((item, index) => <article className="studio-item" key={item.id}>

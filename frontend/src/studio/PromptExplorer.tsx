@@ -8,7 +8,7 @@ export default function PromptExplorer({ notes, onChange }: {
   return <section className="studio-card" aria-label="Brainstorming exercises">
     <p className="studio-eyebrow">When you feel stuck</p>
     <h2>Explore a starting point</h2>
-    <p>Choose a lens and respond with a sketch or a few words. These are guided exercises, not AI-generated recommendations.</p>
+    <p>Pick a lens. Sketch or write a response. These prompts work without AI.</p>
     <label htmlFor="studio-theme">Brainstorming lens</label>
     <select id="studio-theme" value={theme} onChange={event => setTheme(event.target.value)}>
       {THEMES.map(item => <option key={item}>{item}</option>)}

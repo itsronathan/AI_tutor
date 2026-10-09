@@ -8,7 +8,7 @@ export default function ConceptComparison({ draft, onChange }: {
   const direction = draft.concepts.find(concept => concept.id === draft.directionId);
   return <section className="studio-card studio-section" aria-label="Compare concepts">
     <h2>Compare your directions</h2>
-    <p>Choose up to three cards. Look for trade-offs and questions to test; there is no automatic score.</p>
+    <p>Compare up to three ideas. Note trade-offs; there is no score.</p>
     {!draft.concepts.length && <p className="studio-empty">Add a concept card to start comparing.</p>}
     <div className="studio-choices">
       {draft.concepts.map((concept, index) => <label className="studio-check" key={concept.id}>

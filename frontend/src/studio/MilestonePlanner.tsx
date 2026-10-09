@@ -10,8 +10,8 @@ export default function MilestonePlanner({ milestones, onChange }: {
     onChange(milestones.map(item => item.id === id ? { ...item, ...patch } : item));
   }
   return <section className="studio-card studio-section" aria-label="Milestone planner">
-    <h2>Break the project into milestones</h2>
-    <p>Set your own dates from the course brief. Suggested milestones are editable starting points.</p>
+    <h2>Project milestones</h2>
+    <p>Use your assignment dates. Edit starter tasks to fit.</p>
     <p>{milestones.filter(item => item.done).length} of {milestones.length} complete</p>
     {!milestones.length && <button type="button" className="studio-secondary" onClick={() => onChange(STARTERS.map(title => ({
       id: crypto.randomUUID(), title, due: "", done: false,

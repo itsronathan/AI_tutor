@@ -16,11 +16,11 @@ export default function PresentationPrep({ draft, onChange }: {
   const items = draft.presentationItems;
   return <section className="studio-card studio-section" aria-label="Presentation preparation">
     <h2>Prepare for your pin-up</h2>
-    <p>Build a checklist from your actual assignment. The starter list is a suggestion, not an instructor’s rubric.</p>
+    <p>Match the checklist to your assignment. Starters aren’t a grading rubric.</p>
     {draft.requirements.trim() && <details className="studio-context"><summary>Review your recorded assignment requirements</summary><p className="studio-preserve">{draft.requirements}</p></details>}
     <label htmlFor="studio-story">Your short project story</label>
     <textarea id="studio-story" rows={4} maxLength={4000} value={draft.presentationStory}
-      placeholder="What question are you exploring? What spatial move expresses it? What evidence can you show?"
+      placeholder="Your question, design move, and evidence."
       onChange={event => onChange("presentationStory", event.target.value)} />
     <label htmlFor="studio-review-questions">What feedback would help you most?</label>
     <textarea id="studio-review-questions" rows={3} maxLength={4000} value={draft.reviewQuestions}

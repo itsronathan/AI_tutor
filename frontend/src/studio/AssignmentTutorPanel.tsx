@@ -60,14 +60,14 @@ export default function AssignmentTutorPanel({ brief, review, onChange, question
   }
 
   return <section className="studio-analysis" aria-label="Assignment analysis and tutor">
-    <h3>Understand the assignment first</h3>
+    <h3>Understand your brief</h3>
     <AiAvailability />
-    <p>Review the requirements before asking the tutor about your project. Analysis sends your brief to the AI service; follow-up sends the brief, review notes, clarification answers, and recent conversation.</p>
+    <p>Review AI findings before asking questions. AI receives your brief; follow-ups include review notes, answers, and recent chat.</p>
     {!review && <>
       <button type="button" disabled={!brief.trim() || !!busy} onClick={() => void run("analysis")}>
         {busy === "analysis" ? "Analyzing assignment…" : "Analyze assignment"}
       </button>
-      <p className="studio-small">The tutor will look for required spaces, constraints, deliverables, dates, and important unanswered questions.</p>
+      <p className="studio-small">Find requirements, deadlines, and missing details.</p>
     </>}
     {busy && <p aria-live="polite">{busy === "analysis" ? "Reading the assignment requirements…" : "Answering using your reviewed assignment…"}{" "}
       <button className="studio-secondary" type="button" onClick={() => {
@@ -79,7 +79,7 @@ export default function AssignmentTutorPanel({ brief, review, onChange, question
       <h3>Assignment summary</h3>
       <p className="studio-preserve">{review.analysis.summary}</p>
       <h3>Requirements found in the brief</h3>
-      <p className="studio-small">Check this AI review against the original brief. Each item includes its source text.</p>
+      <p className="studio-small">Check each finding and source quote against your brief.</p>
       {!review.analysis.requirements.length && <p>No explicit requirements were identified. Check whether the full assignment was pasted.</p>}
       <ul className="studio-requirements">{review.analysis.requirements.map((item, index) => <li key={index}>
         <span className="studio-category">{item.category}</span>
@@ -94,7 +94,7 @@ export default function AssignmentTutorPanel({ brief, review, onChange, question
       {!review.reviewed && <p className="studio-small">Review the requirements to unlock clarification answers and the assignment tutor.</p>}
       {review.reviewed && <>
         <h3>Fill in what is still unknown</h3>
-        <p>You can leave questions open and return later. Instructor questions need an answer from your course, rather than a guess.</p>
+        <p>Leave unknowns blank. Confirm course requirements with your instructor.</p>
         {!review.analysis.questions.length && <p>No essential clarification questions were identified. You can ask your own below.</p>}
         {review.analysis.questions.map((item, index) => <div className="studio-clarification" key={index}>
           <label htmlFor={`assignment-answer-${index}`}>{item.question}</label>
@@ -104,7 +104,7 @@ export default function AssignmentTutorPanel({ brief, review, onChange, question
             value={review.answers[index] || ""} onChange={event => onChange({ ...review, answers: { ...review.answers, [index]: event.target.value } })} />
         </div>)}
         <h3>Ask about this assignment</h3>
-        <p>The tutor uses the brief and your clarification answers. Earlier replies reflect the context available when you asked.</p>
+        <p>Answers use your brief and clarifications. Earlier replies don’t update.</p>
         <div className="studio-conversation" aria-label="Assignment conversation">
           {review.turns.map((turn, index) => <article className="studio-turn" key={index}>
             <h4>You asked</h4><p className="studio-preserve">{turn.question}</p>
@@ -120,7 +120,7 @@ export default function AssignmentTutorPanel({ brief, review, onChange, question
           placeholder="e.g. What should I explore first while meeting these requirements?"
           onChange={event => setQuestion(event.target.value)} />
         <button type="button" disabled={!!busy || !question.trim()} onClick={() => void run("answer")}>{busy === "answer" ? "Answering…" : "Ask assignment tutor"}</button>
-        <p className="studio-small">The most recent 20 answers are kept in this browser. The tutor receives the last six turns for context. Export your notes to keep a snapshot.</p>
+        <p className="studio-small">20 answers saved locally; the last six go to the tutor. Export to keep a copy.</p>
       </>}
     </>}
   </section>;

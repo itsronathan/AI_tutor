@@ -157,7 +157,7 @@ function StudioWorkspace({ ownerId, learningMode }: { ownerId: string; learningM
         <p className="studio-small">{library.projects.length} / {MAX_PROJECTS} projects in this browser.</p>
       </section>
       <aside className="studio-next-step">
-        <div><strong>Suggested next step</strong><p>{nextStep.reason} You can visit any section at any time.</p></div>
+        <div><strong>Suggested next step</strong><p>{nextStep.reason}</p></div>
         <button type="button" onClick={() => navigate(nextStep.section)}>Continue your project</button>
       </aside>
       <nav className="studio-nav studio-workflow" aria-label="Studio tools">
@@ -166,7 +166,7 @@ function StudioWorkspace({ ownerId, learningMode }: { ownerId: string; learningM
       </nav>
       <p className="studio-status" role="status">{status}</p>
       {undo && <aside className="studio-undo"><span>{undo.message}</span><button type="button" onClick={undo.restore}>Undo deletion</button></aside>}
-      <p className="studio-small">Edits save automatically in this browser only; not synced to your account. Guest drafts are shared by people using this browser.</p>
+      <p className="studio-small">Autosaved in this browser. No account sync; guest drafts are shared here.</p>
       <div key={library.activeId} ref={sectionStart} tabIndex={-1} className="studio-section-start">
       {section === "Learn" && <StudioLessons draft={draft} onChange={update} onOpenBrief={() => navigate("Brief & exercises")} onOpenConcepts={() => navigate("Concepts")} />}
       {section === "Brief & exercises" && <>
@@ -175,13 +175,13 @@ function StudioWorkspace({ ownerId, learningMode }: { ownerId: string; learningM
         <form className="studio-card" onSubmit={save}>
           <details open><summary>Project brief and context</summary>
           <h2>Set up your project</h2>
-          <p>You don’t need a concept yet. Capture what you know and leave the rest open.</p>
+          <p>Add what you know. Leave the rest open.</p>
           <label htmlFor="studio-title">Project or course name <span>(optional)</span></label>
           <input id="studio-title" value={draft.title} maxLength={200}
             placeholder="e.g. Design Studio — Community gathering space"
             onChange={event => update("title", event.target.value)} />
           <label htmlFor="studio-brief">Assignment brief <span>(required)</span></label>
-          <p id="studio-brief-help">Paste the assignment, including any site, users, required spaces, and deliverables. PDF upload will come later. Changing the brief clears its AI review, clarification answers, and conversation.</p>
+          <p id="studio-brief-help">Paste your assignment text (no PDF upload). Editing it resets AI analysis, answers, and chat.</p>
           <textarea id="studio-brief" required rows={9} maxLength={30000}
             aria-describedby="studio-brief-help" value={draft.brief}
             onChange={event => update("brief", event.target.value)} />
@@ -200,11 +200,6 @@ function StudioWorkspace({ ownerId, learningMode }: { ownerId: string; learningM
         </form>
         <aside className="studio-side">
           <details open><summary>Brainstorming exercises</summary><PromptExplorer notes={draft.promptNotes} onChange={value => update("promptNotes", value)} /></details>
-          <section className="studio-card">
-            <h2>A workspace for your ideas</h2>
-            <p>Use Concepts to develop and compare directions, References to collect inspiration, and Plan to set your next steps. Prepare for critiques in Review &amp; export.</p>
-            <p className="studio-small">The exercises here are written prompts. Use Analyze assignment to review the brief with AI before asking the assignment tutor for help. PDF upload is not available yet.</p>
-          </section>
         </aside>
       </div>
       {summary && <section className="studio-card studio-summary" aria-label="Project starting point">

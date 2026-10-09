@@ -12,8 +12,8 @@ export default function ConceptBoard({ concepts, onChange }: {
 }) {
   return <section className="studio-card studio-section" aria-label="Concept board">
     <h2>Your concept board</h2>
-    <p>Develop a few possibilities before settling on one. Cards can contain your own ideas or labeled AI starting points to revise and test.</p>
-    {!concepts.length && <p className="studio-empty">No concepts yet. Try a brainstorming exercise, then capture one direction here.</p>}
+    <p>Capture ideas to compare and test. AI starting points are labeled.</p>
+    {!concepts.length && <p className="studio-empty">Add an idea, or try a brainstorming exercise.</p>}
     <div className="studio-grid">
       {concepts.map((concept, index) => <article className="studio-item" key={concept.id}>
         <h3>Concept {index + 1}</h3>
