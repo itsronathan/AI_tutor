@@ -69,6 +69,7 @@ class Turn(StrictModel):
 
 
 class FollowUpRequest(AnalyzeRequest):
+    project_context: str = Field(default="", max_length=24000)
     analysis: AnalysisResult
     reviewed: bool
     review_notes: str = Field(default="", max_length=4000)
@@ -118,6 +119,13 @@ to the brief, and suggest a small sketch/model experiment. Do not claim a design
 the only correct solution. Return an answer, relevant supporting_quotes from the
 brief (empty if none apply), and up to five remaining_questions. Avoid repeating
 questions already answered in clarifications. Earlier turns are context only.
+When project_context is supplied, coach the student through their selected stage
+using the latest notebook excerpts. Keep the student responsible for design choices.
+Give a brief observation, one concrete next action, and one reflection question.
+Treat checked tasks as student reports, not verified completion or grading.
+Flag missing or conflicting evidence; never claim to have inspected drawings,
+models, sources, or files that are not supplied. Excerpts may be shortened.
+Do not invent prior progress or promise to perform future work automatically.
 """
 
 T = TypeVar("T", bound=StrictModel)

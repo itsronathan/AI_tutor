@@ -25,7 +25,7 @@ export async function analyzeBrief(brief: string, signal: AbortSignal) {
   return analysis;
 }
 
-export async function askAboutBrief(brief: string, review: AssignmentReviewState, question: string, signal: AbortSignal) {
+export async function askAboutBrief(brief: string, review: AssignmentReviewState, question: string, signal: AbortSignal, projectContext?: string) {
   const reply = parseReply(await request("follow-up", {
     brief, analysis: review.analysis, reviewed: review.reviewed, review_notes: review.reviewNotes,
     clarifications: review.analysis.questions.flatMap((item, index) => {
@@ -33,6 +33,7 @@ export async function askAboutBrief(brief: string, review: AssignmentReviewState
       return answer ? [{ question: item.question, answer }] : [];
     }),
     history: review.turns.slice(-6), question,
+    ...(projectContext ? { project_context: projectContext } : {}),
   }, signal), brief);
   if (!reply) throw new Error("The tutor returned an invalid answer. Please try again.");
   return reply;

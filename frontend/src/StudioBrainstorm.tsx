@@ -15,9 +15,10 @@ import AssignmentTutorPanel from "./studio/AssignmentTutorPanel";
 import StudioLessons from "./studio/StudioLessons";
 import CoursePreset from "./studio/CoursePresetPanel";
 import InspirationPanel from "./studio/InspirationPanel";
+import ProjectTutor from "./studio/ProjectTutor";
 import "./StudioBrainstorm.css";
 
-const SECTIONS = ["Brief & exercises", "Learn", "Concepts", "References", "Plan", "Review & export"] as const;
+const SECTIONS = ["Brief & exercises", "Learn", "Concepts", "References", "Plan", "Review & export", "Project tutor"] as const;
 
 export default function StudioBrainstorm({ ownerId, learningMode = false }: { ownerId: string; learningMode?: boolean }) {
   return <StudioWorkspace key={ownerId} ownerId={ownerId} learningMode={learningMode} />;
@@ -161,13 +162,14 @@ function StudioWorkspace({ ownerId, learningMode }: { ownerId: string; learningM
         <button type="button" onClick={() => navigate(nextStep.section)}>Continue your project</button>
       </aside>
       <nav className="studio-nav studio-workflow" aria-label="Studio tools">
-        {SECTIONS.map((label, index) => <button type="button" key={label} aria-pressed={section === label}
+        {SECTIONS.map((label, index) => <button type="button" key={label} className={label === "Project tutor" ? "studio-project-tutor-tab" : undefined} aria-pressed={section === label}
           onClick={() => navigate(label)}><span aria-hidden="true" className="studio-step-number">0{index + 1}</span>{label}</button>)}
       </nav>
       <p className="studio-status" role="status">{status}</p>
       {undo && <aside className="studio-undo"><span>{undo.message}</span><button type="button" onClick={undo.restore}>Undo deletion</button></aside>}
       <p className="studio-small">Autosaved in this browser. No account sync; guest drafts are shared here.</p>
       <div key={library.activeId} ref={sectionStart} tabIndex={-1} className="studio-section-start">
+      {section === "Project tutor" && <ProjectTutor draft={draft} onChange={update} onNavigate={navigate} />}
       {section === "Learn" && <StudioLessons draft={draft} onChange={update} onOpenBrief={() => navigate("Brief & exercises")} onOpenConcepts={() => navigate("Concepts")} />}
       {section === "Brief & exercises" && <>
       <CoursePreset brief={draft.brief} onApply={value => update("brief", value)} />

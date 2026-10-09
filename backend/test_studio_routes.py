@@ -105,3 +105,18 @@ def test_provider_error_does_not_expose_credentials(client, monkeypatch):
     assert response.status_code == 503
     assert "secret-fragment" not in response.text
     assert "OPENAI_API_KEY" in response.text
+
+
+def test_project_notebook_reaches_provider_and_keeps_review_guard(client, monkeypatch):
+    calls = mock_completion(monkeypatch, REPLY)
+    notes = "Stage: Refine. Critique: test a second entrance."
+    assert client.post("/api/studio/follow-up", json=followup(project_context=notes)).status_code == 200
+    assert json.loads(calls[0]["messages"][1]["content"])["project_context"] == notes
+    assert client.post("/api/studio/follow-up", json=followup(project_context=notes, reviewed=False)).status_code == 409
+    assert len(calls) == 1
+
+
+def test_project_notebook_size_is_bounded(client, monkeypatch):
+    calls = mock_completion(monkeypatch, REPLY)
+    assert client.post("/api/studio/follow-up", json=followup(project_context="x" * 24001)).status_code == 422
+    assert not calls

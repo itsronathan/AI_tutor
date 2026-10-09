@@ -3,10 +3,12 @@ import AiAvailability from "./AiAvailability";
 import { analyzeBrief, askAboutBrief } from "./assignmentApi";
 import type { AssignmentReviewState } from "./assignmentReview";
 
-export default function AssignmentTutorPanel({ brief, review, onChange, questionPrefix = "" }: {
+export default function AssignmentTutorPanel({ brief, review, onChange, questionPrefix = "", projectContext, suggestedQuestion }: {
   brief: string; review: AssignmentReviewState | null;
   onChange: (value: AssignmentReviewState) => void;
   questionPrefix?: string;
+  projectContext?: string;
+  suggestedQuestion?: string;
 }) {
   const [busy, setBusy] = useState<"analysis" | "answer" | null>(null);
   const [error, setError] = useState("");
@@ -41,7 +43,7 @@ export default function AssignmentTutorPanel({ brief, review, onChange, question
         }
       } else if (review) {
         const contextualQuestion = questionPrefix + asked;
-        const reply = await askAboutBrief(source, review, contextualQuestion, controller.signal);
+        const reply = await askAboutBrief(source, review, contextualQuestion, controller.signal, projectContext);
         const current = latest.current.review;
         if (!controller.signal.aborted && active.current === controller && current?.analysis.source_brief === source && latest.current.brief.trim() === source) {
           latest.current.onChange({ ...current, turns: [...current.turns, { question: contextualQuestion, reply }].slice(-20) });
@@ -60,7 +62,7 @@ export default function AssignmentTutorPanel({ brief, review, onChange, question
   }
 
   return <section className="studio-analysis" aria-label="Assignment analysis and tutor">
-    <h3>Understand your brief</h3>
+    <h3>{projectContext ? "Your project tutor" : "Understand your brief"}</h3>
     <AiAvailability />
     <p>Review AI findings before asking questions. AI receives your brief; follow-ups include review notes, answers, and recent chat.</p>
     {!review && <>
@@ -116,6 +118,7 @@ export default function AssignmentTutorPanel({ brief, review, onChange, question
           </article>)}
         </div>
         <label htmlFor="assignment-question">Your question for the assignment tutor</label>
+        {suggestedQuestion && <button type="button" className="studio-secondary" disabled={!!busy} onClick={() => setQuestion(suggestedQuestion)}>Suggest a question</button>}
         <textarea id="assignment-question" rows={3} maxLength={2000 - questionPrefix.length} value={question} disabled={!!busy}
           placeholder="e.g. What should I explore first while meeting these requirements?"
           onChange={event => setQuestion(event.target.value)} />

@@ -3,6 +3,7 @@ import { dateOnly } from "./dates";
 import { normalizeReview, type AssignmentReviewState } from "./assignmentReview";
 import { STUDIO_LESSONS, type LessonNotes } from "./lessons";
 import { normalizeExplorations, type Exploration } from "./inspiration";
+import { PROJECT_STAGES, type Journey } from "./journey";
 
 export type Concept = { id: string; title: string; premise: string; moves: string; experiment: string };
 export const MAX_CONCEPTS = 12;
@@ -16,6 +17,7 @@ export type PresentationItem = { id: string; label: string; done: boolean };
 export const MAX_PRESENTATION_ITEMS = 40;
 export type RequirementItem = { id: string; label: string; done: boolean; conceptId: string; evidence: string; quote: string; sourceBrief: string };
 export type StudioDraft = {
+  journey: Journey;
   requirementItems: RequirementItem[];
   title: string; brief: string; interests: string; experience: string;
   site: string; users: string; requirements: string; openQuestions: string;
@@ -31,6 +33,7 @@ export type StudioDraft = {
   explorations: Exploration[];
 };
 export const EMPTY_DRAFT: StudioDraft = {
+  journey: { stage: "brief", completed: [], notes: {} },
   requirementItems: [],
   title: "", brief: "", interests: "", experience: "",
   site: "", users: "", requirements: "", openQuestions: "",
@@ -75,6 +78,11 @@ export function normalizeDraft(value: unknown): StudioDraft {
   }));
   const conceptIds = new Set(concepts.map(concept => concept.id));
   return {
+    journey: {
+      stage: PROJECT_STAGES.find(stage => stage.id === record(source.journey).stage)?.id || "brief",
+      completed: PROJECT_STAGES.filter(stage => Array.isArray(record(source.journey).completed) && (record(source.journey).completed as unknown[]).includes(stage.id)).map(stage => stage.id),
+      notes: Object.fromEntries(PROJECT_STAGES.map(stage => [stage.id, text(record(record(source.journey).notes)[stage.id])])),
+    },
     requirementItems: rows(source.requirementItems, 80).map(row => ({
       id: text(row.id, 100), label: text(row.label, 1000), done: row.done === true,
       conceptId: typeof row.conceptId === "string" && conceptIds.has(row.conceptId) ? row.conceptId : "",

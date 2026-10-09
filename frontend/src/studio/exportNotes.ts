@@ -1,6 +1,7 @@
 import type { StudioDraft } from "./model";
 import { PROMPTS } from "./prompts";
 import { STUDIO_LESSONS } from "./lessons";
+import { PROJECT_STAGES } from "./journey";
 
 export function exportFilename(title: string): string {
   const slug = title.trim().replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "").slice(0, 70);
@@ -17,6 +18,9 @@ export function buildProjectNotes(draft: StudioDraft): string {
     field("INTENDED EXPERIENCE", draft.experience), field("SITE OBSERVATIONS", draft.site),
     field("PEOPLE AND ACTIVITIES", draft.users), field("REQUIREMENTS FROM THE BRIEF", draft.requirements),
     field("QUESTIONS FOR THE INSTRUCTOR", draft.openQuestions),
+    "PROJECT JOURNEY (student-tracked)\n",
+    field("Current stage", draft.journey.stage),
+    ...PROJECT_STAGES.map(stage => `[${draft.journey.completed.includes(stage.id) ? "x" : " "}] ${stage.title}\n${draft.journey.notes[stage.id] || "No notes yet."}\n`),
     ...(draft.assignmentReview ? [
       "AI ASSIGNMENT REVIEW\n",
       field("Review status", draft.assignmentReview.reviewed ? "Reviewed by the student" : "Not yet reviewed by the student"),

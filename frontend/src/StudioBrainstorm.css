@@ -17,6 +17,8 @@
 .studio-page .studio-workflow { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; border-top: 1px solid #a7a99e; border-left: 1px solid #a7a99e; }
 .studio-page .studio-workflow button { display: flex; gap: 12px; align-items: center; text-align: left; padding: 16px 12px; border: 0; border-right: 1px solid #a7a99e; border-bottom: 1px solid #a7a99e; border-radius: 0; color: #292c29; background: #fcfaf5; }
 .studio-page .studio-workflow button[aria-pressed="true"] { background: #292f2b; color: #fffdf7; }
+.studio-page .studio-workflow .studio-project-tutor-tab { grid-column: 1 / -1; }
+.studio-page .studio-section-start { scroll-margin-top: 260px; }
 .studio-step-number { font: 11px ui-monospace, Consolas, monospace; opacity: .75; }
 .studio-page .studio-workflow button:hover { box-shadow: inset 0 -3px #98412a; }
 .studio-page .studio-workflow button:focus-visible { outline-offset: -4px; }
