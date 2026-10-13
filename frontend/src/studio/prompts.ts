@@ -11,4 +11,5 @@ export const PROMPTS = [
   { id: "material-contrast", theme: "Material", title: "Explore a contrast", question: "How might a relationship such as heavy/light or rough/smooth support your concept?", exercise: "Sketch the same gathering place with three material relationships. Describe what each invites." },
 ] as const;
 
-export const THEMES = ["People", "Site", "Light", "Movement", "Material"] as const;
+// Keep older People prompt IDs above so saved notes and sketches remain recoverable.
+export const THEMES = ["Site", "Light", "Movement", "Material"] as const;

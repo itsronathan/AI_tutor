@@ -9,7 +9,8 @@ export default function PromptExplorer({ notes, onChange, images = {}, onAddImag
   onAddImage?: (promptId: string, image: PromptImage) => boolean;
   onRemoveImage?: (promptId: string, id: string) => void;
 }) {
-  const [themes, setThemes] = useState<string[]>(["People"]);
+  const [themes, setThemes] = useState<string[]>([THEMES[0]]);
+  const archived = PROMPTS.filter(prompt => prompt.theme === "People" && (notes[prompt.id]?.trim() || images[prompt.id]?.length));
   return <section className="studio-card studio-prompts" aria-label="Brainstorming exercises">
     <p className="studio-eyebrow">When you feel stuck</p>
     <h2>Explore a starting point</h2>
@@ -19,7 +20,7 @@ export default function PromptExplorer({ notes, onChange, images = {}, onAddImag
         onChange={event => setThemes(current => event.target.checked ? [...current, item] : current.filter(value => value !== item))} />{item}</label>)}
     </fieldset>
     {!themes.length && <p className="studio-small">Choose a lens to see prompts. Your responses stay saved.</p>}
-    {PROMPTS.filter(prompt => themes.includes(prompt.theme)).map(prompt => <div className="studio-exercise" key={prompt.id}>
+    {PROMPTS.filter(prompt => prompt.theme !== "People" && themes.includes(prompt.theme)).map(prompt => <div className="studio-exercise" key={prompt.id}>
       <p className="studio-small">{prompt.theme}</p>
       <h3>{prompt.title}</h3><p>{prompt.question}</p>
       <p className="studio-try-this"><span>Try this:</span> {prompt.exercise}</p>
@@ -29,5 +30,12 @@ export default function PromptExplorer({ notes, onChange, images = {}, onAddImag
       {onAddImage && onRemoveImage && <SketchAttachments promptId={prompt.id} title={prompt.title} images={images[prompt.id] || []}
         onAdd={image => onAddImage(prompt.id, image)} onRemove={id => onRemoveImage(prompt.id, id)} />}
     </div>)}
+    {archived.length > 0 && <details className="studio-context"><summary>Previously saved People work</summary>
+      {archived.map(prompt => <div key={prompt.id} className="studio-exercise">
+        <h3>{prompt.title}</h3><p className="studio-preserve">{notes[prompt.id]}</p>
+        {onAddImage && onRemoveImage && <SketchAttachments promptId={prompt.id} title={prompt.title} images={images[prompt.id] || []}
+          onAdd={image => onAddImage(prompt.id, image)} onRemove={id => onRemoveImage(prompt.id, id)} />}
+      </div>)}
+    </details>}
   </section>;
 }
