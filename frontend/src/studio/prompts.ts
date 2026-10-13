@@ -7,9 +7,10 @@ export const PROMPTS = [
   { id: "light-opening", theme: "Light", title: "Explore apertures", question: "What could change if the same room received light from above, beside, or through a screen?", exercise: "Keep the room's geometry constant and sketch three aperture configurations in section." },
   { id: "movement-path", theme: "Movement", title: "Find more than one path", question: "Could movement be direct, looping, or a series of pauses?", exercise: "Draw three path diagrams between the same arrival and destination. Note whom each path serves." },
   { id: "movement-threshold", theme: "Movement", title: "Design a transition", question: "Where should someone feel they are entering a different kind of space?", exercise: "Sketch a transition using changes in height, enclosure, or view. Explain the intended effect." },
-  { id: "material-rule", theme: "Material", title: "Start with a making rule", question: "What spatial possibilities could come from folding, stacking, or weaving?", exercise: "Choose one operation and make three paper studies. Note a useful space in each." },
-  { id: "material-contrast", theme: "Material", title: "Explore a contrast", question: "How might a relationship such as heavy/light or rough/smooth support your concept?", exercise: "Sketch the same gathering place with three material relationships. Describe what each invites." },
+  // Retain the original IDs so existing responses and sketches stay attached.
+  { id: "material-rule", theme: "Form", title: "Transform a volume", question: "Which operation best expresses your concept?", exercise: "Start with a simple mass. Fold, carve, or offset it, then annotate how the change supports your concept." },
+  { id: "material-contrast", theme: "Form", title: "Shape the void", question: "What should the space between built forms do?", exercise: "Use a solid-and-void diagram to define a courtyard, gap, or enclosure. Mark its proportions and relationship to surrounding volumes." },
 ] as const;
 
 // Keep older People prompt IDs above so saved notes and sketches remain recoverable.
-export const THEMES = ["Site", "Light", "Movement", "Material"] as const;
+export const THEMES = ["Site", "Light", "Movement", "Form"] as const;
