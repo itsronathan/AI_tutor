@@ -17,9 +17,27 @@ function seed() {
     reviewed: true, reviewNotes: "Keep the tree", answers: { 0: "Riverbank" }, turns: [],
   } })));
 }
-function openConcepts() { fireEvent.click(screen.getByRole("button", { name: "Concepts" })); }
+function openConcepts() { fireEvent.click(screen.getByRole("button", { name: "Concepts" })); fireEvent.click(screen.getByText("Need a starting point? Explore AI ideas")); }
 beforeEach(() => localStorage.clear());
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
+
+it("draws a student's own concept without generating AI directions first", async () => {
+  seed();
+  const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify({ image: "data:image/png;base64,iVBORw0KGgo=", record })));
+  vi.stubGlobal("fetch", fetchMock);
+  render(<StudioBrainstorm ownerId="guest" />);
+  fireEvent.click(screen.getByRole("button", { name: "Concepts" }));
+  expect(screen.getByRole("button", { name: "Generate concept drawing" })).toBeDisabled();
+  fireEvent.change(screen.getByLabelText("Describe your concept"), { target: { value: "A shaded courtyard with a welcoming entrance." } });
+  fireEvent.click(screen.getByRole("button", { name: "Generate concept drawing" }));
+  expect(await screen.findByAltText(/AI concept study for My concept/)).toBeInTheDocument();
+  expect(fetchMock).toHaveBeenCalledTimes(1);
+  expect(fetchMock.mock.calls[0][0]).toContain("/concept-drawing");
+  const payload = JSON.parse(fetchMock.mock.calls[0][1].body);
+  expect(payload.direction.idea).toBe("A shaded courtyard with a welcoming entrance.");
+  expect(payload.brief).toBe(brief);
+  expect(screen.getByRole("link", { name: /Download concept drawing/ })).toHaveAttribute("download");
+});
 
 it("adds the preset without overwriting text, clears review and prevents duplicate application", () => {
   seed(); render(<StudioBrainstorm ownerId="guest" />);

@@ -235,7 +235,7 @@ function StudioWorkspace({ ownerId }: { ownerId: string }) {
       </section>}
       </>}
       {section === "Concepts" && <>
-        <details open><summary>AI inspiration and images</summary><InspirationPanel draft={draft} onChange={update} onOpenBrief={() => navigate("Brief & exercises")} /></details>
+        <InspirationPanel draft={draft} onChange={update} onOpenBrief={() => navigate("Brief & exercises")} />
         <ConceptBoard concepts={draft.concepts} onChange={value => update("concepts", value)} />
         <ConceptComparison draft={draft} onChange={update} />
       </>}
