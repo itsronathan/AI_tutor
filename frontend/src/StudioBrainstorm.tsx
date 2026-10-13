@@ -2,7 +2,6 @@ import { useRef, useState, type FormEvent } from "react";
 import { normalizeDraft, type StudioDraft } from "./studio/model";
 import { loadProjects, MAX_PROJECTS, type ProjectLibrary } from "./studio/projects";
 import RequirementsChecklist from "./studio/RequirementsChecklist";
-import ProjectContext from "./studio/ProjectContext";
 import PromptExplorer from "./studio/PromptExplorer";
 import ConceptBoard from "./studio/ConceptBoard";
 import ConceptComparison from "./studio/ConceptComparison";
@@ -213,7 +212,6 @@ function StudioWorkspace({ ownerId, learningMode }: { ownerId: string; learningM
           <textarea id="studio-experience" rows={3} maxLength={4000} value={draft.experience}
             placeholder="Think about arrival, movement, gathering, or finding a quiet place. It’s okay to leave this open."
             onChange={event => update("experience", event.target.value)} />
-          <ProjectContext draft={draft} onChange={update} />
           <button type="submit">Save project draft</button>
           </details>
         </form>
