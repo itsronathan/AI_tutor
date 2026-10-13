@@ -11,7 +11,7 @@ import CritiqueLog from "./studio/CritiqueLog";
 import ProjectExport from "./studio/ProjectExport";
 import PresentationPrep from "./studio/PresentationPrep";
 import AssignmentTutorPanel from "./studio/AssignmentTutorPanel";
-import StudioLessons from "./studio/StudioLessons";
+
 import CoursePreset from "./studio/CoursePresetPanel";
 import InspirationPanel from "./studio/InspirationPanel";
 import ProjectTutor from "./studio/ProjectTutor";
@@ -20,13 +20,13 @@ import BriefPdfUpload from "./studio/BriefPdfUpload";
 import { MAX_PROMPT_IMAGES } from "./studio/promptImages";
 import "./StudioBrainstorm.css";
 
-const SECTIONS = ["Brief & exercises", "Learn", "Concepts", "References", "Plan", "Review & export", "Project tutor", "Focused help"] as const;
+const SECTIONS = ["Brief & exercises", "Concepts", "References", "Plan", "Review & export", "Project tutor", "Focused help"] as const;
 
-export default function StudioBrainstorm({ ownerId, learningMode = false }: { ownerId: string; learningMode?: boolean }) {
-  return <StudioWorkspace key={ownerId} ownerId={ownerId} learningMode={learningMode} />;
+export default function StudioBrainstorm({ ownerId }: { ownerId: string }) {
+  return <StudioWorkspace key={ownerId} ownerId={ownerId} />;
 }
 
-function StudioWorkspace({ ownerId, learningMode }: { ownerId: string; learningMode: boolean }) {
+function StudioWorkspace({ ownerId }: { ownerId: string }) {
   const storageKey = `studio-brainstorm:v1:${ownerId}`;
   const [initial] = useState(() => loadProjects(storageKey));
   const [library, setLibrary] = useState(initial.library);
@@ -39,7 +39,7 @@ function StudioWorkspace({ ownerId, learningMode }: { ownerId: string; learningM
   const toolsStart = useRef<HTMLElement>(null);
   const [status, setStatus] = useState(initial.status);
   const [summary, setSummary] = useState<StudioDraft | null>(null);
-  const [section, setSection] = useState<typeof SECTIONS[number]>(learningMode ? "Learn" : "Brief & exercises");
+  const [section, setSection] = useState<typeof SECTIONS[number]>("Brief & exercises");
 
   function persistLibrary(next: ProjectLibrary, message: string) {
     libraryRef.current = next;
@@ -63,7 +63,7 @@ function StudioWorkspace({ ownerId, learningMode }: { ownerId: string; learningM
     const next = libraryRef.current.projects.find(p => p.id === id);
     if (!next) return;
     currentDraft.current = next.draft; setDraft(next.draft); setSummary(null); setUndo(null);
-    setSection(learningMode ? "Learn" : "Brief & exercises");
+    setSection("Brief & exercises");
     persistLibrary({ ...libraryRef.current, activeId: id }, "Project opened. Saved in this browser.");
   }
 
@@ -129,8 +129,8 @@ function StudioWorkspace({ ownerId, learningMode }: { ownerId: string; learningM
       <header className="studio-header">
         <div className="studio-header-copy">
         <p className="studio-eyebrow">AI Tutor / Architecture workspace</p>
-        <h1>{learningMode ? "Architectural Design Studio" : "Studio Brainstorm"}</h1>
-        <p>{learningMode ? "Learn a concept. Test it through a sketch or model. Reflect on your choices." : "Start with the brief. Find a question worth exploring."}</p>
+        <h1>Studio Brainstorm</h1><a href="/learning?course=architecture">Learn architecture →</a>
+        <p>Start with the brief. Find a question worth exploring.</p>
         <p className="studio-header-caption">Observe. Make. Question. Refine.</p>
         </div>
         <div className="studio-drawing" aria-hidden="true">
@@ -167,12 +167,12 @@ function StudioWorkspace({ ownerId, learningMode }: { ownerId: string; learningM
       <nav ref={toolsStart} tabIndex={-1} className="studio-nav studio-workflow" aria-label="Studio tools">
         <div className="studio-nav-group">
           <p className="studio-nav-label">Your workspace</p>
-          <div className="studio-nav-options">{SECTIONS.slice(0, 6).map(label => <button type="button" key={label} aria-pressed={section === label}
+          <div className="studio-nav-options">{SECTIONS.slice(0, 5).map(label => <button type="button" key={label} aria-pressed={section === label}
             onClick={() => navigate(label)}>{label}</button>)}</div>
         </div>
         <div className="studio-nav-group studio-nav-ai">
           <p className="studio-nav-label">AI support</p>
-          <div className="studio-nav-options">{SECTIONS.slice(6).map(label => <button type="button" key={label} aria-pressed={section === label}
+          <div className="studio-nav-options">{SECTIONS.slice(5).map(label => <button type="button" key={label} aria-pressed={section === label}
             onClick={() => navigate(label)}>{label}</button>)}</div>
         </div>
       </nav>
@@ -185,7 +185,7 @@ function StudioWorkspace({ ownerId, learningMode }: { ownerId: string; learningM
       }}>Back to sections ↑</button></div>
       {section === "Project tutor" && <ProjectTutor draft={draft} onChange={update} onNavigate={navigate} />}
       {section === "Focused help" && <FocusedHelp draft={draft} onChange={update} onOpenBrief={() => navigate("Brief & exercises")} />}
-      {section === "Learn" && <StudioLessons draft={draft} onChange={update} onOpenBrief={() => navigate("Brief & exercises")} onOpenConcepts={() => navigate("Concepts")} />}
+
       {section === "Brief & exercises" && <>
       <CoursePreset brief={draft.brief} onApply={value => update("brief", value)} />
       <div className="studio-layout">

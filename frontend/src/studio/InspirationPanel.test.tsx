@@ -93,10 +93,10 @@ it("shows backend errors without inventing directions", async () => {
   expect(JSON.parse(localStorage.getItem(key)!).explorations).toHaveLength(0);
 });
 
-it("opens visible image tools from architecture lessons without making an AI request", () => {
+it("opens visible image tools from Studio without making an AI request", () => {
   const fetchMock = vi.fn(); vi.stubGlobal("fetch", fetchMock);
-  render(<StudioBrainstorm ownerId="guest" learningMode />);
-  fireEvent.click(screen.getByRole("button", { name: "Create concept images" }));
+  render(<StudioBrainstorm ownerId="guest" />);
+  openConcepts();
   expect(screen.getByRole("region", { name: "Generate images" })).toBeInTheDocument();
   expect(screen.getByRole("option", { name: "Exterior concept sketch" })).toBeInTheDocument();
   expect(screen.getByRole("button", { name: "Generate concept drawing" })).toBeDisabled();

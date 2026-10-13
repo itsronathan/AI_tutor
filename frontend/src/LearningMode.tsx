@@ -1,6 +1,6 @@
 import { useSearchParams } from "react-router-dom";
 import LearningModel from "./LearningModel";
-import StudioBrainstorm from "./StudioBrainstorm";
+import ArchitectureLearning from "./ArchitectureLearning";
 import { useAuth } from "./context/AuthContext";
 import "./LearningMode.css";
 
@@ -20,6 +20,6 @@ export default function LearningMode() {
         <option value="architecture">Architectural Design Studio</option>
       </select>
     </div>
-    {architecture ? loading ? <p>Loading studio…</p> : <StudioBrainstorm key={user?.uid || "guest"} ownerId={user?.uid || "guest"} learningMode /> : <LearningModel />}
+    {architecture ? loading ? <p>Loading lessons…</p> : <ArchitectureLearning ownerId={user?.uid || "guest"} /> : <LearningModel />}
   </>;
 }

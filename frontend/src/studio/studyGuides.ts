@@ -1,32 +1,29 @@
 export type StudyGuide = { scope: string; prompts: string[]; sources: { title: string; url: string }[] };
 export const STUDY_GUIDES: Record<string, StudyGuide> = {
   codes: {
-    scope: "Research organizer, not a compliance assessment. Establish the jurisdiction, adopted edition, project use, and scope before applying a rule. NYC links are a starting point for the supplied Greenpoint assignment, not requirements for every project.",
+    scope: "Learn how to find and distinguish rules. NYC sources are examples; applying a rule requires the correct jurisdiction and edition.",
     prompts: [
-      "Project basis: record the site address, jurisdiction, proposed uses, new construction or alteration, and code edition to confirm.",
-      "Zoning: find the mapped district and any special districts; record sources for permitted use, floor area, height, setbacks, and relevant waterfront provisions. Do not infer these from the building's appearance.",
-      "Life safety: identify occupancy questions, likely occupant-load inputs, exit paths and discharge, fire separation, and protection systems to research. Record section references and unanswered questions rather than assumed limits.",
-      "Design response: annotate one change to your massing or circulation. For each claimed requirement, record its source, section, edition, applicability, and date checked; identify who will confirm it.",
+      "Explain zoning and building codes in one sentence each.",
+      "Find one heading in each source. What design question could it help answer?",
+      "List the information missing from the fictional library example before any rule could be applied.",
     ],
-    sources: [{ title: "NYC Zoning Resolution — districts and land-use regulations", url: "https://zr.planning.nyc.gov/" }, { title: "NYC 2022 Construction Codes — including occupancy, fire protection, and egress chapters", url: "https://www.nyc.gov/site/buildings/codes/2022-construction-codes.page" }],
+    sources: [{ title: "NYC Zoning Resolution — example jurisdiction", url: "https://zr.planning.nyc.gov/" }, { title: "NYC 2022 Construction Codes — example edition", url: "https://www.nyc.gov/site/buildings/codes/2022-construction-codes.page" }],
   },
   accessibility: {
-    scope: "Use this as an accessibility design study. ADA applicability and local accessibility requirements need confirmation for the specific project; a diagram or completed exercise cannot establish compliance.",
+    scope: "Explore participation across a whole journey. This exercise does not establish ADA compliance.",
     prompts: [
-      "Arrival: trace a continuous route from the relevant site arrival points to the entrance and required activities. Note level changes and missing site information.",
-      "Movement and use: investigate doors, maneuvering and turning space, ramps or vertical circulation, surfaces, reach, and controls. Use applicable scoping and technical provisions together.",
-      "Equal participation: examine toilets, seating, signage and communication needs. For the natatorium assignment, research pool entry and associated changing facilities rather than stopping at the front door.",
-      "Evidence: record the element, applicable standard and section, dimensions still needed, proposed design change, and question for your instructor. Mark unverified measurements clearly.",
+      "In the library example, what might make a door, level change, or sign difficult to use?",
+      "Find the difference between scoping (where a requirement applies) and technical criteria (how an element is designed) in the standards.",
+      "Describe one barrier and a possible improvement. Label dimensions you have not checked.",
     ],
     sources: [{ title: "DOJ 2010 ADA Standards — scoping and technical requirements", url: "https://www.ada.gov/law-and-regs/design-standards/2010-stds/" }],
   },
   lighting: {
-    scope: "Compare lighting strategies through sketches and observations. This worksheet does not calculate illuminance, glare, energy performance, or code compliance.",
+    scope: "Practice predicting and observing light. Sketches alone do not measure performance.",
     prompts: [
-      "Context: record location, orientation, obstructions, room use, occupied hours, and what is still unknown.",
-      "Option A: describe daylight openings, shading, and surface choices. Sketch a section and identify possible glare and unwanted heat gain.",
-      "Option B: change one feature, such as opening position, shading, or task-light placement. Compare views, light distribution, and the user's activity under the same assumed conditions.",
-      "After dark and next test: consider ambient and task lighting plus controls. Record what a model, simulation, or measurement should test; avoid inventing lux values or energy savings.",
+      "In the reading room example, where might glare interrupt reading?",
+      "Keep the room the same and compare a shaded and unshaded window. Label orientation as an assumption.",
+      "What changes after dark? Describe a task light and one observation that could test your idea.",
     ],
     sources: [{ title: "US Department of Energy — lighting and daylighting strategies", url: "https://www.energy.gov/cmei/buildings/zeb-technologies-lighting-daylighting" }],
   },

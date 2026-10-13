@@ -1,126 +1,79 @@
 // @vitest-environment jsdom
-import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
+import ArchitectureLearning from "../ArchitectureLearning";
 import StudioBrainstorm from "../StudioBrainstorm";
 import { normalizeDraft } from "./model";
 import { buildProjectNotes } from "./exportNotes";
-import { STUDIO_LESSONS } from "./lessons";
 
-const key = "studio-brainstorm:v1:guest";
-const brief = "Design a pavilion. Submit a site model.";
-function seed(reviewed = true) {
-  localStorage.setItem(key, JSON.stringify(normalizeDraft({
-    brief, interests: "Courtyards", assignmentReview: {
-      analysis: { source_brief: brief, summary: "Design a pavilion.", requirements: [], questions: [
-        { question: "Which site?", reason: "No site specified.", ask: "instructor" },
-      ] }, reviewed, reviewNotes: "Instructor approved the riverbank.", answers: { 0: "The riverbank" }, turns: [],
-    },
-  })));
-}
+const key = "architecture-learning:v1:guest";
 beforeEach(() => localStorage.clear());
-afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
+afterEach(() => { cleanup(); vi.restoreAllMocks(); vi.unstubAllGlobals(); });
 
-it("supports lessons without AI, persists separate reflections, exports them, and isolates owners", () => {
-  const view = render(<StudioBrainstorm ownerId="guest" learningMode />);
-  expect(screen.queryByRole("button", { name: "Ask assignment tutor" })).not.toBeInTheDocument();
-  fireEvent.change(screen.getByLabelText(/^Your reflection:/), { target: { value: "Verify the noisy edge on site." } });
+it("persists learning independently of projects and isolates owners on rerender", () => {
+  const projectKey = "studio-brainstorm:v1:guest";
+  const project = JSON.stringify(normalizeDraft({ brief: "Private assignment", lessonNotes: { site: { reflection: "Earlier project reflection", completed: true } } }));
+  localStorage.setItem(projectKey, project);
+  const view = render(<ArchitectureLearning ownerId="guest" />);
+  expect(screen.queryByText("Private assignment")).not.toBeInTheDocument();
+  expect(screen.getByLabelText(/^Your reflection:/)).toHaveValue("");
+  fireEvent.change(screen.getByLabelText(/^Your reflection:/), { target: { value: "Find a survey for the slope." } });
   fireEvent.click(screen.getByRole("checkbox", { name: /I tried this exercise/ }));
   fireEvent.click(screen.getByRole("button", { name: "Circulation and arrival" }));
   expect(screen.getByLabelText(/^Your reflection:/)).toHaveValue("");
-  fireEvent.change(screen.getByLabelText(/^Your reflection:/), { target: { value: "Keep a clear route along the edge." } });
-  const saved = normalizeDraft(JSON.parse(localStorage.getItem(key)!));
-  expect(buildProjectNotes(saved)).toContain("Verify the noisy edge on site.");
-  expect(buildProjectNotes(saved)).toContain("Keep a clear route along the edge.");
-  view.unmount();
-  const restored = render(<StudioBrainstorm ownerId="guest" learningMode />);
-  expect(screen.getByLabelText(/^Your reflection:/)).toHaveValue("Verify the noisy edge on site.");
-  expect(screen.getByText(/1 of 7 exercises/)).toBeInTheDocument();
-  restored.unmount();
-  render(<StudioBrainstorm ownerId="another-student" learningMode />);
+  expect(localStorage.getItem(projectKey)).toBe(project);
+  expect(buildProjectNotes(normalizeDraft(JSON.parse(project)))).toContain("Earlier project reflection");
+  view.rerender(<ArchitectureLearning ownerId="another-student" />);
   expect(screen.getByLabelText(/^Your reflection:/)).toHaveValue("");
+  view.rerender(<ArchitectureLearning ownerId="guest" />);
+  expect(screen.getByLabelText(/^Your reflection:/)).toHaveValue("Find a survey for the slope.");
+  expect(screen.getByText(/1 of 7 exercises/)).toBeInTheDocument();
 });
 
-it("requires review and invalidates assignment help after brief edits while preserving reflections", () => {
-  seed(false);
-  render(<StudioBrainstorm ownerId="guest" learningMode />);
+it("offers a site exercise without site knowledge, an assignment, or AI", () => {
+  const fetchMock = vi.fn(); vi.stubGlobal("fetch", fetchMock);
+  render(<ArchitectureLearning ownerId="guest" />);
+  expect(screen.getByText(/Practice site \(fictional\)/)).toBeInTheDocument();
+  expect(screen.getByText(/No site or drawing experience needed/)).toBeInTheDocument();
+  expect(screen.queryByText(/15 minutes/)).not.toBeInTheDocument();
   expect(screen.queryByRole("button", { name: "Ask assignment tutor" })).not.toBeInTheDocument();
-  fireEvent.change(screen.getByLabelText(/^Your reflection:/), { target: { value: "Check access." } });
-  fireEvent.click(screen.getByRole("button", { name: "Open assignment brief" }));
-  fireEvent.click(screen.getByRole("checkbox", { name: /I have reviewed/ }));
-  fireEvent.click(screen.getByRole("button", { name: "Learn" }));
-  expect(screen.getByRole("button", { name: "Ask assignment tutor" })).toBeInTheDocument();
-  fireEvent.click(screen.getByRole("button", { name: "Open assignment brief" }));
-  fireEvent.change(screen.getByLabelText(/Assignment brief/), { target: { value: "A different assignment." } });
-  fireEvent.click(screen.getByRole("button", { name: "Learn" }));
-  expect(screen.queryByRole("button", { name: "Ask assignment tutor" })).not.toBeInTheDocument();
-  expect(screen.getByLabelText(/^Your reflection:/)).toHaveValue("Check access.");
+  expect(screen.queryByLabelText(/Assignment brief/)).not.toBeInTheDocument();
+  expect(fetchMock).not.toHaveBeenCalled();
 });
 
-it("sends the selected lesson with the reviewed brief and clarifications, and shares replies with Studio", async () => {
-  seed();
-  const reply = { answer: "Try two alternative arrival diagrams.", supporting_quotes: ["Design a pavilion."], remaining_questions: [] };
-  const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify(reply)));
-  vi.stubGlobal("fetch", fetchMock);
-  render(<StudioBrainstorm ownerId="guest" learningMode />);
-  fireEvent.click(screen.getByRole("button", { name: "Circulation and arrival" }));
-  fireEvent.change(screen.getByLabelText("Your question for the assignment tutor"), { target: { value: "How can I start?" } });
-  fireEvent.click(screen.getByRole("button", { name: "Ask assignment tutor" }));
-  expect(await screen.findByText(reply.answer)).toBeInTheDocument();
-  const payload = JSON.parse(fetchMock.mock.calls[0][1].body);
-  expect(fetchMock.mock.calls[0][0]).toContain("/api/studio/follow-up");
-  expect(payload.question).toContain("Learning topic: Circulation and arrival");
-  expect(payload.question).toContain("How can I start?");
-  expect(payload.brief).toBe(brief);
-  expect(payload.review_notes).toContain("riverbank");
-  expect(payload.clarifications[0].answer).toBe("The riverbank");
-  fireEvent.click(screen.getByRole("button", { name: "Open assignment brief" }));
-  expect(screen.getByText(reply.answer)).toBeInTheDocument();
-  expect(screen.getByLabelText(/What catches your interest/)).toHaveValue("Courtyards");
+it("keeps Learn outside the project workspace with a separate navigation link", () => {
+  render(<StudioBrainstorm ownerId="guest" />);
+  expect(screen.queryByRole("button", { name: "Learn" })).not.toBeInTheDocument();
+  expect(screen.getByRole("link", { name: /Learn architecture/ })).toHaveAttribute("href", "/learning?course=architecture");
+  expect(screen.getByRole("button", { name: "Focused help" })).toBeInTheDocument();
 });
 
-it("cancels pending lesson requests when changing topics and fits every topic in the API question limit", async () => {
-  seed();
-  let resolve!: (response: Response) => void;
-  const fetchMock = vi.fn<(input: RequestInfo | URL, init?: RequestInit) => Promise<Response>>(() => new Promise<Response>(done => { resolve = done; }));
-  vi.stubGlobal("fetch", fetchMock);
-  render(<StudioBrainstorm ownerId="guest" learningMode />);
-  for (const lesson of STUDIO_LESSONS) {
-    fireEvent.click(screen.getByRole("button", { name: lesson.title }));
-    expect(Number(screen.getByLabelText("Your question for the assignment tutor").getAttribute("maxlength"))).toBeGreaterThan(500);
-  }
-  fireEvent.change(screen.getByLabelText("Your question for the assignment tutor"), { target: { value: "Help me start." } });
-  fireEvent.click(screen.getByRole("button", { name: "Ask assignment tutor" }));
-  fireEvent.click(screen.getByRole("button", { name: "Site analysis" }));
-  expect(fetchMock.mock.calls[0][1]?.signal?.aborted).toBe(true);
-  await act(async () => resolve(new Response(JSON.stringify({ answer: "Old reply", supporting_quotes: [], remaining_questions: [] }))));
-  expect(screen.queryByText("Old reply")).not.toBeInTheDocument();
+it("restores learning notes per topic and includes them in downloads", () => {
+  localStorage.setItem(key, JSON.stringify({ codes: { research: "Zoning concerns land use", completed: false, reflection: "Check the jurisdiction" } }));
+  const create = vi.fn().mockReturnValue("blob:notes");
+  vi.stubGlobal("URL", { createObjectURL: create, revokeObjectURL: vi.fn() });
+  vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => {});
+  render(<ArchitectureLearning ownerId="guest" />);
+  fireEvent.click(screen.getByRole("button", { name: "Zoning and safety codes" }));
+  fireEvent.click(screen.getByText("Explore further"));
+  expect(screen.getByLabelText("Learning notes")).toHaveValue("Zoning concerns land use");
+  fireEvent.click(screen.getByRole("button", { name: "Download learning notes" }));
+  expect(create).toHaveBeenCalledWith(expect.any(Blob));
+  expect(create.mock.calls[0][0].size).toBeGreaterThan(0);
 });
 
-it("normalizes old and malformed lesson notes without importing unknown topics", () => {
-  const notes = normalizeDraft({ lessonNotes: { site: { reflection: 42, completed: "true" }, unknown: { reflection: "ignore" } } }).lessonNotes;
-  expect(notes.site).toEqual({ reflection: "", completed: false, research: "" });
-  expect(Object.keys(notes)).toHaveLength(7);
+it("reports failed saves while retaining the current reflection", () => {
+  render(<ArchitectureLearning ownerId="guest" />);
+  vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => { throw new Error("Quota"); });
+  fireEvent.change(screen.getByLabelText(/^Your reflection:/), { target: { value: "Keep this note" } });
+  expect(screen.getByRole("alert")).toHaveTextContent("Notes could not be saved");
+  expect(screen.getByLabelText(/^Your reflection:/)).toHaveValue("Keep this note");
 });
 
-
-it("saves each new topic worksheet, exports research-only notes, and restores old drafts", () => {
-  seed(false);
-  const view = render(<StudioBrainstorm ownerId="guest" learningMode />);
-  for (const title of ["Zoning and safety codes", "ADA and accessible design", "Lighting strategies"]) {
-    fireEvent.click(screen.getByRole("button", { name: title }));
-    expect(screen.getByRole("region", { name: "Project study worksheet" })).toBeInTheDocument();
-    expect(screen.getByLabelText("Working notes and source evidence")).toHaveValue("");
-    fireEvent.change(screen.getByLabelText("Working notes and source evidence"), { target: { value: `Research for ${title}` } });
-  }
-  const saved = normalizeDraft(JSON.parse(localStorage.getItem(key)!));
-  const exported = buildProjectNotes(saved);
-  expect(exported).toContain("Research for Zoning and safety codes");
-  expect(exported).toContain("Research for ADA and accessible design");
-  expect(exported).toContain("Research for Lighting strategies");
-  view.unmount();
-  render(<StudioBrainstorm ownerId="guest" learningMode />);
-  fireEvent.click(screen.getByRole("button", { name: "ADA and accessible design" }));
-  expect(screen.getByLabelText("Working notes and source evidence")).toHaveValue("Research for ADA and accessible design");
-  expect(screen.getByRole("link", { name: /DOJ 2010 ADA Standards/ })).toHaveAttribute("href", "https://www.ada.gov/law-and-regs/design-standards/2010-stds/");
-  expect(normalizeDraft({ lessonNotes: { codes: { research: 42 } } }).lessonNotes.codes.research).toBe("");
+it("handles corrupt storage and normalizes malformed legacy notes", () => {
+  localStorage.setItem(key, "{broken");
+  render(<ArchitectureLearning ownerId="guest" />);
+  expect(screen.getByRole("alert")).toHaveTextContent("could not be loaded");
+  expect(normalizeDraft({ lessonNotes: { site: { reflection: 42, completed: "true" }, unknown: {} } }).lessonNotes.site)
+    .toEqual({ reflection: "", completed: false, research: "" });
 });
