@@ -9,9 +9,9 @@ export default function CritiqueLog({ critiques, onChange }: {
   }
   return <section className="studio-card studio-section" aria-label="Critique log">
     <h2>Critique notes</h2>
-    <p>Record feedback, your interpretation, and your next test.</p>
+    <p>Feedback → next step.</p>
     <p>{critiques.filter(item => item.nextAction.trim() && !item.done).length} follow-up actions open</p>
-    {!critiques.length && <p className="studio-empty">Use this after a desk critique, peer conversation, or review.</p>}
+    {!critiques.length && <p className="studio-empty">Add notes after a review.</p>}
     {critiques.map((item, index) => <article className="studio-item" key={item.id}>
       <h3>Critique {index + 1}</h3>
       <div className="studio-grid">

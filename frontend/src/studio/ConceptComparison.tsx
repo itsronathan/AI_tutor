@@ -7,8 +7,8 @@ export default function ConceptComparison({ draft, onChange }: {
   const selected = draft.concepts.filter(concept => draft.comparisonIds.includes(concept.id));
   const direction = draft.concepts.find(concept => concept.id === draft.directionId);
   return <section className="studio-card studio-section" aria-label="Compare concepts">
-    <h2>Compare your directions</h2>
-    <p>Compare up to three ideas. Note trade-offs; there is no score.</p>
+    <h2>Compare ideas</h2>
+    <p>Choose up to three ideas.</p>
     {!draft.concepts.length && <p className="studio-empty">Add a concept card to start comparing.</p>}
     <div className="studio-choices">
       {draft.concepts.map((concept, index) => <label className="studio-check" key={concept.id}>
@@ -37,7 +37,7 @@ export default function ConceptComparison({ draft, onChange }: {
     {direction && <p className="studio-selection">Current direction: <strong>{direction.title || "Untitled concept"}</strong>{" "}
       <button className="studio-secondary" type="button" onClick={() => onChange("directionId", "")}>Keep the choice open</button>
     </p>}
-    <label htmlFor="studio-decision">What makes a direction worth pursuing?</label>
+    <label htmlFor="studio-decision">Why this direction?</label>
     <textarea id="studio-decision" rows={3} maxLength={4000} value={draft.decisionNotes}
       placeholder="Record strengths, trade-offs, and what you still need to test."
       onChange={event => onChange("decisionNotes", event.target.value)} />

@@ -11,8 +11,8 @@ export default function ProjectTutor({ draft, onChange, onNavigate }: {
   const stage = PROJECT_STAGES.find(item => item.id === journey.stage)!;
   const index = PROJECT_STAGES.indexOf(stage);
   return <section aria-label="Project tutor">
-    <h2>From brief to final review</h2>
-    <p>Choose your stage. Work through one next step at a time.</p>
+    <h2>Project tutor</h2>
+    <p>Choose a stage. Take one step.</p>
     <nav className="studio-nav" aria-label="Project stages">
       {PROJECT_STAGES.map((item, i) => <button type="button" key={item.id} aria-pressed={item.id === stage.id}
         onClick={() => onChange("journey", { ...journey, stage: item.id })}>{i + 1}. {item.title}{journey.completed.includes(item.id) ? " ✓" : ""}</button>)}
@@ -33,7 +33,7 @@ export default function ProjectTutor({ draft, onChange, onNavigate }: {
         <p>AI uses your reviewed brief and notebook excerpts. Requests may incur API charges.</p>
         <details><summary>Notes shared with AI</summary><pre className="studio-export-preview">{projectTutorContext(draft)}</pre></details>
         {!draft.assignmentReview?.reviewed ? <>
-          <p>Review your brief to unlock AI guidance. Stage notes work without AI.</p>
+          <p>Review your brief for AI help. Notes work anytime.</p>
           <button type="button" onClick={() => onNavigate("Brief & exercises")}>Review assignment first</button>
         </> : <AssignmentTutorPanel key={stage.id} brief={draft.brief.trim()} review={draft.assignmentReview}
           onChange={value => onChange("assignmentReview", value)} projectContext={projectTutorContext(draft)}

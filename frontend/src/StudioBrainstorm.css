@@ -33,6 +33,11 @@
 .studio-page p { line-height: 1.65; }
 .studio-page a { color: #98412a; text-underline-offset: 3px; }
 .studio-page summary { cursor: pointer; }
+.studio-help { margin: 16px 0; border-top: 1px solid #deded5; padding-top: 12px; }
+.studio-help > summary { color: #52634f; font-size: 14px; font-weight: 600; padding: 4px 0; }
+.studio-help[open] > summary { margin-bottom: 12px; }
+.studio-card > h2:first-child { margin-top: 0; }
+.studio-card > p:first-of-type { color: #59625d; }
 .studio-page h2 { letter-spacing: -.025em; }
 .studio-layout { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr); gap: 32px; align-items: start; }
 .studio-card { background: #fffefa; border: 1px solid #deded5; border-radius: 8px; padding: 32px; min-width: 0; }

@@ -6,14 +6,14 @@ export default function RequirementsChecklist({ draft, onChange }: { draft: Stud
   const imported = draft.assignmentReview?.reviewed ? draft.assignmentReview.analysis.requirements.filter(r => !items.some(i => i.sourceBrief === draft.brief && i.quote === r.quote && i.label === r.requirement)) : [];
   return <section className="studio-card studio-section" aria-label="Requirements checklist">
     <h2>Requirements checklist</h2>
-    <p>Track requirements and link your evidence. Mark completion yourself.</p>
+    <p>Check off requirements. Add evidence.</p>
     <p>{items.filter(i => i.done).length} of {items.length} marked complete</p>
     {items.map((item, index) => <article className="studio-item" key={item.id}>
       <label htmlFor={`requirement-${item.id}`}>Requirement {index + 1}</label>
       <textarea id={`requirement-${item.id}`} value={item.label} maxLength={1000} onChange={e => edit(item.id, { label: e.target.value })} />
       {item.quote && <blockquote>{item.quote}</blockquote>}
       <p className="studio-small">{item.quote ? "Imported from reviewed AI analysis; check against the brief." : "Student-entered requirement."}</p>
-      {item.sourceBrief !== draft.brief && <p className="studio-error">The brief has changed. Recheck this requirement and its completion status.</p>}
+      {item.sourceBrief !== draft.brief && <p className="studio-error">Brief changed — recheck this item.</p>}
       <label htmlFor={`link-${item.id}`}>Related concept for requirement {index + 1}</label>
       <select id={`link-${item.id}`} value={item.conceptId} onChange={e => edit(item.id, { conceptId: e.target.value })}>
         <option value="">No concept linked</option>
@@ -27,6 +27,6 @@ export default function RequirementsChecklist({ draft, onChange }: { draft: Stud
     </article>)}
     <button type="button" disabled={items.length >= 80} onClick={() => onChange([...items, { id: crypto.randomUUID(), label: "", done: false, conceptId: "", evidence: "", quote: "", sourceBrief: draft.brief }])}>Add requirement</button>
     <button type="button" disabled={!imported?.length || items.length >= 80} onClick={() => onChange([...items, ...imported!.map(r => ({ id: crypto.randomUUID(), label: r.requirement, quote: r.quote, sourceBrief: draft.brief, done: false, conceptId: "", evidence: "" }))].slice(0, 80))}>Import reviewed requirements</button>
-    <p className="studio-small">80 items max. Review AI analysis to import; existing items stay.</p>
+    <p className="studio-small">Up to 80 items. Import from reviewed analysis.</p>
   </section>;
 }

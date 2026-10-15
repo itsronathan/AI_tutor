@@ -65,13 +65,14 @@ export default function AssignmentTutorPanel({ brief, review, onChange, question
 
   return <section className="studio-analysis" aria-label="Assignment analysis and tutor">
     <h3>{helpTopic ? "Ask about this issue" : projectContext ? "Your project tutor" : "Understand your brief"}</h3>
-    <AiAvailability />
-    <p>Review AI findings before asking questions. AI receives your brief; follow-ups include review notes, answers, and recent chat.</p>
+    <details className="studio-help"><summary>AI connection &amp; data</summary><AiAvailability />
+      <p>AI receives your brief, review notes, answers, and recent chat.</p>
+    </details>
     {!review && <>
       <button type="button" disabled={!brief.trim() || !!busy} onClick={() => void run("analysis")}>
         {busy === "analysis" ? "Analyzing assignment…" : "Analyze assignment"}
       </button>
-      <p className="studio-small">Find requirements, deadlines, and missing details.</p>
+      <p className="studio-small">Find requirements and deadlines.</p>
     </>}
     {busy && <p aria-live="polite">{busy === "analysis" ? "Reading the assignment requirements…" : "Answering using your reviewed assignment…"}{" "}
       <button className="studio-secondary" type="button" onClick={() => {

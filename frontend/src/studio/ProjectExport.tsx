@@ -24,7 +24,7 @@ export default function ProjectExport({ draft }: { draft: StudioDraft }) {
   }
   return <section className="studio-card studio-section" aria-label="Export project notes">
     <h2>Export your notes</h2>
-    <p>Download your current notes, including unsaved edits.</p>
+    <p>Includes your latest edits.</p>
     <button type="button" onClick={download}>Download project notes (.txt)</button>
     <p aria-live="polite">{message}</p>
     <details className="studio-context"><summary>Preview project notes</summary><pre className="studio-export-preview">{notes}</pre></details>

@@ -3,9 +3,9 @@ import { referenceUrl } from "./links";
 
 const FIELDS = [
   ["title", "Reference name", "Building, drawing, artwork, landscape, or reading"],
-  ["source", "Source or citation", "Paste an http(s) link, or note the author, publication, and page"],
-  ["observation", "What do you notice?", "Describe a specific spatial relationship or design move"],
-  ["application", "What could you test in your project?", "Explain the principle you could explore and how your situation differs"],
+  ["source", "Link or citation", "Paste an http(s) link, or note the author, publication, and page"],
+  ["observation", "What do you like?", "Light, form, atmosphere, or anything you notice."],
+  ["application", "Idea to try", "Explain the principle you could explore and how your situation differs"],
 ] as const;
 
 export default function PrecedentJournal({ precedents, onChange }: {
@@ -13,7 +13,7 @@ export default function PrecedentJournal({ precedents, onChange }: {
 }) {
   return <section className="studio-card studio-section" aria-label="Reference journal">
     <h2>Reference journal</h2>
-    <p>Save a source, an observation, and an idea to test. Links aren’t verified.</p>
+    <p>Save references and what you like. Links aren’t verified.</p>
     {!precedents.length && <p className="studio-empty">Add your first reference.</p>}
     <div className="studio-grid">{precedents.map((item, index) => <article key={item.id} className="studio-item">
       <h3>Reference {index + 1}</h3>

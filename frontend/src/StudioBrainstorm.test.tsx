@@ -78,7 +78,7 @@ describe("Studio Brainstorm drafts", () => {
     fireEvent.click(screen.getByRole("button", { name: "Review & export" }));
     fireEvent.click(screen.getByRole("button", { name: "Use suggested checklist" }));
     fireEvent.click(screen.getByLabelText("Ready: presentation item 1"));
-    fireEvent.change(screen.getByLabelText("Your short project story"), { target: { value: "A gathering place around a shared garden" } });
+    fireEvent.change(screen.getByLabelText("Project story"), { target: { value: "A gathering place around a shared garden" } });
     fireEvent.click(screen.getByRole("button", { name: "Add critique" }));
     fireEvent.change(screen.getByLabelText("Feedback received"), { target: { value: "Explore a second entrance" } });
     fireEvent.change(screen.getByLabelText("What will you try next?"), { target: { value: "Draw another arrival sequence" } });

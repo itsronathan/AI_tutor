@@ -11,7 +11,7 @@ export default function MilestonePlanner({ milestones, onChange }: {
   }
   return <section className="studio-card studio-section" aria-label="Milestone planner">
     <h2>Project milestones</h2>
-    <p>Use your assignment dates. Edit starter tasks to fit.</p>
+    <p>Add tasks and due dates.</p>
     <p>{milestones.filter(item => item.done).length} of {milestones.length} complete</p>
     {!milestones.length && <button type="button" className="studio-secondary" onClick={() => onChange(STARTERS.map(title => ({
       id: crypto.randomUUID(), title, due: "", done: false,
@@ -34,6 +34,6 @@ export default function MilestonePlanner({ milestones, onChange }: {
     <button type="button" disabled={milestones.length >= MAX_MILESTONES} onClick={() => onChange([
       ...milestones, { id: crypto.randomUUID(), title: "", due: "", done: false },
     ])}>Add milestone</button>
-    <p className="studio-small">Up to {MAX_MILESTONES} milestones. Dates are shown in your local calendar.</p>
+    <p className="studio-small">Up to {MAX_MILESTONES} milestones. Local dates.</p>
   </section>;
 }

@@ -65,7 +65,7 @@ it("imports reviewed requirements once, exports evidence, and flags changed brie
   fireEvent.click(screen.getByLabelText("Complete requirement 1"));
   click("Brief & exercises");
   fireEvent.change(screen.getByLabelText(/Assignment brief/), { target: { value: "Include two sections." } });
-  click("Plan"); expect(screen.getByText(/The brief has changed/)).toBeInTheDocument();
+  click("Plan"); expect(screen.getByText(/Brief changed/)).toBeInTheDocument();
   const saved = normalizeDraft(JSON.parse(localStorage.getItem("studio-brainstorm:v1:guest")!));
   expect(buildProjectNotes(saved)).toContain("Sheet A2");
   expect(buildProjectNotes(saved)).toContain("Brief changed: recheck this item.");

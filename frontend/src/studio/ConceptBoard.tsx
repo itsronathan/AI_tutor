@@ -2,9 +2,9 @@ import { MAX_CONCEPTS, type Concept } from "./model";
 
 const FIELDS = [
   ["title", "Concept name", "A working title is enough."],
-  ["premise", "Core idea and connection to the brief", "What are you exploring, and which need or requirement does it address?"],
-  ["moves", "Possible spatial moves", "Describe arrangements, paths, thresholds, light, or material relationships."],
-  ["experiment", "Next sketch or model experiment", "What small test could help you learn whether this idea works?"],
+  ["premise", "Core idea", "What are you exploring, and which need or requirement does it address?"],
+  ["moves", "Spatial moves", "Describe arrangements, paths, thresholds, light, or material relationships."],
+  ["experiment", "Next test", "What small test could help you learn whether this idea works?"],
 ] as const;
 
 export default function ConceptBoard({ concepts, onChange }: {
@@ -12,8 +12,8 @@ export default function ConceptBoard({ concepts, onChange }: {
 }) {
   return <section className="studio-card studio-section" aria-label="Concept board">
     <h2>Your concept board</h2>
-    <p>Capture ideas to compare and test. AI starting points are labeled.</p>
-    {!concepts.length && <p className="studio-empty">Add an idea, or try a brainstorming exercise.</p>}
+    <p>Save ideas to compare.</p>
+    {!concepts.length && <p className="studio-empty">Start with one idea.</p>}
     <div className="studio-grid">
       {concepts.map((concept, index) => <article className="studio-item" key={concept.id}>
         <h3>Concept {index + 1}</h3>

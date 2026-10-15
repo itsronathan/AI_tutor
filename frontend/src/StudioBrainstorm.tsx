@@ -190,9 +190,7 @@ function StudioWorkspace({ ownerId }: { ownerId: string }) {
       <CoursePreset brief={draft.brief} onApply={value => update("brief", value)} />
       <div className="studio-layout">
         <form className="studio-card" onSubmit={save}>
-          <details open><summary>Project brief and context</summary>
-          <h2>Set up your project</h2>
-          <p>Add what you know. Leave the rest open.</p>
+          <h2>Assignment brief</h2>
           <label htmlFor="studio-title">Project or course name <span>(optional)</span></label>
           <input id="studio-title" value={draft.title} maxLength={200}
             placeholder="e.g. Design Studio — Community gathering space"
@@ -204,6 +202,7 @@ function StudioWorkspace({ ownerId }: { ownerId: string }) {
             aria-describedby="studio-brief-help" value={draft.brief}
             onChange={event => update("brief", event.target.value)} />
           <AssignmentTutorPanel brief={draft.brief.trim()} review={draft.assignmentReview} onChange={value => update("assignmentReview", value)} />
+          <details className="studio-help"><summary>Your interests &amp; experience (optional)</summary>
           <label htmlFor="studio-interests">What catches your interest? <span>(optional)</span></label>
           <textarea id="studio-interests" rows={3} maxLength={4000} value={draft.interests}
             placeholder="A site detail, a material, a memory, a question — or simply ‘I’m not sure yet.’"
@@ -212,8 +211,8 @@ function StudioWorkspace({ ownerId }: { ownerId: string }) {
           <textarea id="studio-experience" rows={3} maxLength={4000} value={draft.experience}
             placeholder="Think about arrival, movement, gathering, or finding a quiet place. It’s okay to leave this open."
             onChange={event => update("experience", event.target.value)} />
-          <button type="submit">Save project draft</button>
           </details>
+          <button type="submit">Save project draft</button>
         </form>
         <aside className="studio-side">
           <details open><summary>Brainstorming exercises</summary><PromptExplorer notes={draft.promptNotes} onChange={value => update("promptNotes", value)} images={draft.promptImages}

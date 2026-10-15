@@ -15,8 +15,8 @@ export default function FocusedHelpPanel({ draft, onChange, onOpenBrief }: {
   const context = focusedHelpContext(current);
   const updateNote = (field: "issue" | "details", value: string) => onChange("focusedHelp", { ...focus, notes: { ...focus.notes, [topic.id]: { ...note, [field]: value } } });
   return <section aria-label="Focused design help">
-    <h2>One issue. Your existing concept.</h2>
-    <p>Choose a topic and describe where you’re stuck.</p>
+    <h2>Focused help</h2>
+    <p>Pick a topic. Ask a question.</p>
     <nav className="studio-nav" aria-label="Help topics">
       {HELP_TOPICS.map(item => <button type="button" key={item.id} aria-pressed={topic.id === item.id}
         onClick={() => onChange("focusedHelp", { ...focus, topic: item.id })}>{item.title}</button>)}
@@ -42,7 +42,7 @@ export default function FocusedHelpPanel({ draft, onChange, onOpenBrief }: {
         {(topic.id === "zoning" || topic.id === "accessibility") && <p className="studio-small">Provide the applicable source. No live code lookup or compliance approval.</p>}
         <details><summary>Notes shared with AI</summary><pre className="studio-export-preview">{context}</pre></details>
         {!draft.assignmentReview?.reviewed ? <>
-          <p>Review your assignment to unlock AI help. Your topic notes save without AI.</p>
+          <p>Review your brief for AI help. Notes work anytime.</p>
           <button type="button" onClick={onOpenBrief}>Review assignment first</button>
         </> : <AssignmentTutorPanel key={`${topic.id}:${focus.conceptId}:${draft.directionId}`} brief={draft.brief.trim()} review={draft.assignmentReview}
           onChange={value => onChange("assignmentReview", value)} projectContext={context} helpTopic={topic.id}

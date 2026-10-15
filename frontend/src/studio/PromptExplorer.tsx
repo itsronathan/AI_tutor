@@ -12,9 +12,8 @@ export default function PromptExplorer({ notes, onChange, images = {}, onAddImag
   const [themes, setThemes] = useState<string[]>([THEMES[0]]);
   const archived = PROMPTS.filter(prompt => prompt.theme === "People" && (notes[prompt.id]?.trim() || images[prompt.id]?.length));
   return <section className="studio-card studio-prompts" aria-label="Brainstorming exercises">
-    <p className="studio-eyebrow">When you feel stuck</p>
     <h2>Explore a starting point</h2>
-    <p>Pick one or more lenses. Sketch or write a response.</p>
+    <p>Pick lenses. Sketch or write.</p>
     <fieldset className="studio-lenses"><legend>Brainstorming lenses</legend>
       {THEMES.map(item => <label className="studio-check" key={item}><input type="checkbox" checked={themes.includes(item)}
         onChange={event => setThemes(current => event.target.checked ? [...current, item] : current.filter(value => value !== item))} />{item}</label>)}
@@ -23,7 +22,7 @@ export default function PromptExplorer({ notes, onChange, images = {}, onAddImag
     {PROMPTS.filter(prompt => prompt.theme !== "People" && themes.includes(prompt.theme)).map(prompt => <div className="studio-exercise" key={prompt.id}>
       <p className="studio-small">{prompt.theme}</p>
       <h3>{prompt.title}</h3><p>{prompt.question}</p>
-      <p className="studio-try-this"><span>Try this:</span> {prompt.exercise}</p>
+      <details className="studio-help"><summary>Try an exercise</summary><p className="studio-try-this">{prompt.exercise}</p></details>
       <label htmlFor={`response-${prompt.id}`}>Your response to “{prompt.title}”</label>
       <textarea id={`response-${prompt.id}`} rows={3} maxLength={4000} value={notes[prompt.id] || ""}
         onChange={event => onChange({ ...notes, [prompt.id]: event.target.value })} />
