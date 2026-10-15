@@ -13,14 +13,14 @@ afterEach(() => { cleanup(); vi.restoreAllMocks(); });
 
 it("attaches, restores, exports a reference, and removes a sketch without losing notes", async () => {
   vi.spyOn(images, "readSketch").mockResolvedValue(sketch);
-  const view = render(<StudioBrainstorm ownerId="guest" />);
+  const view = render(<StudioBrainstorm ownerId="guest" />); fireEvent.change(screen.getByLabelText("Activity"), { target: { value: "Exercises" } });
   fireEvent.change(screen.getByLabelText("Your response to “Work with an edge”"), { target: { value: "Keep the welcoming entrance." } });
   upload();
   expect(await screen.findByAltText(/Sketch for Work with an edge/)).toBeInTheDocument();
   const saved = normalizeDraft(JSON.parse(localStorage.getItem("studio-brainstorm:v1:guest")!));
   expect(buildProjectNotes(saved)).toContain("Work with an edge: arrival.png");
   view.unmount();
-  render(<StudioBrainstorm ownerId="guest" />);
+  render(<StudioBrainstorm ownerId="guest" />); fireEvent.change(screen.getByLabelText("Activity"), { target: { value: "Exercises" } });
   expect(screen.getByAltText(/Sketch for Work with an edge/)).toBeInTheDocument();
   fireEvent.click(screen.getByRole("button", { name: "Remove arrival.png" }));
   expect(screen.queryByAltText(/Sketch for Work with an edge/)).not.toBeInTheDocument();
@@ -30,9 +30,9 @@ it("attaches, restores, exports a reference, and removes a sketch without losing
 it("does not attach a late image to a different project", async () => {
   let resolve!: (value: images.PromptImage) => void;
   vi.spyOn(images, "readSketch").mockImplementation(() => new Promise(done => { resolve = done; }));
-  render(<StudioBrainstorm ownerId="guest" />);
+  render(<StudioBrainstorm ownerId="guest" />); fireEvent.change(screen.getByLabelText("Activity"), { target: { value: "Exercises" } });
   upload();
-  fireEvent.click(screen.getByRole("button", { name: "New project" }));
+  fireEvent.click(screen.getByText("Projects")); fireEvent.click(screen.getByRole("button", { name: "New project" }));
   await act(async () => resolve(sketch));
   expect(screen.queryByAltText(/Sketch for Work with an edge/)).not.toBeInTheDocument();
 });

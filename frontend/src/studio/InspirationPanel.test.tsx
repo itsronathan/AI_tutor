@@ -17,7 +17,7 @@ function seed() {
     reviewed: true, reviewNotes: "Keep the tree", answers: { 0: "Riverbank" }, turns: [],
   } })));
 }
-function openConcepts() { fireEvent.click(screen.getByRole("button", { name: "Concepts" })); fireEvent.click(screen.getByText("Need a starting point? Explore AI ideas")); }
+function openConcepts() { fireEvent.change(screen.getByLabelText("Activity"), { target: { value: "Concepts" } }); fireEvent.click(screen.getByText("Need a starting point? Explore AI ideas")); }
 beforeEach(() => localStorage.clear());
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 
@@ -26,7 +26,7 @@ it("draws a student's own concept without generating AI directions first", async
   const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify({ image: "data:image/png;base64,iVBORw0KGgo=", record })));
   vi.stubGlobal("fetch", fetchMock);
   render(<StudioBrainstorm ownerId="guest" />);
-  fireEvent.click(screen.getByRole("button", { name: "Concepts" }));
+  fireEvent.change(screen.getByLabelText("Activity"), { target: { value: "Concepts" } });
   expect(screen.getByRole("button", { name: "Generate concept drawing" })).toBeDisabled();
   fireEvent.change(screen.getByLabelText("Describe your concept"), { target: { value: "A shaded courtyard with a welcoming entrance." } });
   fireEvent.click(screen.getByRole("button", { name: "Generate concept drawing" }));
@@ -41,7 +41,7 @@ it("draws a student's own concept without generating AI directions first", async
 
 it("adds the preset without overwriting text, clears review and prevents duplicate application", () => {
   seed(); render(<StudioBrainstorm ownerId="guest" />);
-  fireEvent.click(screen.getByText(/Optional course preset:/));
+  fireEvent.change(screen.getByLabelText("Activity"), { target: { value: "Brief review" } }); fireEvent.click(screen.getByText(/Optional course preset:/));
   fireEvent.click(screen.getByRole("button", { name: "Add course preset to brief" }));
   const saved = JSON.parse(localStorage.getItem(key)!);
   expect(saved.brief).toBe(`${brief}\n\n${COURSE_BRIEF}`);
@@ -71,7 +71,7 @@ it("generates alternatives, adopts a concept, requests a selected drawing, and e
   expect(payload.brief).toBe(brief); expect(payload.review_notes).toBe("Keep the tree");
   expect(payload.clarifications[0].answer).toBe("Riverbank");
   fireEvent.click(screen.getAllByRole("button", { name: "Add to concept board" })[0]);
-  expect(screen.getByLabelText("Concept name")).toHaveValue("Courtyard");
+  expect(JSON.parse(localStorage.getItem(key)!).concepts[0].title).toBe("Courtyard");
   fireEvent.click(screen.getAllByRole("button", { name: "Select for drawing" })[0]);
   fireEvent.change(screen.getByLabelText("Drawing type"), { target: { value: "perspective" } });
   fireEvent.change(screen.getByLabelText(/Refinement for this drawing/), { target: { value: "More open" } });
@@ -83,7 +83,7 @@ it("generates alternatives, adopts a concept, requests a selected drawing, and e
   expect(saved.explorations).toHaveLength(2);
   expect(buildProjectNotes(saved)).toContain("image-test");
   expect(localStorage.getItem(key)).not.toContain("data:image");
-  fireEvent.click(screen.getByRole("button", { name: "Brief & exercises" }));
+  fireEvent.change(screen.getByLabelText("Activity"), { target: { value: "Brief & exercises" } });
   fireEvent.change(screen.getByLabelText(/Assignment brief/), { target: { value: "New assignment" } });
   openConcepts();
   expect(screen.getByRole("button", { name: "Generate concept drawing" })).toBeDisabled();
@@ -97,7 +97,7 @@ it("discards canceled late results when leaving the panel", async () => {
   vi.stubGlobal("fetch", fetchMock);
   render(<StudioBrainstorm ownerId="guest" />); openConcepts();
   fireEvent.click(screen.getByRole("button", { name: "Generate three directions" }));
-  fireEvent.click(screen.getByRole("button", { name: "Brief & exercises" }));
+  fireEvent.change(screen.getByLabelText("Activity"), { target: { value: "Brief & exercises" } });
   expect(fetchMock.mock.calls[0][1]?.signal?.aborted).toBe(true);
   await act(async () => resolve(new Response(JSON.stringify(result))));
   expect(JSON.parse(localStorage.getItem(key)!).explorations).toHaveLength(0);

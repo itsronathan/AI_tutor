@@ -8,7 +8,11 @@ import { buildProjectNotes } from "./exportNotes";
 
 beforeEach(() => localStorage.clear());
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); vi.restoreAllMocks(); });
-const click = (name: string) => fireEvent.click(screen.getByRole("button", { name }));
+const click = (name: string) => {
+ if (["Concepts", "Plan", "Brief & exercises"].includes(name)) { fireEvent.change(screen.getByLabelText("Activity"), { target: { value: name === "Concepts" ? "Concept cards" : name } }); return; }
+ if (["New project", "Duplicate project"].includes(name) && !screen.getByText("Projects").parentElement?.hasAttribute("open")) fireEvent.click(screen.getByText("Projects"));
+ fireEvent.click(screen.getByRole("button", { name }));
+};
 
 it("migrates the legacy project, duplicates independently, and restores the selected project", () => {
   localStorage.setItem("studio-brainstorm:v1:guest", JSON.stringify({ title: "Pavilion", brief: "Keep this assignment" }));
@@ -38,12 +42,12 @@ it("undo restores a removed concept without discarding subsequent work", () => {
   render(<StudioBrainstorm ownerId="guest" />);
   click("Concepts"); click("Add concept");
   fireEvent.change(screen.getByLabelText("Concept name"), { target: { value: "Courtyard" } });
-  fireEvent.click(screen.getByLabelText("Compare Courtyard")); click("Develop this concept");
-  click("Remove concept 1"); click("Add concept");
+  fireEvent.change(screen.getByLabelText("Activity"), { target: { value: "Compare concepts" } }); fireEvent.click(screen.getByLabelText("Compare Courtyard")); click("Develop this concept");
+  fireEvent.change(screen.getByLabelText("Activity"), { target: { value: "Concept cards" } }); click("Remove concept 1"); click("Add concept");
   fireEvent.change(screen.getByLabelText("Concept name"), { target: { value: "Threshold" } });
   click("Undo deletion");
   expect(screen.getAllByLabelText("Concept name").map(e => (e as HTMLTextAreaElement).value)).toEqual(["Threshold", "Courtyard"]);
-  expect(screen.getByRole("button", { name: "Current direction" })).toBeInTheDocument();
+  fireEvent.change(screen.getByLabelText("Activity"), { target: { value: "Compare concepts" } }); expect(screen.getByRole("button", { name: "Current direction" })).toBeInTheDocument();
 });
 
 it("keeps unsaved projects in memory when browser storage fails", () => {

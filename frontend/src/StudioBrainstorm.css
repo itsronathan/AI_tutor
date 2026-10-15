@@ -135,3 +135,17 @@ details.studio-card { margin-bottom: 24px; }
 .studio-project-controls button:focus-visible, .studio-project-controls select:focus-visible, .studio-next-step button:focus-visible, .studio-undo button:focus-visible { outline: 3px solid #98412a; outline-offset: 3px; }
 @container (max-width: 760px) { .studio-layout { grid-template-columns: 1fr; } .studio-card { padding: 24px; } }
 @container (max-width: 480px) { .studio-nav-options { grid-template-columns: repeat(2, minmax(0, 1fr)); } .studio-page .studio-workflow button { padding: 12px 10px; } .studio-card { padding: 20px; } }
+.studio-simple-header { display: flex; justify-content: space-between; align-items: start; gap: 24px; margin-bottom: 24px; }
+.studio-simple-header h1 { font-size: clamp(28px, 4vw, 40px); margin: 4px 0; }
+.studio-simple-header .studio-eyebrow { margin: 0; }
+.studio-project-menu { position: relative; flex-shrink: 0; }
+.studio-project-menu > summary { padding: 10px 14px; border: 1px solid #cecabe; border-radius: 6px; }
+.studio-project-menu .studio-project-controls { position: absolute; right: 0; z-index: 5; width: min(320px, 75vw); display: grid; padding: 20px; background: #fffefa; border: 1px solid #cecabe; box-shadow: 0 8px 28px #292c291a; }
+.studio-primary-tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 24px 0; }
+.studio-page .studio-primary-tabs button { background: #fffefa; color: #52634f; border: 1px solid #d4dad3; padding: 14px; border-radius: 8px; }
+.studio-page .studio-primary-tabs button[aria-pressed="true"] { background: #e4eee6; border-color: #4c7058; color: #254b32; font-weight: 700; }
+.studio-activity-picker { display: flex; align-items: center; gap: 14px; max-width: 430px; }
+.studio-activity-picker label { margin: 0; }
+.studio-activity-picker select { flex: 1; min-width: 0; padding: 10px 12px; border: 1px solid #cecabe; border-radius: 6px; background: #fffefa; color: #292c29; font: inherit; }
+.studio-simple-header > div { min-width: 0; overflow-wrap: anywhere; }
+.studio-section-start > form.studio-card { max-width: 720px; margin: 24px auto; }

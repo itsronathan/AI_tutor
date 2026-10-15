@@ -7,7 +7,7 @@ import { focusedHelpContext } from "./focusedHelp";
 import { buildProjectNotes } from "./exportNotes";
 
 const key = "studio-brainstorm:v1:guest";
-const open = () => fireEvent.click(screen.getByRole("button", { name: "Focused help" }));
+const open = () => fireEvent.change(screen.getByLabelText("Activity"), { target: { value: "Focused help" } });
 beforeEach(() => localStorage.clear());
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 

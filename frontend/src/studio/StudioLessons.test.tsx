@@ -45,7 +45,7 @@ it("keeps Learn outside the main project workspace", () => {
   render(<StudioBrainstorm ownerId="guest" />);
   expect(screen.queryByRole("button", { name: "Learn" })).not.toBeInTheDocument();
   expect(screen.queryByRole("link", { name: /Learn architecture/ })).not.toBeInTheDocument();
-  expect(screen.getByRole("button", { name: "Focused help" })).toBeInTheDocument();
+  expect(screen.getByRole("option", { name: "Focused help" })).toBeInTheDocument();
 });
 
 it("restores learning notes per topic and includes them in downloads", () => {

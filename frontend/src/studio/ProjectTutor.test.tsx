@@ -9,7 +9,7 @@ import { projectTutorContext } from "./journey";
 const key = "studio-brainstorm:v1:guest";
 beforeEach(() => localStorage.clear());
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
-const open = () => fireEvent.click(screen.getByRole("button", { name: "Project tutor" }));
+const open = () => fireEvent.change(screen.getByLabelText("Activity"), { target: { value: "Project tutor" } });
 
 it("saves stages and notes without AI, restores them, exports them, and isolates projects", () => {
   const view = render(<StudioBrainstorm ownerId="guest" />);
@@ -25,8 +25,8 @@ it("saves stages and notes without AI, restores them, exports them, and isolates
   expect(screen.getByLabelText("Stage notes")).toHaveValue("Test a courtyard model.");
   expect(screen.getByRole("checkbox", { name: /worked through this stage/ })).toBeChecked();
   fireEvent.click(screen.getByRole("button", { name: "Open Concepts" }));
-  expect(screen.getByRole("heading", { name: "Your concept board" })).toBeInTheDocument();
-  fireEvent.click(screen.getByRole("button", { name: "New project" }));
+  expect(screen.getByRole("heading", { name: "Concept image generator" })).toBeInTheDocument();
+  fireEvent.click(screen.getByText("Projects")); fireEvent.click(screen.getByRole("button", { name: "New project" }));
   open();
   expect(screen.getByLabelText("Stage notes")).toHaveValue("");
   expect(screen.getByRole("button", { name: "1. Understand" })).toHaveAttribute("aria-pressed", "true");

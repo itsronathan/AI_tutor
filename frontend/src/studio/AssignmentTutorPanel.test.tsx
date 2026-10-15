@@ -16,7 +16,9 @@ beforeEach(() => localStorage.clear());
 afterEach(() => { cleanup(); vi.restoreAllMocks(); vi.unstubAllGlobals(); });
 
 function enterBrief() {
+  fireEvent.change(screen.getByLabelText("Activity"), { target: { value: "Brief & exercises" } });
   fireEvent.change(screen.getByLabelText(/Assignment brief/), { target: { value: brief } });
+  fireEvent.change(screen.getByLabelText("Activity"), { target: { value: "Brief review" } });
 }
 
 describe("assignment tutor workflow", () => {
@@ -24,7 +26,7 @@ describe("assignment tutor workflow", () => {
     const fetchMock = vi.fn().mockResolvedValueOnce(response(analysis)).mockResolvedValueOnce(response(reply));
     vi.stubGlobal("fetch", fetchMock);
     const first = render(<StudioBrainstorm ownerId="guest" />);
-    expect(screen.getByRole("button", { name: "Analyze assignment" })).toBeDisabled();
+    fireEvent.change(screen.getByLabelText("Activity"), { target: { value: "Brief review" } }); expect(screen.getByRole("button", { name: "Analyze assignment" })).toBeDisabled();
     enterBrief();
     fireEvent.click(screen.getByRole("button", { name: "Analyze assignment" }));
     expect(await screen.findByText(analysis.summary)).toBeInTheDocument();
@@ -43,23 +45,25 @@ describe("assignment tutor workflow", () => {
     expect(payload.clarifications).toEqual([{ question: "Which site should be used?", answer: "The riverbank" }]);
     first.unmount();
     render(<StudioBrainstorm ownerId="guest" />);
-    expect(screen.getByText(reply.answer)).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText("Activity"), { target: { value: "Brief review" } }); expect(screen.getByText(reply.answer)).toBeInTheDocument();
     expect(screen.getByLabelText("Which site should be used?")).toHaveValue("The riverbank");
+    fireEvent.change(screen.getByLabelText("Activity"), { target: { value: "Brief & exercises" } });
     fireEvent.change(screen.getByLabelText(/Assignment brief/), { target: { value: "A new library assignment" } });
     expect(screen.queryByText(reply.answer)).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Analyze assignment" })).toBeEnabled();
+    fireEvent.change(screen.getByLabelText("Activity"), { target: { value: "Brief review" } }); expect(screen.getByRole("button", { name: "Analyze assignment" })).toBeEnabled();
     expect(JSON.parse(localStorage.getItem("studio-brainstorm:v1:guest")!).assignmentReview).toBeNull();
   });
 
-  it("keeps other draft edits made while an analysis request is pending", async () => {
+  it("keeps draft edits and cancels analysis when leaving review", async () => {
     let resolve!: (value: Response) => void;
     vi.stubGlobal("fetch", vi.fn(() => new Promise<Response>(done => { resolve = done; })));
     render(<StudioBrainstorm ownerId="guest" />);
     enterBrief();
     fireEvent.click(screen.getByRole("button", { name: "Analyze assignment" }));
+    fireEvent.change(screen.getByLabelText("Activity"), { target: { value: "Brief & exercises" } });
     fireEvent.change(screen.getByLabelText(/What catches your interest/), { target: { value: "Courtyard light" } });
     await act(async () => { resolve(response(analysis)); });
-    expect(await screen.findByText(analysis.summary)).toBeInTheDocument();
+    expect(screen.queryByText(analysis.summary)).not.toBeInTheDocument();
     expect(screen.getByLabelText(/What catches your interest/)).toHaveValue("Courtyard light");
     expect(JSON.parse(localStorage.getItem("studio-brainstorm:v1:guest")!).interests).toBe("Courtyard light");
   });
@@ -71,11 +75,12 @@ describe("assignment tutor workflow", () => {
     render(<StudioBrainstorm ownerId="guest" />);
     enterBrief();
     fireEvent.click(screen.getByRole("button", { name: "Analyze assignment" }));
+    fireEvent.change(screen.getByLabelText("Activity"), { target: { value: "Brief & exercises" } });
     fireEvent.change(screen.getByLabelText(/Assignment brief/), { target: { value: "A different assignment" } });
     await act(async () => { resolve(response(analysis)); });
     expect(screen.queryByText(analysis.summary)).not.toBeInTheDocument();
     expect(screen.getByLabelText(/Assignment brief/)).toHaveValue("A different assignment");
-    expect(screen.getByRole("button", { name: "Analyze assignment" })).toBeEnabled();
+    fireEvent.change(screen.getByLabelText("Activity"), { target: { value: "Brief review" } }); expect(screen.getByRole("button", { name: "Analyze assignment" })).toBeEnabled();
   });
 
   it("shows configuration errors without pretending the assignment was analyzed", async () => {
