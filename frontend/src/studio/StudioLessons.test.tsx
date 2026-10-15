@@ -41,10 +41,10 @@ it("offers a site exercise without site knowledge, an assignment, or AI", () => 
   expect(fetchMock).not.toHaveBeenCalled();
 });
 
-it("keeps Learn outside the project workspace with a separate navigation link", () => {
+it("keeps Learn outside the main project workspace", () => {
   render(<StudioBrainstorm ownerId="guest" />);
   expect(screen.queryByRole("button", { name: "Learn" })).not.toBeInTheDocument();
-  expect(screen.getByRole("link", { name: /Learn architecture/ })).toHaveAttribute("href", "/learning?course=architecture");
+  expect(screen.queryByRole("link", { name: /Learn architecture/ })).not.toBeInTheDocument();
   expect(screen.getByRole("button", { name: "Focused help" })).toBeInTheDocument();
 });
 

@@ -129,7 +129,7 @@ function StudioWorkspace({ ownerId }: { ownerId: string }) {
       <header className="studio-header">
         <div className="studio-header-copy">
         <p className="studio-eyebrow">AI Tutor / Architecture workspace</p>
-        <h1>Studio Brainstorm</h1><a href="/learning?course=architecture">Learn architecture →</a>
+        <h1>Studio Brainstorm</h1>
         <p>Start with the brief. Find a question worth exploring.</p>
         <p className="studio-header-caption">Observe. Make. Question. Refine.</p>
         </div>

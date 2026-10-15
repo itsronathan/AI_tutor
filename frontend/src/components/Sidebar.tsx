@@ -69,7 +69,6 @@ type Tab = { key: string; labelKey: "sidebar.learningMode" | "sidebar.grades" | 
 
 const TABS: Tab[] = [
   { key: "/studio", labelKey: "sidebar.studio", icon: I.home, path: "/studio" },
-  { key: "/learning", labelKey: "sidebar.learningMode", icon: I.learning, path: "/learning" },
   { key: "/grades", labelKey: "sidebar.grades", icon: I.course, path: "/grades" },
   { key: "/autograder", labelKey: "sidebar.autoGrader", icon: I.grader, path: "/autograder" },
 ];
@@ -321,6 +320,15 @@ export default function Sidebar() {
         </nav>
 
         <div className="sb-group-label sb-group-label--gap">{t("sidebar.study")}</div>
+        <nav className="sb-nav" aria-label="Study tools">
+          <button type="button" className={`sb-link${onLearning ? " is-active" : ""}`}
+            title={t("sidebar.learningMode")}
+            onClick={() => go({ key: "/learning", labelKey: "sidebar.learningMode", icon: I.learning,
+              path: location.pathname.startsWith("/studio") || location.search.includes("course=architecture") ? "/learning?course=architecture" : "/learning" })}>
+            <span className="sb-link-ic">{I.learning}</span>
+            <span className="sb-link-label">{t("sidebar.learningMode")}</span>
+          </button>
+        </nav>
 
         {/* Learning Progress (was Aquarius's "syllabus") — the real panel, bridged to Learning Mode */}
         <div
