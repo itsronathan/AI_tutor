@@ -1,0 +1,16 @@
+export const PROMPTS = [
+  { id: "people-arrival", theme: "People", title: "Follow an arrival", question: "Choose a person from your project. What do they notice, need, or wonder about on arrival?", exercise: "Draw a six-frame sequence tracing their movement through the space. Annotate a moment of spatial uncertainty and a moment that creates a sense of welcome." },
+  { id: "people-meeting", theme: "People", title: "Space to connect and pause", question: "Where might people want to gather, and where might someone want to be alone?", exercise: "Sketch three spatial arrangements that explore the relationship between a communal and a quiet place." },
+  { id: "site-edge", theme: "Site", title: "Work with an edge", question: "Which boundary or feature of the site could become a starting point?", exercise: "Sketch three spatial responses to the edge: align with it, intersect it, and set back from it." },
+  { id: "site-ground", theme: "Site", title: "Engage the terrain", question: "What possibilities emerge if your project sits on, above, or partly within the ground?", exercise: "Sketch three sectional strategies. Annotate confirmed site conditions and assumptions that need further verification." },
+  { id: "light-sequence", theme: "Light", title: "Move through light", question: "How might a change in light help express the experience you want?", exercise: "Sketch a sequence of three spaces using light and shadow to define their spatial characteristics. Annotate your assumptions about solar orientation." },
+  { id: "light-opening", theme: "Light", title: "Explore apertures", question: "What could change if the same room received light from above, beside, or through a screen?", exercise: "Keep the room's geometry constant and sketch three aperture configurations in section." },
+  { id: "movement-path", theme: "Movement", title: "Find more than one path", question: "Could movement be direct, looping, or a series of pauses?", exercise: "Draw three path diagrams between the same arrival and destination. Note whom each path serves." },
+  { id: "movement-threshold", theme: "Movement", title: "Design a transition", question: "Where should someone feel they are entering a different kind of space?", exercise: "Sketch a transition using changes in height, enclosure, or view. Explain the intended effect." },
+  // Retain the original IDs so existing responses and sketches stay attached.
+  { id: "material-rule", theme: "Form", title: "Transform a volume", question: "Which operation best expresses your concept?", exercise: "Start with a simple mass. Fold, carve, or offset it, then annotate how the change supports your concept." },
+  { id: "material-contrast", theme: "Form", title: "Shape the void", question: "What should the space between built forms do?", exercise: "Use a solid-and-void diagram to define a courtyard, gap, or enclosure. Mark its proportions and relationship to surrounding volumes." },
+] as const;
+
+// Keep older People prompt IDs above so saved notes and sketches remain recoverable.
+export const THEMES = ["Site", "Light", "Movement", "Form"] as const;
