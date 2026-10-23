@@ -56,7 +56,7 @@ def _bar_path(student_id: str, textbook_id: str = "focs") -> str:
 
 
 def delete_all_file_bars_for_textbook(textbook_id: str) -> int:
-    """Remove local student_bars JSON files for this textbook (any student id prefix). Never touches FCOS."""
+    """Remove local student_bars JSON files for this textbook (any student id prefix). Never touches FOCS."""
     tid = re.sub(r"[^A-Za-z0-9_\-]", "_", (textbook_id or "focs").strip()) or "focs"
     if tid == "focs":
         return 0
@@ -186,17 +186,70 @@ def _load_tree_token_map(textbook_id: str = "focs", user_email: Optional[str] = 
     return _load_tree_token_map_from_raw(raw)
 
 
-def _extract_section_tokens(message: str, valid_tokens: set[str]) -> List[str]:
-    tokens = re.findall(r"\b\d+(?:\.\d+)*\b", message or "")
+def _lettered_sections_from_raw(raw: Dict[str, Any]) -> Dict[str, Tuple[str, str]]:
+    """字母章小节号（如 Lathi 的 "B.4"）-> (它的 token, 所在章的 token)。
+
+    这些节没有数字节号，进度条用 path token 记它们（与前端一致），所以消息里写的
+    "B.4" 要先换成 token。
+    """
+    out: Dict[str, Tuple[str, str]] = {}
+
+    def walk(obj: Dict[str, Any], path_prefix: str, root: Optional[str]) -> None:
+        for k, v in obj.items():
+            if k == "_range" or not isinstance(v, dict):
+                continue
+            path = f"{path_prefix}/{k}" if path_prefix else k
+            first = k.split()[0] if k.split() else ""
+            token = first if re.match(r"^\d+(?:\.\d+)*$", first) else _path_section_token(path)
+            if re.match(r"^[A-Z](?:\.\d+)+$", first):
+                out[first] = (token, root or token)
+            walk(v, path, root or token)
+
+    walk(raw or {}, "", None)
+    return out
+
+
+def _lettered_refs(message: str, lettered: Dict[str, Tuple[str, str]]) -> List[Tuple[int, int, str]]:
+    """消息里提到的字母章小节（"B.4"、"b.4"）：[(start, end, token)]；书里没有的不算。"""
+    refs: List[Tuple[int, int, str]] = []
+    if not lettered:
+        return refs
+    # (?!\d), not \b: "B.4我学过了" has no \b after the 4, since CJK counts as a word character.
+    for m in re.finditer(r"(?<![A-Za-z0-9])([A-Za-z])\.(\d+(?:\.\d+)*)(?!\d)", message or ""):
+        hit = lettered.get(f"{m.group(1).upper()}.{m.group(2)}")
+        if hit:
+            refs.append((m.start(), m.end(), hit[0]))
+    return refs
+
+
+def _tokens_in_message(
+    message: str, pattern: str, valid_tokens: set[str], lettered: Optional[Dict[str, Tuple[str, str]]]
+) -> List[str]:
+    refs = _lettered_refs(message, lettered or {})
+    found = [(start, token) for start, _, token in refs]
+    for m in re.finditer(pattern, message or ""):
+        # The 4 in "B.4" is part of section B.4, not chapter 4.
+        if not any(start <= m.start() < end for start, end, _ in refs):
+            found.append((m.start(), m.group(0)))
     out: List[str] = []
-    for t in tokens:
+    for _, t in sorted(found):
         if t in valid_tokens and t not in out:
             out.append(t)
     return out
 
 
+def _extract_section_tokens(
+    message: str, valid_tokens: set[str], lettered: Optional[Dict[str, Tuple[str, str]]] = None
+) -> List[str]:
+    return _tokens_in_message(message, r"\b\d+(?:\.\d+)*\b", valid_tokens, lettered)
+
+
 def _root_chapter_ints_from_raw(raw: Dict[str, Any]) -> List[int]:
-    """教材目录顶层章编号（如 1,2,…,5），不含小节。"""
+    """顶层章编号中的数字章（如 1,2,…,5），不含小节。
+
+    字母章（如 Lathi 的 "B Background"）按设计排除：它们是背景/复习章，
+    与 FOCS 的第 0 章同类，不参与「学到第 n 章」的自动标记。
+    """
     if not raw:
         return []
     nums: List[int] = []
@@ -236,7 +289,10 @@ def _extract_explicit_chapter_numbers(msg: str) -> List[int]:
 def _apply_learned_through_chapter_n(
     bar: Dict[str, Any], n: int, valid_tokens: set[str], raw: Dict[str, Any]
 ) -> None:
-    """学到第 n 章 → 默认正文第 1..n 章（FOCS 顶层章号，跳过第 0 章 Background）均已掌握。"""
+    """学到第 n 章 → 正文第 1..n 章均已掌握。
+
+    背景章不计入：数字 0 章显式跳过，字母章（"B"）由 _root_chapter_ints_from_raw 排除。
+    """
     learned = set(bar.get("learned_sections") or [])
     for ch in _root_chapter_ints_from_raw(raw):
         if ch == 0:
@@ -276,14 +332,11 @@ def _ordered_section_tokens_preorder(textbook_id: str = "focs", user_email: Opti
     return _ordered_section_tokens_preorder_from_raw(raw)
 
 
-def _extract_subsection_tokens(message: str, valid_tokens: set[str]) -> List[str]:
-    """仅匹配含小数点的小节 token（5.3、5.1.1），按在消息中首次出现顺序去重。"""
-    found = re.findall(r"\b\d+\.\d+(?:\.\d+)*\b", message or "")
-    seen: List[str] = []
-    for t in found:
-        if t in valid_tokens and t not in seen:
-            seen.append(t)
-    return seen
+def _extract_subsection_tokens(
+    message: str, valid_tokens: set[str], lettered: Optional[Dict[str, Tuple[str, str]]] = None
+) -> List[str]:
+    """仅匹配小节 token（5.3、5.1.1，以及字母章的 B.4），按在消息中首次出现顺序去重。"""
+    return _tokens_in_message(message, r"\b\d+\.\d+(?:\.\d+)*\b", valid_tokens, lettered)
 
 
 def _apply_learned_through_subsection(
@@ -291,14 +344,15 @@ def _apply_learned_through_subsection(
     target_token: str,
     valid_tokens: set[str],
     ordered: List[str],
+    root_token: Optional[str] = None,
 ) -> None:
     """
     学到小节如 5.3 → 在该章子树内，从章根（5）到 5.3 的前序闭包全部标为已学（含 5、5.1、5.1.1…5.3）。
-    不推断其它章（1–4）已学。
+    不推断其它章（1–4）已学。字母章小节的 token 里没有章号，章根由 root_token 给出。
     """
     if target_token not in ordered:
         return
-    root = target_token.split(".")[0]
+    root = root_token or target_token.split(".")[0]
     try:
         start = next(i for i, t in enumerate(ordered) if t == root)
     except StopIteration:
@@ -331,8 +385,9 @@ def update_bar_from_message(
     raw = lr.load_outline_dict(tid, user_email)
     token_map = _load_tree_token_map_from_raw(raw)
     valid = set(token_map.keys())
+    lettered = _lettered_sections_from_raw(raw)
     msg = (message or "").strip()
-    tokens = _extract_section_tokens(msg, valid)
+    tokens = _extract_section_tokens(msg, valid, lettered)
     msg_lower = msg.lower()
 
     # 必须同时命中「进度语义」+ 消息里的节号，才会写入 learned（避免只贴目录就标成已学）
@@ -445,13 +500,14 @@ def update_bar_from_message(
         _apply_learned_through_chapter_n(bar, n_through, valid, raw)
 
     # 学到 5.3 等小节 → 该章内从章根到该节的前序节点全部标为已学（不自动标 1–4 章）
-    subsection_hits = _extract_subsection_tokens(msg, valid)
+    subsection_hits = _extract_subsection_tokens(msg, valid, lettered)
     if subsection_hits and should_apply_through:
         ordered = _ordered_section_tokens_preorder_from_raw(raw)
         in_order = [t for t in subsection_hits if t in ordered]
         if in_order:
             target_sub = max(in_order, key=lambda t: ordered.index(t))
-            _apply_learned_through_subsection(bar, target_sub, valid, ordered)
+            roots = dict(lettered.values())
+            _apply_learned_through_subsection(bar, target_sub, valid, ordered, roots.get(target_sub))
 
     # Update learned sections when user explicitly says learned/completed.
     if tokens and _contains_any(msg, learned_kw):
@@ -496,8 +552,9 @@ def update_bar_from_message_on_bar(
     raw = lr.load_outline_dict(tid, user_email)
     token_map = _load_tree_token_map_from_raw(raw)
     valid = set(token_map.keys())
+    lettered = _lettered_sections_from_raw(raw)
     msg = (message or "").strip()
-    tokens = _extract_section_tokens(msg, valid)
+    tokens = _extract_section_tokens(msg, valid, lettered)
     msg_lower = msg.lower()
 
     learned_kw = [
@@ -541,13 +598,14 @@ def update_bar_from_message_on_bar(
         n_through = max(explicit_chapters)
         _apply_learned_through_chapter_n(bar, n_through, valid, raw)
 
-    subsection_hits = _extract_subsection_tokens(msg, valid)
+    subsection_hits = _extract_subsection_tokens(msg, valid, lettered)
     if subsection_hits and should_apply_through:
         ordered = _ordered_section_tokens_preorder_from_raw(raw)
         in_order = [t for t in subsection_hits if t in ordered]
         if in_order:
             target_sub = max(in_order, key=lambda t: ordered.index(t))
-            _apply_learned_through_subsection(bar, target_sub, valid, ordered)
+            roots = dict(lettered.values())
+            _apply_learned_through_subsection(bar, target_sub, valid, ordered, roots.get(target_sub))
 
     if tokens and _contains_any(msg, learned_kw):
         learned_set = set(bar.get("learned_sections") or [])

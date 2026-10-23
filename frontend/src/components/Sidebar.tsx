@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback, type PointerEvent as ReactPoi
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useLocale } from "../i18n/LocaleContext";
+import { useFeedback } from "../feedback/FeedbackContext";
 import SidebarHistory from "./SidebarHistory";
 import LearningBarPanel, { type OutlineSectionPreviewDetail } from "../LearningBarPanel";
 import { useSessionBridge } from "../context/SessionBridge";
@@ -50,6 +51,11 @@ const I = {
   history: (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
       <path d="M3 12a9 9 0 1 0 3-6.7L3 8" /><path d="M3 4v4h4" /><path d="M12 8v4l3 2" />
+    </svg>
+  ),
+  feedback: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
     </svg>
   ),
   chevron: (
@@ -118,6 +124,7 @@ function writeSidebarProgressHeight(height: number | null): void {
 export default function Sidebar() {
   const { user, loading, logout, setShowSignIn } = useAuth();
   const { t } = useLocale();
+  const { openFeedback } = useFeedback();
   const navigate = useNavigate();
   const location = useLocation();
   const bridge = useSessionBridge();
@@ -335,7 +342,12 @@ export default function Sidebar() {
           </button>
           <div className="sb-section-body">
             <div className="sb-progress-embed" data-onboarding="learning-progress" ref={progressEmbedRef}>
-              <LearningBarPanel variant="embed" studentId={studentId} onOutlineSectionPreview={previewSection} />
+              <LearningBarPanel
+                variant="embed"
+                studentId={studentId}
+                onOutlineSectionPreview={previewSection}
+                currentSection={bridge.currentSection}
+              />
               <div
                 className="sb-progress-resize"
                 role="separator"
@@ -380,6 +392,18 @@ export default function Sidebar() {
       </div>
 
       <div className="sb-footer">
+        {loading ? null : (
+          <button
+            type="button"
+            className="sb-link sb-feedback"
+            onClick={() => openFeedback()}
+            title={t("feedback.sidebarItem")}
+            aria-label={t("feedback.sidebarItem")}
+          >
+            <span className="sb-link-ic">{I.feedback}</span>
+            <span className="sb-link-label">{t("feedback.sidebarItem")}</span>
+          </button>
+        )}
         {loading ? null : user ? (
           <div className="sb-user">
             <button
@@ -403,10 +427,14 @@ export default function Sidebar() {
             </button>
           </div>
         ) : (
-          <button className="sb-signin" onClick={() => setShowSignIn(true)}>
-            <span className="sb-link-ic">{I.profile}</span>
-            <span className="sb-link-label">{t("sidebar.signIn")}</span>
-          </button>
+          <>
+            {/* LAYOUT CHANGE (spec §5.2): the old top banner's message lives here now. */}
+            <p className="sb-signin-prompt">{t("sidebar.signInPrompt")}</p>
+            <button className="sb-signin" onClick={() => setShowSignIn(true)}>
+              <span className="sb-link-ic">{I.profile}</span>
+              <span className="sb-link-label">{t("sidebar.signIn")}</span>
+            </button>
+          </>
         )}
       </div>
     </aside>

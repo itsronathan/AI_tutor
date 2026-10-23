@@ -22,7 +22,7 @@ Use the top nav for Home, Auto Grader, My profile, etc.
 
 ## 2. Left: Learning progress
 
-- Tree of **chapter → section** for the current book (e.g. FCOS).  
+- Tree of **chapter → section** for the current book (e.g. FOCS).  
 - Numbers in parentheses are **printed book page numbers** (same as the textbook TOC).
 
 **Dots:** solid green = learned; hollow = not learned. Click to toggle.
@@ -54,7 +54,7 @@ Mentioning sections (e.g. `5.1`, `Chapter 11`) helps. You can also open pages fr
 
 **“I already fully understand — Start a new question”** resets the session for a new topic or problem.
 
-For very short questions like “what is induction”, you may get a **one-sentence** answer. If you always get long structured replies, contact your project maintainer (it may depend on the deployed version or configuration).
+When no section is open, a question that only asks what a term means, like “what is induction”, gets a **short answer**: the definition plus one line of intuition or a small example, with the book opened at the matching pages. For the full step-by-step explanation, ask “how” or “why”, or ask for an example. Questions asked with a section open always get the full answer.
 
 ---
 

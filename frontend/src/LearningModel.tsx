@@ -5,9 +5,10 @@ import { apiUrl } from "./apiBase";
 import { useCurriculum } from "./context/CurriculumContext";
 import {
   fetchTextbookTreeForId,
-  focsOutlineToCurriculum,
+  outlineToCurriculum,
   readSelectedTextbookId,
   reconcileSelectedTextbookWithCatalog,
+  textbookLinkLabel,
 } from "./learningTextbooks";
 import MarkdownMessage from "./MarkdownMessage";
 import { getOrCreateStudentId } from "./utils/studentId";
@@ -22,17 +23,18 @@ import {
 } from "./TextbookSectionNote";
 import { useVerticalSplitPct } from "./hooks/useVerticalSplitPct";
 import { useDragScroll } from "./hooks/useDragScroll";
-import { FOCS_SECTION_NOTES } from "./data/focsSectionNotes";
 import { PracticePanel } from "./practice/PracticePanel";
 import { isProblemsSection, chapterOfProblems } from "./practice/isProblemsSection";
 import { getPracticeSet } from "./data/focsPracticeSets";
 import { GuidePanel } from "./guide/GuidePanel";
 import { isInductionGuideSection } from "./guide/chapterOfSection";
-import { INDUCTION_GUIDE } from "./guide/inductionGuide";
 import { getSectionNoteWithNewVocab, sectionTokenFromTitle, type BookAnchor } from "./utils/sectionNotes";
-import { FOCS_SECTION_TOKENS_PREORDER } from "./utils/focsSectionOrder";
+import { pageIndexAfterReply, replyIsAboutSection, viewingBookPage } from "./utils/sectionPages";
+import { sectionTokensPreorder } from "./utils/focsSectionOrder";
+import { tryGetBook } from "./books/registry";
 import { useLocale } from "./i18n/LocaleContext";
-import { LEARNING_CHAT_EXAMPLES } from "./learningChatExamples";
+import { useFeedback } from "./feedback/FeedbackContext";
+import { pageContextFor } from "./feedback/pageContext";
 import {
   ONBOARDING_STEP_EVENT,
   emitOnboardingNoteReady,
@@ -40,11 +42,6 @@ import {
   emitOnboardingExpandPaths,
   ONBOARDING_FINISHED_EVENT,
 } from "./onboarding/onboardingStorage";
-import {
-  ONBOARDING_NOTE_SECTION,
-  ONBOARDING_PROBLEMS_SECTION,
-  ONBOARDING_INDUCTION_EXPAND_PATHS,
-} from "./onboarding/onboardingDemoSection";
 import { WELCOME_MSG_SENTINEL } from "./i18n/messages";
 
 /** Left textbook panel width as % of layout (matches state rightPanelWidth). */
@@ -124,11 +121,28 @@ function buildChatApiHistory(msgs: { sender: string; text: string }[]) {
   });
 }
 
+/* Header icons for the textbook bar (spec §5.3). */
+const FlagIcon = (
+  <svg className="left-panel-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <path d="M5 21V4" />
+    <path d="M5 4h11l-2 4 2 4H5" />
+  </svg>
+);
+const EyeOffIcon = (
+  <svg className="left-panel-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <path d="M3 3l18 18" />
+    <path d="M10.6 5.1A10 10 0 0 1 12 5c5 0 9 4.5 10 7a12.6 12.6 0 0 1-3.2 4.3" />
+    <path d="M6.6 6.6C4.4 8 2.8 10.2 2 12c1 2.5 5 7 10 7a9.8 9.8 0 0 0 4.4-1" />
+    <path d="M9.9 9.9a3 3 0 0 0 4.2 4.2" />
+  </svg>
+);
+
 export default function LearningModel() {
   const location = useLocation();
   const { t, chatLanguageSuffix } = useLocale();
   const [studentId] = useState<string>(() => getOrCreateStudentId());
   const { token } = useAuth();
+  const { openFeedback, registerPageContext } = useFeedback();
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
@@ -173,11 +187,29 @@ export default function LearningModel() {
 
   const [matchedSection, setMatchedSection] = useState<any>(null);
   const [dataMatchedTopic, setDataMatchedTopic] = useState<{
+    /** The book this section's pages came from, which can differ from the selection after a switch. */
+    bookId: string;
     name: string;
     startBook: number;
     endBook: number;
     sectionHint?: string;
   } | null>(null);
+  // Tell the sidebar outline which section is on screen (spec D10). Depend on the stable
+  // publishSection, never on `bridge`, whose identity changes every provider render.
+  const { publishSection } = bridge;
+  useEffect(() => {
+    publishSection(
+      dataMatchedTopic
+        ? {
+            bookId: dataMatchedTopic.bookId,
+            title: dataMatchedTopic.name,
+            startBook: dataMatchedTopic.startBook,
+            endBook: dataMatchedTopic.endBook,
+          }
+        : null,
+    );
+  }, [dataMatchedTopic, publishSection]);
+  useEffect(() => () => publishSection(null), [publishSection]);
   // Client-side trigger for Practice mode (eng-review #2/#3): captured synchronously
   // from the outline click, NOT from the server-set dataMatchedTopic.
   const [activeSectionTitle, setActiveSectionTitle] = useState<string | null>(null);
@@ -187,6 +219,13 @@ export default function LearningModel() {
   const [referencePageSnippets, setReferencePageSnippets] = useState<string[] | null>(null);
   const [referenceSectionPages, setReferenceSectionPages] = useState<string[] | null>(null);
   const [sectionPageIndex, setSectionPageIndex] = useState(0);
+  // Tell the feedback form which book, section and printed page are on screen.
+  useEffect(() => {
+    registerPageContext(
+      pageContextFor(textbookId, dataMatchedTopic, Boolean(referenceSectionPages?.length), sectionPageIndex),
+    );
+  }, [registerPageContext, textbookId, dataMatchedTopic, referenceSectionPages, sectionPageIndex]);
+  useEffect(() => () => registerPageContext(null), [registerPageContext]);
   const [outlinePreviewLoading, setOutlinePreviewLoading] = useState(false);
   const [outlinePreviewError, setOutlinePreviewError] = useState<string | null>(null);
   const [enlargedImageSrc, setEnlargedImageSrc] = useState<string | null>(null);
@@ -271,7 +310,7 @@ export default function LearningModel() {
     void (async () => {
       const tree = await fetchTextbookTreeForId(token, textbookId);
       if (cancelled) return;
-      setCurriculumTree(focsOutlineToCurriculum(tree));
+      setCurriculumTree(outlineToCurriculum(tree));
     })();
     return () => {
       cancelled = true;
@@ -359,6 +398,7 @@ export default function LearningModel() {
               const sb = data.matched_topic.start_book ?? data.matched_topic.start ?? detail.startBook;
               const eb = data.matched_topic.end_book ?? data.matched_topic.end ?? detail.endBook;
               setDataMatchedTopic({
+                bookId: textbookId,
                 name: data.matched_topic.name,
                 startBook: sb,
                 endBook: eb,
@@ -413,6 +453,7 @@ export default function LearningModel() {
               const sb = cData.matched_topic.start_book ?? cData.matched_topic.start ?? detail.startBook;
               const eb = cData.matched_topic.end_book ?? cData.matched_topic.end ?? detail.endBook;
               setDataMatchedTopic({
+                bookId: textbookId,
                 name: cData.matched_topic.name,
                 startBook: sb,
                 endBook: eb,
@@ -445,8 +486,10 @@ export default function LearningModel() {
   const practiceChapter = isProblemsSection(activeSectionTitle)
     ? chapterOfProblems(activeSectionTitle)
     : null;
-  const practiceActive = Boolean(practiceChapter && getPracticeSet(practiceChapter));
-  const guideActive = textbookId === "focs" && isInductionGuideSection(activeSectionTitle);
+  const practiceActive = Boolean(practiceChapter && getPracticeSet(textbookId, practiceChapter));
+  const book = tryGetBook(textbookId);
+  const guide = book?.guides?.[0];
+  const guideActive = Boolean(guide) && isInductionGuideSection(activeSectionTitle);
 
   const hasLeftPanelContent = Boolean(
     practiceActive ||
@@ -632,6 +675,9 @@ export default function LearningModel() {
             session_id: sessionId,
             textbook_id: textbookId,
             section_hint: sectionHint,
+            viewing_page: sectionHint
+              ? viewingBookPage(dataMatchedTopic?.startBook, referenceSectionPages?.length ?? 0, sectionPageIndex)
+              : undefined,
           }),
           signal: controller.signal,
         });
@@ -666,6 +712,7 @@ export default function LearningModel() {
           const sb = data.matched_topic.start_book ?? data.matched_topic.startBook ?? data.matched_topic.start;
           const eb = data.matched_topic.end_book ?? data.matched_topic.endBook ?? data.matched_topic.end;
           setDataMatchedTopic({
+            bookId: textbookId,
             name: data.matched_topic.name,
             startBook: sb,
             endBook: eb,
@@ -676,10 +723,10 @@ export default function LearningModel() {
           setMatchedSection(null);
         }
         if (data.reference_section_pages_b64?.length) {
-          setReferenceSectionPages(
-            data.reference_section_pages_b64.map((b64) => `data:image/png;base64,${b64}`)
-          );
-          setSectionPageIndex(0);
+          const pages = data.reference_section_pages_b64;
+          const stay = replyIsAboutSection(dataMatchedTopic, textbookId, data.matched_topic);
+          setReferenceSectionPages(pages.map((b64) => `data:image/png;base64,${b64}`));
+          setSectionPageIndex((i) => pageIndexAfterReply(stay, i, pages.length));
           setReferencePageSnippets(null);
           setReferencePageImage(null);
         } else if (data.reference_page_snippets_b64?.length) {
@@ -722,6 +769,8 @@ export default function LearningModel() {
       chatLanguageSuffix,
       t,
       dataMatchedTopic,
+      referenceSectionPages,
+      sectionPageIndex,
     ]
   );
 
@@ -848,6 +897,9 @@ export default function LearningModel() {
           session_id: sessionId,
           textbook_id: textbookId,
           section_hint: sectionHint,
+          viewing_page: sectionHint
+            ? viewingBookPage(dataMatchedTopic?.startBook, referenceSectionPages?.length ?? 0, sectionPageIndex)
+            : undefined,
         }),
         signal: controller.signal,
       });
@@ -874,6 +926,7 @@ export default function LearningModel() {
         const sb = data.matched_topic.start_book ?? data.matched_topic.startBook ?? data.matched_topic.start;
         const eb = data.matched_topic.end_book ?? data.matched_topic.endBook ?? data.matched_topic.end;
         setDataMatchedTopic({
+          bookId: textbookId,
           name: data.matched_topic.name,
           startBook: sb,
           endBook: eb,
@@ -884,10 +937,10 @@ export default function LearningModel() {
         setMatchedSection(null);
       }
       if (data.reference_section_pages_b64?.length) {
-        setReferenceSectionPages(
-          data.reference_section_pages_b64.map((b64) => `data:image/png;base64,${b64}`)
-        );
-        setSectionPageIndex(0);
+        const pages = data.reference_section_pages_b64;
+        const stay = replyIsAboutSection(dataMatchedTopic, textbookId, data.matched_topic);
+        setReferenceSectionPages(pages.map((b64) => `data:image/png;base64,${b64}`));
+        setSectionPageIndex((i) => pageIndexAfterReply(stay, i, pages.length));
         setReferencePageSnippets(null);
         setReferencePageImage(null);
       } else if (data.reference_page_snippets_b64?.length) {
@@ -968,6 +1021,7 @@ export default function LearningModel() {
   // CLEAR EVERYTHING
   // ============================
   const hasUserMessage = messages.some((m) => m.sender === "user");
+  const chatExamples = book?.chatExamples ?? [];
 
   const reset = () => {
     setMessages([]);
@@ -1024,14 +1078,15 @@ export default function LearningModel() {
   sessionApiRef.current = { load: loadSession, newChat: handleNewChat, preview: handleOutlineSectionPreview };
 
   const activeSectionNote = useMemo(() => {
-    if (textbookId !== "focs" || !dataMatchedTopic) return null;
+    if (!dataMatchedTopic || !book) return null;
+    if (Object.keys(book.sectionNotes).length === 0) return null;
     return getSectionNoteWithNewVocab(
-      FOCS_SECTION_NOTES,
-      FOCS_SECTION_TOKENS_PREORDER,
+      book.sectionNotes,
+      sectionTokensPreorder(book),
       dataMatchedTopic.sectionHint,
       dataMatchedTopic.name
     );
-  }, [textbookId, dataMatchedTopic]);
+  }, [textbookId, dataMatchedTopic, book]);
 
   const sectionNoteLabel = dataMatchedTopic
     ? `${dataMatchedTopic.sectionHint ?? ""}:${dataMatchedTopic.name}`
@@ -1048,9 +1103,11 @@ export default function LearningModel() {
   useEffect(() => {
     const onTourStep = (e: Event) => {
       const stepId = (e as CustomEvent<{ stepId?: string }>).detail?.stepId;
+      const onboarding = book?.onboarding;
+      if (!onboarding) return;
       if (stepId === "note") {
         void (async () => {
-          await handleOutlineSectionPreview(ONBOARDING_NOTE_SECTION);
+          await handleOutlineSectionPreview(onboarding.noteSection);
           window.setTimeout(() => {
             sectionNoteToggle.setOpen(true);
             emitOnboardingNoteReady();
@@ -1059,16 +1116,16 @@ export default function LearningModel() {
       } else if (stepId === "problems") {
         sectionNoteToggle.setOpen(false);
         setPracticeViewNote(false);
-        emitOnboardingExpandPaths(ONBOARDING_INDUCTION_EXPAND_PATHS);
+        emitOnboardingExpandPaths(onboarding.expandPaths);
         void (async () => {
-          await handleOutlineSectionPreview(ONBOARDING_PROBLEMS_SECTION);
+          await handleOutlineSectionPreview(onboarding.problemsSection);
           emitOnboardingProblemsReady();
         })();
       }
     };
     window.addEventListener(ONBOARDING_STEP_EVENT, onTourStep);
     return () => window.removeEventListener(ONBOARDING_STEP_EVENT, onTourStep);
-  }, [handleOutlineSectionPreview, sectionNoteToggle.setOpen]);
+  }, [handleOutlineSectionPreview, sectionNoteToggle.setOpen, book]);
 
   useEffect(() => {
     const onFinished = () => closeSectionNoteRef.current();
@@ -1284,20 +1341,35 @@ export default function LearningModel() {
                 role="group"
                 aria-label={t("learning.currentSection")}
               >
-                <span className="left-panel-topic-bar-title">
-                  {t("learning.textbook")} {dataMatchedTopic.name}
-                </span>
-                <span className="left-panel-topic-bar-sep" aria-hidden="true">
-                  ·
-                </span>
-                <span className="left-panel-topic-bar-pages">
-                  {t("learning.pages", {
-                    start: String(dataMatchedTopic.startBook),
-                    end: String(dataMatchedTopic.endBook),
-                  })}
+                <span className="left-panel-topic-bar-label">{t("learning.textbook")}</span>
+                <span className="left-panel-topic-bar-title">{dataMatchedTopic.name}</span>
+                <span className="left-panel-topic-bar-meta">
+                  {textbookLinkLabel(dataMatchedTopic.bookId) ? (
+                    <>
+                      <span className="left-panel-topic-bar-book">{textbookLinkLabel(dataMatchedTopic.bookId)}</span>
+                      <span className="left-panel-topic-bar-sep" aria-hidden="true">
+                        ·
+                      </span>
+                    </>
+                  ) : null}
+                  <span className="left-panel-topic-bar-pages">
+                    {t("learning.pages", {
+                      start: String(dataMatchedTopic.startBook),
+                      end: String(dataMatchedTopic.endBook),
+                    })}
+                  </span>
                 </span>
               </div>
               <div className="left-panel-topic-bar-actions">
+                <button
+                  type="button"
+                  className="left-panel-hide-btn left-panel-hide-btn--in-bar left-panel-report-btn"
+                  onClick={() => openFeedback({ type: "content" })}
+                  title={t("feedback.reportProblemTitle")}
+                >
+                  {FlagIcon}
+                  {t("feedback.reportProblem")}
+                </button>
                 {activeSectionNote ? (
                   <SectionNoteButton
                     open={sectionNoteToggle.open}
@@ -1311,6 +1383,7 @@ export default function LearningModel() {
                   onClick={() => setLeftPanelOpen(false)}
                   title={t("learning.hideSidebar")}
                 >
+                  {EyeOffIcon}
                   {t("learning.hide")}
                 </button>
               </div>
@@ -1324,6 +1397,7 @@ export default function LearningModel() {
               onClick={() => setLeftPanelOpen(false)}
               title={t("learning.hideSidebar")}
             >
+              {EyeOffIcon}
               {t("learning.hide")}
             </button>
           </div>
@@ -1341,15 +1415,7 @@ export default function LearningModel() {
                   <button
                     type="button"
                     onClick={() => setPracticeViewNote(false)}
-                    style={{
-                      background: "none",
-                      border: "none",
-                      color: "#0f766e",
-                      textDecoration: "underline",
-                      cursor: "pointer",
-                      padding: "6px 0",
-                      fontSize: "0.8rem",
-                    }}
+                    className="section-note-back-link"
                   >
                     ← Back to practice
                   </button>
@@ -1394,15 +1460,7 @@ export default function LearningModel() {
                   <button
                     type="button"
                     onClick={() => setGuideViewNote(false)}
-                    style={{
-                      background: "none",
-                      border: "none",
-                      color: "#0f766e",
-                      textDecoration: "underline",
-                      cursor: "pointer",
-                      padding: "6px 0",
-                      fontSize: "0.8rem",
-                    }}
+                    className="section-note-back-link"
                   >
                     ← Back to walkthrough
                   </button>
@@ -1412,14 +1470,17 @@ export default function LearningModel() {
                     actions={sectionNoteActions}
                   />
                 </div>
-              ) : (
+              ) : guide ? (
                 <GuidePanel
-                  script={INDUCTION_GUIDE}
+                  script={guide}
                   textbookId={textbookId}
                   onViewNote={activeSectionNote ? () => setGuideViewNote(true) : undefined}
-                  onOpenProblems={() => void handleOutlineSectionPreview(ONBOARDING_PROBLEMS_SECTION)}
+                  onOpenProblems={() => {
+                    const ob = book?.onboarding;
+                    if (ob) void handleOutlineSectionPreview(ob.problemsSection);
+                  }}
                 />
-              )}
+              ) : null}
             </div>
             <div
               className="textbook-note-split-handle"
@@ -1497,11 +1558,14 @@ export default function LearningModel() {
           </div>
         )}
 
-        {/* Reset button */}
-        <div className="reset-box" data-onboarding="new-session">
-          <button type="button" onClick={reset} disabled={isAwaitingReply}>
-            {t("chat.newQuestion")}
-          </button>
+        {/* LAYOUT CHANGE (spec §5.4): title row; the tour still spotlights .reset-box. */}
+        <div className="chat-panel-titlebar">
+          <h2 className="chat-panel-title">{t("chat.tutorTitle")}</h2>
+          <div className="reset-box" data-onboarding="new-session">
+            <button type="button" onClick={reset} disabled={isAwaitingReply}>
+              {t("chat.newQuestion")}
+            </button>
+          </div>
         </div>
 
         {isAwaitingReply && (
@@ -1594,11 +1658,11 @@ export default function LearningModel() {
           </div>
         )}
 
-        {!hasUserMessage && (
+        {!hasUserMessage && chatExamples.length > 0 && (
           <div className="chat-example-prompts" role="group" aria-label={t("learning.exampleLabel")}>
             <p className="chat-example-label">{t("learning.exampleLabel")}</p>
             <div className="chat-example-list">
-              {LEARNING_CHAT_EXAMPLES.map((ex, i) => (
+              {chatExamples.map((ex, i) => (
                 <button
                   key={ex.id}
                   type="button"

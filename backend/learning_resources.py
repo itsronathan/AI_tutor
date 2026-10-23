@@ -2,14 +2,15 @@
 
 import base64
 import json
-import os
+import math
 import re
 import tempfile
 import threading
 from contextlib import contextmanager
 from dataclasses import dataclass
-from typing import Any, Dict, Iterator, List, Optional
+from typing import Any, Dict, Iterable, Iterator, List, Optional
 
+import builtin_books as bb
 import user_textbook_store as uts
 
 import fitz  # PyMuPDF
@@ -22,16 +23,11 @@ except ImportError:
 
 from deps import create_chat_completion, clamp_int_0_100
 
-# PDF 前 15 页无内容，教材第 "1" 页对应 PDF 第 16 页
-PDF_PAGE_OFFSET = 15
-
-DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
-FOCS_JSON_PATH = os.path.join(DATA_DIR, "FOCS.json")
-FOCS_PDF_PATH = os.path.join(DATA_DIR, "FOCS.pdf")  # 或 data 下首个 .pdf
+# Kept as module attributes because other modules still read them; they now
+# describe the default builtin book rather than a special-cased FOCS.
+DEFAULT_BOOK_ID = bb.DEFAULT_BOOK_ID
 
 _topic_list: List[Dict[str, Any]] = []  # [{name, start, end}, ...]
-_focs_pdf_bytes: Optional[bytes] = None
-_focs_json_disk_cache: Optional[Dict[str, Any]] = None
 
 _tls = threading.local()
 
@@ -44,35 +40,25 @@ class ActiveTextbook:
     pdf_page_offset: int
 
 
-def _load_focs_json_from_disk() -> Dict[str, Any]:
-    global _focs_json_disk_cache
-    if _focs_json_disk_cache is not None:
-        return _focs_json_disk_cache
-    if os.path.exists(FOCS_JSON_PATH):
-        with open(FOCS_JSON_PATH, encoding="utf-8") as f:
-            _focs_json_disk_cache = json.load(f)
-    else:
-        _focs_json_disk_cache = {}
-    return _focs_json_disk_cache
-
-
 def get_effective_raw() -> Dict[str, Any]:
     ctx = getattr(_tls, "book", None)
     if ctx is not None:
         return ctx.raw
-    return _load_focs_json_from_disk()
+    return bb.load_outline(DEFAULT_BOOK_ID) or {}
 
 
 def effective_pdf_page_offset() -> int:
     ctx = getattr(_tls, "book", None)
     if ctx is not None:
         return int(ctx.pdf_page_offset)
-    return PDF_PAGE_OFFSET
+    meta = bb.load_meta(DEFAULT_BOOK_ID) or {}
+    return int(meta.get("pdf_page_offset", 0))
 
 
 def get_effective_pdf_bytes() -> Optional[bytes]:
     ctx = getattr(_tls, "book", None)
-    if ctx is not None and ctx.pdf_bytes is not None:
+    # A builtin book never borrows another book's PDF: without its own, it has no pages.
+    if ctx is not None and (ctx.pdf_bytes is not None or bb.is_builtin(ctx.book_id)):
         return ctx.pdf_bytes
     return load_focs_pdf()
 
@@ -81,7 +67,7 @@ def effective_memory_book_id() -> str:
     ctx = getattr(_tls, "book", None)
     if ctx is not None:
         return ctx.book_id
-    return "focs"
+    return DEFAULT_BOOK_ID
 
 
 def set_request_book(ctx: ActiveTextbook) -> None:
@@ -107,39 +93,60 @@ def request_book(book_id: Optional[str], user_email: Optional[str]) -> Iterator[
         clear_request_book()
 
 
+def _builtin_ctx(book_id: str) -> Optional["ActiveTextbook"]:
+    meta = bb.load_meta(book_id)
+    if meta is None:
+        return None
+    return ActiveTextbook(
+        book_id=book_id,
+        raw=bb.load_outline(book_id) or {},
+        pdf_bytes=bb.load_pdf_bytes(book_id),
+        pdf_page_offset=int(meta.get("pdf_page_offset", 0)),
+    )
+
+
 def resolve_textbook_for_request(book_id: Optional[str], user_email: Optional[str]) -> ActiveTextbook:
-    bid = (book_id or "focs").strip() or "focs"
-    if bid == "focs":
-        raw = _load_focs_json_from_disk()
-        return ActiveTextbook(
-            book_id="focs",
-            raw=raw,
-            pdf_bytes=load_focs_pdf(),
-            pdf_page_offset=PDF_PAGE_OFFSET,
-        )
+    bid = (book_id or DEFAULT_BOOK_ID).strip() or DEFAULT_BOOK_ID
+
+    ctx = _builtin_ctx(bid)
+    if ctx is not None:
+        return ctx
+
     if (
         bid.startswith("user_")
         and user_email
         and uts.is_valid_user_book_id(bid)
         and uts.user_owns_book(user_email, bid)
     ):
-        raw = uts.load_outline(user_email, bid) or {}
         meta = uts.load_meta(user_email, bid) or {}
-        off = int(meta.get("pdf_page_offset", 0))
-        pdf = uts.load_pdf_bytes(user_email, bid)
-        return ActiveTextbook(book_id=bid, raw=raw, pdf_bytes=pdf, pdf_page_offset=off)
-    raw = _load_focs_json_from_disk()
-    return ActiveTextbook(
-        book_id="focs",
-        raw=raw,
-        pdf_bytes=load_focs_pdf(),
-        pdf_page_offset=PDF_PAGE_OFFSET,
-    )
+        return ActiveTextbook(
+            book_id=bid,
+            raw=uts.load_outline(user_email, bid) or {},
+            pdf_bytes=uts.load_pdf_bytes(user_email, bid),
+            pdf_page_offset=int(meta.get("pdf_page_offset", 0)),
+        )
+
+    fallback = _builtin_ctx(DEFAULT_BOOK_ID)
+    if fallback is not None:
+        return fallback
+    return ActiveTextbook(book_id=DEFAULT_BOOK_ID, raw={}, pdf_bytes=None, pdf_page_offset=0)
+
+
+def active_display_name() -> str:
+    """Human name of the active book, for tutor prompts."""
+    ctx = getattr(_tls, "book", None)
+    bid = ctx.book_id if ctx is not None else DEFAULT_BOOK_ID
+    meta = bb.load_meta(bid)
+    if meta and meta.get("display_name"):
+        return str(meta["display_name"])
+    if bid.startswith("user_"):
+        return "the textbook the student selected"
+    return bid
 
 
 def load_outline_dict(book_id: Optional[str], user_email: Optional[str]) -> Dict[str, Any]:
     """不修改 TLS；用于 student_bar 等在请求外解析目录。"""
-    return resolve_textbook_for_request(book_id or "focs", user_email).raw
+    return resolve_textbook_for_request(book_id or DEFAULT_BOOK_ID, user_email).raw
 
 
 # 全局缓存：当前教材的段落
@@ -158,7 +165,7 @@ def _sanitize_memory_segment(s: str) -> str:
 
 def get_chapter_heading_key(chapter_num: str) -> Optional[str]:
     """
-    在 FOCS.json 顶层查找章节标题键，如 chapter_num='5' -> '5 Induction: Proving \"FOR ALL ...\" '。
+    在当前教材 outline.json 顶层查找章节标题键，如 chapter_num='5' -> '5 Induction: Proving \"FOR ALL ...\" '。
     仅匹配顶层章（首词等于章节号）。
     """
     if not chapter_num:
@@ -178,7 +185,7 @@ def get_chapter_heading_key(chapter_num: str) -> Optional[str]:
 
 def topic_name_to_memory_address(topic_name: str) -> str:
     """
-    将 FOCS.json 的 topic 名称转为 memory 地址（允许用 / 分层）。
+    将当前教材 outline.json 的 topic 名称转为 memory 地址（允许用 / 分层）。
 
     - 小节（首词形如 5.1、5.1.1）：存到「章」目录下，例如
       5_Induction_.../5_1_Ordinary_Induction，这样同一章下 5.1、5.2 共用父目录。
@@ -193,8 +200,8 @@ def topic_name_to_memory_address(topic_name: str) -> str:
         return "unknown"
     token = parts[0]
 
-    # 小节：5.1 / 5.1.1 → 父目录为 FOCS 顶层章标题，子目录为本节
-    if re.match(r"^\d+\.\d+(?:\.\d+)*$", token):
+    # 小节：5.1 / 5.1.1 / B.1 → 父目录为顶层章标题，子目录为本节
+    if re.match(r"^(?:\d+|[A-Z])\.\d+(?:\.\d+)*$", token):
         chapter_num = token.split(".")[0]
         ch_key = get_chapter_heading_key(chapter_num)
         if ch_key:
@@ -203,8 +210,8 @@ def topic_name_to_memory_address(topic_name: str) -> str:
             return f"{parent}/{child}"
         return _sanitize_memory_segment(s)
 
-    # 章级：首词仅为章节号 → 单层（对应整章记忆）
-    if re.match(r"^\d+$", token):
+    # 章级：首词仅为章节号（数字或单个大写字母，如 B）→ 单层
+    if re.match(r"^(?:\d+|[A-Z])$", token):
         ch_key = get_chapter_heading_key(token)
         if ch_key:
             return _sanitize_memory_segment(ch_key)
@@ -215,7 +222,7 @@ def topic_name_to_memory_address(topic_name: str) -> str:
 
 def get_focs_chapter_tree(chapter_filter: Optional[str] = None) -> str:
     """
-    从 FOCS.json 生成教材章节树（缩进 + 页码）。
+    从当前教材的 outline.json 生成教材章节树（缩进 + 页码）。
     chapter_filter: 若为 "5"，只返回第 5 章及其 sections，不返回全书；None 则返回全书。
     """
     raw = get_effective_raw()
@@ -350,6 +357,15 @@ def extract_section_from_message(message: str) -> Optional[str]:
         return None
     s = message.strip()
     m = re.search(r"(?:section|subsection)?\s*(\d+\.\d+(?:\.\d+)*)", s, re.IGNORECASE)
+    # A lettered section (Lathi's "B.4") counts only if the active book has it, so books
+    # without lettered chapters read every message exactly as before.
+    # (?!\d), not \b: a CJK character counts as a word character, so "B.4是什么" has no \b after the 4.
+    for lm in re.finditer(r"(?<![A-Za-z0-9])([A-Za-z])\.(\d+(?:\.\d+)*)(?!\d)", s):
+        if m and m.start(1) < lm.start():
+            break
+        label = f"{lm.group(1).upper()}.{lm.group(2)}"
+        if get_section_start_end_name(label):
+            return label
     if m:
         return m.group(1).strip()
     m = re.search(r"\b(\d+\.\d+(?:\.\d+)*)\b", s)
@@ -389,30 +405,36 @@ def load_focs_topic_list() -> List[Dict[str, Any]]:
 
 
 def load_focs_pdf() -> Optional[bytes]:
-    """加载 data 下的 PDF。优先 FOCS.pdf，否则取首个 .pdf。"""
-    global _focs_pdf_bytes
-    if _focs_pdf_bytes is not None:
-        return _focs_pdf_bytes
-    if os.path.exists(FOCS_PDF_PATH):
-        with open(FOCS_PDF_PATH, "rb") as f:
-            _focs_pdf_bytes = f.read()
-        return _focs_pdf_bytes
-    if os.path.isdir(DATA_DIR):
-        for fn in os.listdir(DATA_DIR):
-            if fn.lower().endswith(".pdf"):
-                path = os.path.join(DATA_DIR, fn)
-                with open(path, "rb") as f:
-                    _focs_pdf_bytes = f.read()
-                return _focs_pdf_bytes
-    return None
+    """Default builtin book's PDF. Name kept for existing callers."""
+    return bb.load_pdf_bytes(DEFAULT_BOOK_ID)
+
+
+_TOPIC_LIST_BUDGET = 12000
+
+
+def _topic_names_for_matcher(topics: List[Dict[str, Any]]) -> List[str]:
+    """按目录顺序取 topic 名，列表总长不超过 _TOPIC_LIST_BUDGET 字符。
+
+    限长度而不是限个数：以前固定取前 120 个，FOCS 共 208 个，第 18 章以后永远匹配不到。
+    两本内置教材都能整本放进去（FOCS 约 5.8k 字符）；超长的上传教材在这里截断。
+    """
+    names: List[str] = []
+    used = 0
+    for t in topics:
+        cost = len(t["name"]) + 3  # "- " + 名字 + 换行
+        if used + cost > _TOPIC_LIST_BUDGET:
+            break
+        names.append(t["name"])
+        used += cost
+    return names
 
 
 def match_topic_with_llm(question: str) -> Optional[Dict[str, Any]]:
-    """用 LLM 根据学生问题匹配 FOCS.json 中最相关的 topic。若问题与课程完全无关则返回 None。"""
+    """用 LLM 根据学生问题匹配当前教材 outline.json 中最相关的 topic。若问题与课程完全无关则返回 None。"""
     topics = load_focs_topic_list()
     if not topics:
         return None
-    names = [t["name"] for t in topics[:120]]  # 限制长度
+    names = _topic_names_for_matcher(topics)
     prompt = (
         f"You are matching a student question to a textbook topic, remember to choose the topic by how to solve the question instead of the words\n\n"
         f"Student question: {question}\n\n"
@@ -657,6 +679,166 @@ def extract_pdf_pages_text(pdf_bytes: bytes, start_page: int, end_page: int, max
             break
     doc.close()
     return text.strip()
+
+
+# A longer section is only scanned this many pages (around the viewed page when there
+# is one), so a huge range in an uploaded book cannot stall a chat.
+_EXCERPT_SCAN_PAGES = 60
+# A cut piece shorter than this is not worth its label.
+_EXCERPT_MIN_CUT = 200
+
+_EXCERPT_STOPWORDS = frozenset(
+    "the and for are was were what which when where who whom why how this that these those "
+    "with from into onto about does did done can could should would will shall may might must "
+    "has have had not but you your our their its than then there here also just only now "
+    "all any some more most very much many each other same such out over again still really "
+    "say says said see look get got find use used using know need help understand like want "
+    "work works way make made let think write written "
+    "please explain tell show give mean means meaning page pages section book".split()
+)
+
+
+def _question_terms(question: str) -> set:
+    words = re.findall(r"[a-z][a-z0-9\-]{2,}", (question or "").lower())
+    return {w for w in words if w not in _EXCERPT_STOPWORDS}
+
+
+def _cut_page(text: str, space: int, keep: str, terms: Iterable[str]) -> str:
+    """At most `space` chars of a page that does not fit, with … where it was cut.
+
+    keep="end" keeps the end (a page before the one being read), "match" keeps the stretch
+    around the first word that matched the question, anything else keeps the start.
+    """
+    if space <= 0:
+        return ""
+    if len(text) <= space:
+        return text
+    space = max(0, space - 2)  # room for the … marks
+    if keep == "end":
+        return "…" + text[len(text) - space :]
+    start = 0
+    if keep == "match":
+        low = text.lower()
+        hits = [low.find(t) for t in terms if t in low]
+        if hits:
+            start = max(0, min(min(hits) - space // 2, len(text) - space))
+    piece = text[start : start + space]
+    return ("…" if start > 0 else "") + piece + ("…" if start + space < len(text) else "")
+
+
+def select_section_text(
+    pdf_bytes: bytes,
+    start_book: int,
+    end_book: int,
+    *,
+    offset: int,
+    question: str = "",
+    focus_book: Optional[int] = None,
+    budget: int = 12000,
+) -> str:
+    """Textbook text for a section (printed pages start_book..end_book), at most `budget` chars.
+
+    A section that fits comes back exactly as extract_pdf_pages_text gives it. Cutting a
+    longer one at the budget would keep only its first few pages, so it is excerpted instead,
+    each page labelled with its printed number, in page order: the page the student is
+    viewing (`focus_book`, a printed page number) and its neighbours, then the pages that best
+    match the question, then pages outward from the viewed one. Without a viewed page inside
+    the section, the excerpt starts at the section's first page. The first page that does
+    not fit is cut to the room left: the end of a page before the viewed one, the start of
+    one after it, the stretch around the matching word of a matching page.
+    """
+    # A section that fits is sent exactly as before, read the same way as before.
+    whole = extract_pdf_pages_text(pdf_bytes, start_book + offset, end_book + offset)
+    if len(whole) <= budget:
+        return whole
+
+    doc = fitz.open(stream=pdf_bytes, filetype="pdf")
+    try:
+        first = max(start_book, 1 - offset)
+        last = min(end_book, len(doc) - offset)
+        if last < first:
+            return ""
+        focus = focus_book if focus_book is not None and first <= focus_book <= last else None
+        lo, hi = first, last
+        if hi - lo + 1 > _EXCERPT_SCAN_PAGES:
+            anchor = focus if focus is not None else first
+            lo = max(first, anchor - _EXCERPT_SCAN_PAGES // 2)
+            hi = min(last, lo + _EXCERPT_SCAN_PAGES - 1)
+            lo = max(first, hi - _EXCERPT_SCAN_PAGES + 1)
+        # Pages without text (figures, scans) get no label.
+        texts: Dict[int, str] = {}
+        for b in range(lo, hi + 1):
+            t = doc[b + offset - 1].get_text().strip()
+            if t:
+                texts[b] = t
+    finally:
+        doc.close()
+    if not texts:
+        # Only the scanned window lacks text; send what was sent before.
+        return whole[:budget]
+
+    anchor = focus if focus is not None else lo
+    lowered = {b: t.lower() for b, t in texts.items()}
+    weights: Dict[str, float] = {}
+    for term in _question_terms(question):
+        df = sum(1 for t in lowered.values() if term in t)
+        # A word on most pages says nothing about which page is meant.
+        if 0 < df <= len(texts) / 2:
+            weights[term] = math.log((len(texts) + 1) / (df + 1)) + 1.0
+
+    def score(b: int) -> float:
+        return sum(w for term, w in weights.items() if term in lowered[b])
+
+    # Pages in the order they are wanted, each with the part to keep if it must be cut.
+    if focus is not None:
+        plan = [(focus, "start"), (focus + 1, "start"), (focus - 1, "end")]
+    else:
+        plan = [(lo, "start")]
+    planned = {b for b, _ in plan}
+    others = [b for b in texts if b not in planned]
+    matching = sorted((b for b in others if score(b) > 0), key=lambda b: (-score(b), abs(b - anchor), b))
+    nearby = sorted((b for b in others if score(b) == 0), key=lambda b: (abs(b - anchor), b))
+    plan += [(b, "match") for b in matching]
+    plan += [(b, "end" if b < anchor else "start") for b in nearby]
+
+    span = f"book pp. {start_book}-{end_book}"
+    if focus is not None:
+        header = (
+            f"(Excerpt: this section, {span}, is too long to include in full. "
+            f"The student is viewing book p. {focus}. "
+            "Below are that page, its neighbours, and the pages that best match the question.)\n\n"
+        )
+    else:
+        header = (
+            f"(Excerpt: this section, {span}, is too long to include in full. "
+            "Below are its opening pages and the pages that best match the question.)\n\n"
+        )
+    gap = "[…]\n\n"
+    room = budget - len(header)
+    chosen: Dict[int, str] = {}
+    for b, keep in plan:
+        if b not in texts or b in chosen:
+            continue
+        label = f"[book p. {b}]\n"
+        cost = len(label) + len(texts[b]) + 2 + len(gap)
+        if cost <= room:
+            chosen[b] = f"{label}{texts[b]}\n\n"
+            room -= cost
+            continue
+        # The first page that does not fit is cut to the room left, which fills the budget.
+        space = room - len(label) - 2 - len(gap)
+        if space >= _EXCERPT_MIN_CUT or not chosen:
+            chosen[b] = f"{label}{_cut_page(texts[b], space, keep, weights)}\n\n"
+        break
+
+    parts = [header]
+    prev = None
+    for b in sorted(chosen):
+        if prev is not None and b != prev + 1:
+            parts.append(gap)
+        parts.append(chosen[b])
+        prev = b
+    return "".join(parts).strip()[:budget]
 
 
 # ================================

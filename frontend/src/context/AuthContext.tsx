@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import {
   onAuthStateChanged,
@@ -22,6 +22,13 @@ interface AuthUser {
 
 export type AuthMethod = "google" | "email" | "anonymous";
 
+/**
+ * How often to ask Firebase for the ID token. ID tokens last an hour, and Firebase hands back
+ * the cached one until it is within five minutes of expiring, then refreshes it. Asking more
+ * often than every five minutes keeps `token` valid for as long as the tab stays open.
+ */
+const TOKEN_REFRESH_INTERVAL_MS = 4 * 60 * 1000;
+
 interface AuthContextType {
   user: AuthUser | null;
   token: string | null;
@@ -31,6 +38,8 @@ interface AuthContextType {
   logout: () => Promise<void>;
   showSignIn: boolean;
   setShowSignIn: (v: boolean) => void;
+  /** Asks Firebase for a token now: the cached one, or a new one when it is close to expiring. */
+  getFreshToken: () => Promise<string | null>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -92,6 +101,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
+  // The token above is fetched once per sign-in. Keep it fresh, or a tab left open for more
+  // than an hour starts failing every signed-in request.
+  useEffect(() => {
+    if (!auth) return;
+    const firebaseAuth = auth;
+    const refresh = () => {
+      const current = firebaseAuth.currentUser;
+      if (!current) return;
+      current
+        .getIdToken()
+        .then((fresh) => {
+          // A token that arrives after sign-out, or after switching accounts, is stale.
+          if (firebaseAuth.currentUser?.uid === current.uid) setToken(fresh);
+        })
+        .catch(() => {
+          // Offline or a transient Firebase error: keep the current token and retry next time.
+        });
+    };
+    const refreshIfVisible = () => {
+      if (document.visibilityState === "visible") refresh();
+    };
+    const timer = setInterval(refresh, TOKEN_REFRESH_INTERVAL_MS);
+    document.addEventListener("visibilitychange", refreshIfVisible);
+    window.addEventListener("online", refresh);
+    return () => {
+      clearInterval(timer);
+      document.removeEventListener("visibilitychange", refreshIfVisible);
+      window.removeEventListener("online", refresh);
+    };
+  }, []);
+
   const loginWithProvider = async (method: AuthMethod) => {
     if (!auth) return;
     try {
@@ -132,11 +172,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     resetServerTextbookSessionForLogout();
   };
 
+  const getFreshToken = useCallback(async () => {
+    const current = auth?.currentUser;
+    return current ? current.getIdToken() : null;
+  }, []);
+
   return (
     <AuthContext.Provider value={{
       user, token, loading,
       loginWithProvider, loginWithEmail,
       logout, showSignIn, setShowSignIn,
+      getFreshToken,
     }}>
       {children}
     </AuthContext.Provider>
