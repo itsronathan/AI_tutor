@@ -15,6 +15,7 @@ import { OnboardingProvider } from "./context/OnboardingContext";
 import { useAuth } from "./context/AuthContext";
 
 import "./App.css";
+import "./LearningTheme.css";
 
 function AppShell() {
   const showDeployWarning = apiBlockedByMixedContent();
@@ -24,7 +25,7 @@ function AppShell() {
   const isHome = location.pathname === "/";
 
   return (
-    <div className={`app-container${isHome ? " app-container--home" : ""}`}>
+    <div className={`app-container${isHome ? " app-container--home" : ""}${location.pathname === "/learning" ? " app-container--learning" : ""}`}>
       {!isHome && <Sidebar />}
       <div className="app-main">
         {!isHome && showDeployWarning ? (

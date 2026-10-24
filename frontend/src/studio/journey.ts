@@ -3,7 +3,7 @@ import type { StudioDraft } from "./model";
 export const PROJECT_STAGES = [
   { id: "brief", title: "Understand", task: "Read your brief. Record deliverables and unknowns.", tool: "Brief & exercises", question: "Help me break down this brief and choose my first task." },
   { id: "research", title: "Research", task: "Observe the site, people, and useful references.", tool: "References", question: "What should I investigate before choosing a design direction?" },
-  { id: "explore", title: "Explore", task: "Sketch alternatives. Compare their trade-offs.", tool: "Concepts", question: "Help me compare my ideas and choose a sketch or model experiment." },
+  { id: "explore", title: "Test ideas", task: "Sketch a few options. Choose one to develop.", tool: "Concepts", question: "Help me compare my ideas and choose a sketch or model experiment." },
   { id: "develop", title: "Develop", task: "Test your chosen idea against the brief.", tool: "Plan", question: "What should I develop next, and which requirements need evidence?" },
   { id: "refine", title: "Refine", task: "Use critique feedback to plan your next revision.", tool: "Review & export", question: "Help me prioritize my critique feedback and plan a revision." },
   { id: "present", title: "Present", task: "Check deliverables and explain your design decisions.", tool: "Review & export", question: "Help me prepare my final presentation and identify unfinished work." },

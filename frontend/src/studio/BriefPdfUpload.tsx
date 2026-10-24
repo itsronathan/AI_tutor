@@ -25,10 +25,9 @@ export default function BriefPdfUpload({ hasBrief, onImport }: { hasBrief: boole
     } finally { clearTimeout(timer); if (active.current === controller) { active.current = null; setBusy(false); } }
   }
   return <section className="studio-pdf-upload" aria-label="Import assignment PDF">
-    <label htmlFor="studio-pdf">Insert assignment PDF</label>
-    <p className="studio-small">Text PDFs · up to 10 MB / 40 pages. No API key needed.</p>
+    <label htmlFor="studio-pdf">Upload PDF</label>
     <input id="studio-pdf" type="file" accept=".pdf,application/pdf" onChange={event => { void read(event.target.files?.[0]); event.target.value = ""; }} />
-    <p className="studio-small">Sent to this app’s server for text extraction. Review before using.</p>
+    <details className="studio-help"><summary>Upload details</summary><p className="studio-small">Text PDFs · up to 10 MB / 40 pages. Sent to this app’s server for extraction. Review before using.</p></details>
     {busy && <p role="status">Reading PDF…</p>}
     {error && <p role="alert" className="studio-error">{error}</p>}
     {preview && <>

@@ -12,12 +12,17 @@ describe("Studio Brainstorm drafts", () => {
     expect(screen.getByRole("heading", { name: "What are you working on?" })).toBeInTheDocument();
     expect(screen.queryByRole("region", { name: "Brainstorming exercises" })).not.toBeInTheDocument();
     expect(screen.getByText("Projects").parentElement).not.toHaveAttribute("open");
+    const options = () => Array.from((screen.getByLabelText("Activity") as HTMLSelectElement).options).map(option => option.text);
+    expect(options()).toEqual(["Assignment brief", "Review requirements", "Project tutor", "Focused help"]);
     fireEvent.click(screen.getByRole("button", { name: "Explore" }));
     expect(screen.getByRole("region", { name: "Brainstorming exercises" })).toBeInTheDocument();
     expect(screen.queryByLabelText(/Assignment brief/)).not.toBeInTheDocument();
+    expect(options()).toEqual(["Exercises", "Generate images", "Concept cards", "Compare concepts", "References"]);
+    fireEvent.click(screen.getByRole("button", { name: "Finish" }));
     fireEvent.change(screen.getByLabelText("Activity"), { target: { value: "Export" } });
     expect(screen.getByRole("button", { name: "Finish" })).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByRole("heading", { name: "Export your notes" })).toBeInTheDocument();
+    expect(options()).toEqual(["Requirements", "Milestones", "Pin-up prep", "Critique notes", "Export notes"]);
     expect(screen.queryByRole("region", { name: "Brainstorming exercises" })).not.toBeInTheDocument();
   });
   it("autosaves partial work before the student has an assignment brief", () => {
@@ -59,16 +64,21 @@ describe("Studio Brainstorm drafts", () => {
   });
   it("keeps brainstorming responses when switching lenses and tools", () => {
     render(<StudioBrainstorm ownerId="guest" />);
+    fireEvent.click(screen.getByRole("button", { name: "Explore" }));
     fireEvent.change(screen.getByLabelText("Activity"), { target: { value: "Exercises" } }); fireEvent.click(screen.getByRole("checkbox", { name: "Light" }));
     fireEvent.change(screen.getByLabelText("Your response to “Move through light”"), { target: { value: "A dark entry opening to a bright court" } });
+    fireEvent.click(screen.getByRole("button", { name: "Explore" }));
     fireEvent.change(screen.getByLabelText("Activity"), { target: { value: "Concepts" } });
+    fireEvent.click(screen.getByRole("button", { name: "Project" }));
     fireEvent.change(screen.getByLabelText("Activity"), { target: { value: "Brief & exercises" } });
+    fireEvent.click(screen.getByRole("button", { name: "Explore" }));
     fireEvent.change(screen.getByLabelText("Activity"), { target: { value: "Exercises" } }); fireEvent.click(screen.getByRole("checkbox", { name: "Light" }));
     expect(screen.getByLabelText("Your response to “Move through light”")).toHaveValue("A dark entry opening to a bright court");
   });
 
   it("lets a student compare directions and removes stale selections when a concept is deleted", () => {
     render(<StudioBrainstorm ownerId="guest" />);
+    fireEvent.click(screen.getByRole("button", { name: "Explore" }));
     fireEvent.change(screen.getByLabelText("Activity"), { target: { value: "Concepts" } });
     fireEvent.change(screen.getByLabelText("Activity"), { target: { value: "Concept cards" } }); fireEvent.click(screen.getByRole("button", { name: "Add concept" }));
     fireEvent.change(screen.getByLabelText("Concept name"), { target: { value: "Courtyard" } });
@@ -85,6 +95,7 @@ describe("Studio Brainstorm drafts", () => {
 
   it("preserves planning, critique, and presentation work across reload and includes it in the export", () => {
     const first = render(<StudioBrainstorm ownerId="guest" />);
+    fireEvent.click(screen.getByRole("button", { name: "Finish" }));
     fireEvent.change(screen.getByLabelText("Activity"), { target: { value: "Milestones" } });
     fireEvent.click(screen.getByRole("button", { name: "Use starter milestones" }));
     fireEvent.click(screen.getByLabelText("Complete milestone 1"));
@@ -97,11 +108,13 @@ describe("Studio Brainstorm drafts", () => {
     fireEvent.change(screen.getByLabelText("What will you try next?"), { target: { value: "Draw another arrival sequence" } });
     first.unmount();
     render(<StudioBrainstorm ownerId="guest" />);
+    fireEvent.click(screen.getByRole("button", { name: "Finish" }));
     fireEvent.change(screen.getByLabelText("Activity"), { target: { value: "Milestones" } });
     expect(screen.getByLabelText("Complete milestone 1")).toBeChecked();
     fireEvent.change(screen.getByLabelText("Activity"), { target: { value: "Review & export" } });
     expect(screen.getByLabelText("Ready: presentation item 1")).toBeChecked();
     fireEvent.change(screen.getByLabelText("Activity"), { target: { value: "Critique notes" } }); expect(screen.getByLabelText("Feedback received")).toHaveValue("Explore a second entrance");
+    fireEvent.click(screen.getByRole("button", { name: "Finish" }));
     fireEvent.change(screen.getByLabelText("Activity"), { target: { value: "Export" } }); fireEvent.click(screen.getByText("Preview project notes"));
     const preview = screen.getByText(/Student-authored notes and responses/);
     expect(preview).toHaveTextContent("A gathering place around a shared garden");

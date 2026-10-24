@@ -14,7 +14,7 @@ const open = () => fireEvent.change(screen.getByLabelText("Activity"), { target:
 it("saves stages and notes without AI, restores them, exports them, and isolates projects", () => {
   const view = render(<StudioBrainstorm ownerId="guest" />);
   open();
-  fireEvent.click(screen.getByRole("button", { name: "3. Explore" }));
+  fireEvent.click(screen.getByRole("button", { name: "3. Test ideas" }));
   fireEvent.change(screen.getByLabelText("Stage notes"), { target: { value: "Test a courtyard model." } });
   fireEvent.click(screen.getByRole("checkbox", { name: /worked through this stage/ }));
   expect(screen.queryByRole("button", { name: "Ask assignment tutor" })).not.toBeInTheDocument();
@@ -43,14 +43,14 @@ it("sends current notebook context and stage, saves replies, and cancels on stag
   vi.stubGlobal("fetch", fetchMock);
   render(<StudioBrainstorm ownerId="guest" />);
   open();
-  fireEvent.click(screen.getByRole("button", { name: "3. Explore" }));
+  fireEvent.click(screen.getByRole("button", { name: "3. Test ideas" }));
   fireEvent.change(screen.getByLabelText("Stage notes"), { target: { value: "Two entrances to test." } });
   fireEvent.click(screen.getByRole("button", { name: "Suggest a question" }));
   expect(fetchMock).not.toHaveBeenCalled();
   fireEvent.click(screen.getByRole("button", { name: "Ask assignment tutor" }));
   expect(await screen.findByText(reply.answer)).toBeInTheDocument();
   const payload = JSON.parse(fetchMock.mock.calls[0][1].body);
-  expect(payload.question).toContain("Project stage: Explore");
+  expect(payload.question).toContain("Project stage: Test ideas");
   expect(payload.project_context).toContain("Courtyard");
   expect(payload.project_context).toContain("Two entrances to test.");
   expect(buildProjectNotes(normalizeDraft(JSON.parse(localStorage.getItem(key)!)))).toContain(reply.answer);

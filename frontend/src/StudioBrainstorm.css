@@ -149,3 +149,11 @@ details.studio-card { margin-bottom: 24px; }
 .studio-activity-picker select { flex: 1; min-width: 0; padding: 10px 12px; border: 1px solid #cecabe; border-radius: 6px; background: #fffefa; color: #292c29; font: inherit; }
 .studio-simple-header > div { min-width: 0; overflow-wrap: anywhere; }
 .studio-section-start > form.studio-card { max-width: 720px; margin: 24px auto; }
+
+.studio-storage-note { margin: 8px 0; color: #60635c; font-size: 12px; }
+.studio-storage-note summary { cursor: pointer; }
+.studio-card > .studio-exercise-fold { padding: 0; border: 1px solid #d4dad3; border-radius: 8px; margin: 12px 0; }
+.studio-card > .studio-exercise-fold > summary { padding: 18px; border: 0; cursor: pointer; }
+.studio-exercise-fold > summary small { display: block; margin: 6px 0 0 18px; color: #60635c; font-weight: 400; }
+.studio-card > .studio-exercise-fold[open] { padding: 0 20px 20px; }
+.studio-card > .studio-exercise-fold[open] > summary { padding-left: 0; border-bottom: 1px solid #d4dad3; }

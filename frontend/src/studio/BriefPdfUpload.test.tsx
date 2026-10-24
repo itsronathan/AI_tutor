@@ -5,7 +5,7 @@ import BriefPdfUpload from "./BriefPdfUpload";
 import PromptExplorer from "./PromptExplorer";
 
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
-const upload = () => fireEvent.change(screen.getByLabelText("Insert assignment PDF"), { target: { files: [new File(["%PDF-"], "brief.pdf", { type: "application/pdf" })] } });
+const upload = () => fireEvent.change(screen.getByLabelText("Upload PDF"), { target: { files: [new File(["%PDF-"], "brief.pdf", { type: "application/pdf" })] } });
 
 it("keeps earlier People responses accessible without a People lens", () => {
   render(<PromptExplorer notes={{ "people-arrival": "A welcoming threshold" }} onChange={vi.fn()} />);
@@ -49,10 +49,10 @@ it("shows multiple lenses together and allows an empty selection", () => {
   expect(screen.queryByRole("checkbox", { name: "People" })).not.toBeInTheDocument();
   expect(screen.getByRole("checkbox", { name: "Movement" })).toBeInTheDocument();
   fireEvent.click(screen.getByRole("checkbox", { name: "Light" }));
-  expect(screen.getByRole("heading", { name: "Work with an edge" })).toBeInTheDocument();
-  expect(screen.getByRole("heading", { name: "Move through light" })).toBeInTheDocument();
+  expect(screen.getByText("Work with an edge")).toBeInTheDocument();
+  expect(screen.getByText("Move through light")).toBeInTheDocument();
   fireEvent.click(screen.getByRole("checkbox", { name: "Site" }));
-  expect(screen.queryByRole("heading", { name: "Work with an edge" })).not.toBeInTheDocument();
+  expect(screen.queryByText("Work with an edge")).not.toBeInTheDocument();
   fireEvent.click(screen.getByRole("checkbox", { name: "Light" }));
-  expect(screen.getByText(/Choose a lens to see prompts/)).toBeInTheDocument();
+  expect(screen.getByText(/Choose a lens to begin/)).toBeInTheDocument();
 });

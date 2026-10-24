@@ -145,14 +145,12 @@ function StudioWorkspace({ ownerId }: { ownerId: string }) {
       <div className="studio-activity-picker">
         <label htmlFor="studio-activity">Activity</label>
         <select id="studio-activity" value={section} onChange={e => navigate(e.target.value as Activity)}>
-          {(Object.keys(GROUPS) as (keyof typeof GROUPS)[]).map(key => <optgroup key={key} label={key}>
-            {GROUPS[key].map(item => <option key={item} value={item}>{LABELS[item]}</option>)}
-          </optgroup>)}
+          {GROUPS[group].map(item => <option key={item} value={item}>{LABELS[item]}</option>)}
         </select>
       </div>
       <p className="studio-status" role="status">{status}</p>
       {undo && <aside className="studio-undo"><span>{undo.message}</span><button type="button" onClick={undo.restore}>Undo deletion</button></aside>}
-      <p className="studio-small">Autosaved in this browser. No account sync; guest drafts are shared here.</p>
+      <details className="studio-storage-note"><summary>About saving</summary><p>Autosaved in this browser. No account sync; guest drafts are shared here.</p></details>
       <div key={library.activeId} ref={sectionStart} tabIndex={-1} className="studio-section-start">
       {section === "Project tutor" && <ProjectTutor draft={draft} onChange={update} onNavigate={navigate} />}
       {section === "Focused help" && <FocusedHelp draft={draft} onChange={update} onOpenBrief={() => navigate("Brief review")} />}
@@ -160,25 +158,25 @@ function StudioWorkspace({ ownerId }: { ownerId: string }) {
       {section === "Brief & exercises" && <>
         <form className="studio-card" onSubmit={save}>
           <h2>What are you working on?</h2>
-          <label htmlFor="studio-title">Project or course name <span>(optional)</span></label>
+          <label htmlFor="studio-title">Project name <span>(optional)</span></label>
           <input id="studio-title" value={draft.title} maxLength={200}
-            placeholder="e.g. Design Studio — Community gathering space"
+            placeholder="e.g. Community pavilion"
             onChange={event => update("title", event.target.value)} />
           <BriefPdfUpload hasBrief={!!draft.brief.trim()} onImport={value => update("brief", value)} />
           <label htmlFor="studio-brief">Assignment brief <span>(required)</span></label>
-          <p id="studio-brief-help">Import a PDF above or paste text. Editing resets AI review and chat.</p>
+          <p id="studio-brief-help">Or paste below. Edits reset AI review and chat.</p>
           <textarea id="studio-brief" required rows={5} maxLength={30000}
             aria-describedby="studio-brief-help" value={draft.brief}
             onChange={event => update("brief", event.target.value)} />
 
-          <details className="studio-help"><summary>Your interests &amp; experience (optional)</summary>
+          <details className="studio-help"><summary>Add context</summary>
           <label htmlFor="studio-interests">What catches your interest? <span>(optional)</span></label>
           <textarea id="studio-interests" rows={3} maxLength={4000} value={draft.interests}
-            placeholder="A site detail, a material, a memory, a question — or simply ‘I’m not sure yet.’"
+            placeholder="A material, place, or idea…"
             onChange={event => update("interests", event.target.value)} />
           <label htmlFor="studio-experience">What might someone experience here? <span>(optional)</span></label>
           <textarea id="studio-experience" rows={3} maxLength={4000} value={draft.experience}
-            placeholder="Think about arrival, movement, gathering, or finding a quiet place. It’s okay to leave this open."
+            placeholder="Arrival, gathering, quiet…"
             onChange={event => update("experience", event.target.value)} />
           </details>
           <button type="submit">Continue</button>

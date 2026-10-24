@@ -1,14 +1,14 @@
-/** Starter prompts above Learning Mode chat input (book content stays English). */
+/** Architecture starter prompts above the Learning Mode chat input. */
 export const LEARNING_CHAT_EXAMPLES = [
   {
-    id: "induction",
-    label: "What is induction?",
-    sendText: "What is induction?",
+    id: "design-concept",
+    label: "How do I develop a design concept?",
+    sendText: "How do I develop a design concept from an architecture assignment? Explain with a simple example.",
   },
   {
-    id: "problem-5-1",
-    label: "Problem 5.1: Is 2^p − 1 prime for p = 2, 3, 5, 7?",
+    id: "daylight",
+    label: "How can daylight shape a space?",
     sendText:
-      "Problem 5.1: Is 2^p - 1 prime for the primes p = 2, 3, 5, 7? Is 2^p - 1 prime whenever p is prime?",
+      "How can daylight shape the experience of a space? Compare side windows, skylights, and shaded openings in a small reading room.",
   },
 ] as const;
